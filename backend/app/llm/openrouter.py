@@ -26,7 +26,7 @@ class OpenRouterClient:
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
             "HTTP-Referer": settings.frontend_url,
-            "X-Title": "Zéphyr",
+            "X-Title": "Zephyr",
         }
 
         payload = {
