@@ -89,3 +89,45 @@ async def clear_memory():
 async def get_memory():
 
     return zephyr.memory.get_memory_info()
+
+@app.get("/api/learner/profile")
+async def get_learner_profile():
+
+    return zephyr.get_learner_profile()
+
+@app.delete("/api/learner/profile")
+async def clear_learner_profile():
+
+    zephyr.clear_learner_profile()
+
+    return {
+        "status": "success",
+        "message": "Le profil de l'apprenant a été effacé.",
+    }
+
+class LearnerProfileRequest(BaseModel):
+    name: str | None = None
+    target_language: str | None = None
+    level: str | None = None
+    goal: str | None = None
+
+@app.put("/api/learner/profile")
+async def update_learner_profile(
+    request: LearnerProfileRequest,
+):
+
+    if request.name is not None:
+        zephyr.learner.set_name(request.name)
+
+    if request.target_language is not None:
+        zephyr.learner.set_target_language(
+            request.target_language
+        )
+
+    if request.level is not None:
+        zephyr.learner.set_level(request.level)
+
+    if request.goal is not None:
+        zephyr.learner.add_goal(request.goal)
+
+    return zephyr.get_learner_profile()

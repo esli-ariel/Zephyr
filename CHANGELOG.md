@@ -59,3 +59,20 @@ Toutes les modifications importantes du projet sont enregistrées ici.
 
 - Architecture de `ZephyrAgent`.
 - Gestion du contexte envoyé au modèle.
+
+## [0.4.1] - 07/09/2026
+
+### Ajouté
+
+- Extraction automatique du profil apprenant.
+- Nouveau `ProfileExtractor`.
+- Extraction du nom.
+- Extraction de la langue cible.
+- Extraction du niveau.
+- Extraction des objectifs.
+- Mise à jour automatique du profil depuis les conversations.
+
+### Amélioré
+
+- Personnalisation des conversations.
+- Intégration du profil apprenant dans le contexte envoyé au modèle.

@@ -119,3 +119,37 @@ Zéphyr peut désormais utiliser les échanges précédents d'une conversation p
 ### Statut
 
 ✅ Terminé
+
+## 07/09/2026 — Extraction automatique du profil V0.4.1
+
+### Objectif
+
+Permettre à Zéphyr d'identifier automatiquement les informations importantes concernant l'apprenant à partir de ses messages.
+
+### Travaux réalisés
+
+- Création de `ProfileExtractor`.
+- Utilisation d'OpenRouter pour l'extraction structurée.
+- Extraction du nom.
+- Extraction de la langue cible.
+- Extraction du niveau.
+- Extraction des objectifs.
+- Intégration de l'extracteur dans `ZephyrAgent`.
+- Mise à jour automatique de `LearnerProfile`.
+- Vérification du fonctionnement avec des informations absentes.
+
+### Tests réalisés
+
+- Extraction indépendante du profil.
+- Test d'un message contenant plusieurs informations.
+- Test d'un message ne contenant aucune information de profil.
+- Test complet via `/api/chat`.
+- Vérification via `/api/learner/profile`.
+
+### Résultat
+
+Zéphyr peut désormais identifier automatiquement certaines informations concernant l'apprenant et les enregistrer dans son profil.
+
+### Statut
+
+✅ Terminé

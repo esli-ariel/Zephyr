@@ -204,3 +204,31 @@
 - [x] Effacement de la mémoire
 - [x] Limitation du nombre de messages
 - [x] Validation de la taille des messages
+
+### V0.4.0 — Profil intelligent de l'apprenant
+
+- [x] Création du modèle LearnerProfile
+- [x] Gestionnaire LearnerProfileManager
+- [x] Gestion du nom de l'apprenant
+- [x] Gestion de la langue cible
+- [x] Gestion du niveau
+- [x] Gestion des objectifs
+- [x] Gestion des points faibles
+- [x] Gestion du vocabulaire appris
+- [x] Gestion des erreurs fréquentes
+- [x] Intégration du profil dans ContextBuilder
+- [x] Intégration du profil dans ZephyrAgent
+- [x] Consultation du profil
+- [x] Effacement du profil
+
+### V0.4.1 — Extraction automatique du profil
+
+- [x] Création de ProfileExtractor
+- [x] Extraction automatique du nom
+- [x] Extraction automatique de la langue cible
+- [x] Extraction automatique du niveau
+- [x] Extraction automatique des objectifs
+- [x] Mise à jour automatique du profil
+- [x] Gestion des informations absentes
+- [x] Test de l'extraction indépendante
+- [x] Test de l'intégration avec Zephyr
