@@ -181,6 +181,26 @@
 | 0.8.0   | —          | Autonomie                 | ⬜      |
 | 1.0.0   | —          | Première version complète | ⬜      |
 
+## Phase 2 — Intelligence de Zéphyr
+
 - [x] Connexion à OpenRouter
 - [x] Premier test avec un modèle IA
 - [x] Gestion des erreurs API
+- [ ] Gestion du contexte conversationnel
+- [ ] Mémoire court terme
+- [ ] Mémoire long terme
+- [ ] Système de prompts avancé
+- [ ] Outils autonomes
+- [ ] Système de planification
+
+### V0.3.0 — Mémoire conversationnelle
+
+- [x] Mémoire court terme
+- [x] Gestionnaire de mémoire
+- [x] Conservation de l'historique
+- [x] Construction du contexte
+- [x] Intégration de la mémoire avec OpenRouter
+- [x] Consultation de la mémoire
+- [x] Effacement de la mémoire
+- [x] Limitation du nombre de messages
+- [x] Validation de la taille des messages

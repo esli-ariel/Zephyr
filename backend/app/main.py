@@ -3,6 +3,8 @@ from pydantic import BaseModel
 
 from app.config import settings
 from app.agent.zephyr import ZephyrAgent
+from pydantic import BaseModel, Field
+
 
 
 app = FastAPI(
@@ -16,8 +18,11 @@ zephyr = ZephyrAgent()
 
 
 class ChatRequest(BaseModel):
-    message: str
-
+    message: str = Field(
+        ...,
+        min_length=1,
+        max_length=5000,
+    )
 
 @app.get("/")
 async def root():
@@ -69,3 +74,18 @@ async def chat(request: ChatRequest):
             status_code=502,
             detail=str(exc),
         )
+
+@app.delete("/api/chat/memory")
+async def clear_memory():
+
+    zephyr.clear_memory()
+
+    return {
+        "status": "success",
+        "message": "La mémoire conversationnelle a été effacée.",
+    }
+
+@app.get("/api/chat/memory")
+async def get_memory():
+
+    return zephyr.memory.get_memory_info()

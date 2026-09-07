@@ -62,29 +62,60 @@ Connecter Zéphyr à OpenRouter afin qu'il puisse produire de véritables répon
 
 🟢 Fondation initiale terminée.
 
-## 07/09/2026
+## 07/09/2026 — Connexion de Zéphyr à OpenRouter
 
-### 🎯 Objectif
+### Objectif
 
-Connecter le cerveau conversationnel de Zéphyr à OpenRouter.
+Connecter le cerveau de Zéphyr à un véritable modèle de langage afin de permettre des conversations intelligentes.
 
-### ✅ Travaux réalisés
+### Travaux réalisés
 
-- Création du client OpenRouter.
-- Configuration de la clé API via `.env`.
-- Connexion de ZephyrAgent au LLM.
-- Création de l'endpoint POST /api/chat.
-- Ajout de la validation des messages.
-- Ajout de la gestion des erreurs.
+- Installation de `httpx`.
+- Configuration de la clé API OpenRouter dans `.env`.
+- Configuration du modèle `openrouter/free`.
+- Création du client `OpenRouterClient`.
+- Connexion de `ZephyrAgent` au client OpenRouter.
+- Création de l'endpoint `POST /api/chat`.
+- Validation des messages utilisateur.
+- Gestion des erreurs de configuration.
+- Gestion des erreurs retournées par OpenRouter.
+- Test réel avec le message :
+  `Bonjour Zéphyr, qui es-tu ?`
 
-### 🧪 Test
+### Résultat
 
-Message :
-"Bonjour Zéphyr, qui es-tu ?"
+Zéphyr reçoit correctement un message utilisateur, l'envoie à OpenRouter et retourne une réponse générée par le modèle IA.
 
-Résultat :
-Réponse générée par le modèle via OpenRouter.
+### Statut
 
-### 📌 Statut
+✅ Terminé
 
-🟢 Terminé
+### Prochaine étape
+
+Mettre en place le contexte conversationnel afin que Zéphyr puisse conserver les messages précédents d'une conversation.
+
+## 07/09/2026 — Mémoire conversationnelle V0.3.0
+
+### Objectif
+
+Permettre à Zéphyr de conserver et exploiter le contexte récent d'une conversation.
+
+### Travaux réalisés
+
+- Création de `ShortTermMemory`.
+- Création de `MemoryManager`.
+- Création de `ContextBuilder`.
+- Intégration de la mémoire dans `ZephyrAgent`.
+- Ajout de la consultation de la mémoire.
+- Ajout de l'effacement de la mémoire.
+- Limitation de l'historique à 20 messages.
+- Limitation des messages utilisateur à 5000 caractères.
+- Tests de mémorisation et de rappel.
+
+### Résultat
+
+Zéphyr peut désormais utiliser les échanges précédents d'une conversation pour générer ses réponses.
+
+### Statut
+
+✅ Terminé
