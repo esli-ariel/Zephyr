@@ -24,3 +24,13 @@ Toutes les modifications importantes du projet sont enregistrées ici.
 * Première interaction avec le modèle IA.
 * Gestion des erreurs API.
 * Création de la première interface frontend.
+
+## [0.2.0] - 07/09/2026
+
+### Added
+
+- Connexion à OpenRouter.
+- Client OpenRouter.
+- Communication avec un modèle LLM.
+- Endpoint POST /api/chat.
+- Gestion des erreurs API.

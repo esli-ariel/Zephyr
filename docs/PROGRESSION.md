@@ -180,3 +180,7 @@
 | 0.7.0   | —          | Avatar                    | ⬜      |
 | 0.8.0   | —          | Autonomie                 | ⬜      |
 | 1.0.0   | —          | Première version complète | ⬜      |
+
+- [x] Connexion à OpenRouter
+- [x] Premier test avec un modèle IA
+- [x] Gestion des erreurs API

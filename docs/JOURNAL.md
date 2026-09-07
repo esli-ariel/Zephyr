@@ -61,3 +61,30 @@ Connecter Zéphyr à OpenRouter afin qu'il puisse produire de véritables répon
 ### 📌 Statut
 
 🟢 Fondation initiale terminée.
+
+## 07/09/2026
+
+### 🎯 Objectif
+
+Connecter le cerveau conversationnel de Zéphyr à OpenRouter.
+
+### ✅ Travaux réalisés
+
+- Création du client OpenRouter.
+- Configuration de la clé API via `.env`.
+- Connexion de ZephyrAgent au LLM.
+- Création de l'endpoint POST /api/chat.
+- Ajout de la validation des messages.
+- Ajout de la gestion des erreurs.
+
+### 🧪 Test
+
+Message :
+"Bonjour Zéphyr, qui es-tu ?"
+
+Résultat :
+Réponse générée par le modèle via OpenRouter.
+
+### 📌 Statut
+
+🟢 Terminé
