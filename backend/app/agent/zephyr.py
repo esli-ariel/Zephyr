@@ -89,3 +89,16 @@ class ZephyrAgent:
 
         for goal in extracted.get("goals", []):
             self.learner.add_goal(goal)
+
+    def apply_assessment_result(
+        self,
+        result: dict,
+    ) -> None:
+        """
+        Applique un résultat d'évaluation
+        au profil de l'apprenant.
+        """
+
+        self.learner.apply_assessment_result(
+            result
+        )

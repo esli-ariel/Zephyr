@@ -26,17 +26,31 @@ class LearnerProfile:
         default_factory=list
     )
 
-    def to_dict(self) -> dict:
-        """
-        Convertit le profil en dictionnaire.
-        """
+    competency_scores: dict = field(
+        default_factory=dict
+    )
 
+    assessment_history: list[dict] = field(
+        default_factory=list
+    )
+
+    def to_dict(self) -> dict:
         return {
             "name": self.name,
             "target_language": self.target_language,
             "level": self.level,
             "goals": self.goals,
             "weak_points": self.weak_points,
-            "learned_vocabulary": self.learned_vocabulary,
-            "common_mistakes": self.common_mistakes,
+            "learned_vocabulary": (
+                self.learned_vocabulary
+            ),
+            "common_mistakes": (
+                self.common_mistakes
+            ),
+            "competency_scores": (
+                self.competency_scores
+            ),
+            "assessment_history": (
+                self.assessment_history
+            ),
         }

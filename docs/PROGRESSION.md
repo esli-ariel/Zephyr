@@ -232,3 +232,28 @@
 - [x] Gestion des informations absentes
 - [x] Test de l'extraction indépendante
 - [x] Test de l'intégration avec Zephyr
+
+### V0.5 — Évaluation intelligente du niveau
+
+- [x] Banque de questions CECRL A1 → C2
+- [x] Questions de vocabulaire
+- [x] Questions de grammaire
+- [x] Questions de compréhension
+- [x] Questions d'expression
+- [x] Évaluation locale des questions fermées
+- [x] Évaluation LLM des questions ouvertes
+- [x] Calcul des scores par compétence
+- [x] Calcul des scores par niveau
+- [x] Détermination du niveau CECRL
+- [x] Validation progressive des niveaux
+- [x] Évaluation adaptative
+- [x] Progression A1 → A2 → B1 → B2 → C1 → C2
+- [x] Arrêt anticipé si le niveau est insuffisant
+- [x] Approfondissement des niveaux intermédiaires
+- [x] Intégration de l'évaluation avec OpenRouter
+- [x] API FastAPI de l'évaluation
+- [x] Intégration du résultat dans le profil apprenant
+- [x] Historique des évaluations
+- [x] Identifiant unique par session d'évaluation
+- [x] Protection contre l'enregistrement des doublons
+- [x] Tests automatisés

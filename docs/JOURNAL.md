@@ -153,3 +153,38 @@ Zéphyr peut désormais identifier automatiquement certaines informations concer
 ### Statut
 
 ✅ Terminé
+
+## 08/09/2026 — V0.5 terminée
+
+### Objectif
+
+Construire un système complet d'évaluation intelligente du niveau
+de l'apprenant selon le CECRL.
+
+### Réalisations
+
+- Création de la banque de 36 questions.
+- Mise en place de l'évaluation des questions fermées.
+- Mise en place de l'évaluation des questions ouvertes avec le LLM.
+- Calcul des scores par compétence.
+- Calcul des scores par niveau.
+- Détermination progressive du niveau CECRL.
+- Mise en place de l'évaluation adaptative.
+- Création de l'orchestrateur `AdaptiveAssessment`.
+- Création des endpoints FastAPI.
+- Intégration des résultats dans `LearnerProfile`.
+- Ajout de l'historique des évaluations.
+- Protection contre les doublons.
+- Ajout des tests automatisés.
+
+### Tests
+
+Tous les tests automatisés sont passés avec succès.
+
+### Résultat
+
+V0.5 validée.
+
+### Statut
+
+✅ Terminé

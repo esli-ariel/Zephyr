@@ -76,3 +76,23 @@ Toutes les modifications importantes du projet sont enregistrées ici.
 
 - Personnalisation des conversations.
 - Intégration du profil apprenant dans le contexte envoyé au modèle.
+
+## [0.5.0] - 08/09/2026
+
+### Added
+
+- Banque de 36 questions CECRL A1 à C2.
+- Évaluation du vocabulaire, de la grammaire, de la compréhension et de l'expression.
+- Correction locale des questions fermées.
+- Évaluation des questions ouvertes avec OpenRouter.
+- Calcul des scores par compétence.
+- Calcul des scores par niveau CECRL.
+- Évaluation adaptative A1 → C2.
+- Progression automatique selon les performances.
+- Arrêt anticipé lorsque le niveau est insuffisant.
+- Approfondissement des niveaux intermédiaires.
+- API FastAPI dédiée à l'évaluation.
+- Intégration des résultats dans le profil apprenant.
+- Historique des évaluations.
+- Identifiant unique des sessions d'évaluation.
+- Tests automatisés.
