@@ -257,3 +257,93 @@
 - [x] Identifiant unique par session d'évaluation
 - [x] Protection contre l'enregistrement des doublons
 - [x] Tests automatisés
+
+## V0.6.5 — Vocabulary Manager ✅
+
+**Statut : TERMINÉ**
+
+### Objectif
+
+Mettre en place un système permettant à Zéphyr de gérer le vocabulaire de l'apprenant et de suivre progressivement sa maîtrise des mots appris.
+
+### Fonctionnalités implémentées
+
+* [x] Création du modèle `VocabularyItem`
+* [x] Ajout d'un mot au vocabulaire
+* [x] Traduction du mot
+* [x] Langue cible
+* [x] Niveau de l'apprenant
+* [x] Catégorisation des mots
+* [x] Ajout d'exemples
+* [x] Niveau de difficulté de 1 à 5
+* [x] Détection des doublons
+* [x] Recherche d'un mot
+* [x] Suppression d'un mot
+* [x] Enregistrement des réponses correctes
+* [x] Enregistrement des réponses incorrectes
+* [x] Calcul automatique du taux de maîtrise
+* [x] Identification des mots à réviser
+* [x] Identification des mots maîtrisés
+* [x] Calcul des statistiques du vocabulaire
+* [x] Intégration avec `LearningEngine`
+* [x] Intégration avec `LearnerProfileManager`
+* [x] Mise à jour de `learned_vocabulary`
+* [x] API REST du vocabulaire
+* [x] Tests unitaires
+
+### API ajoutée
+
+* `POST /api/learning/vocabulary`
+* `GET /api/learning/vocabulary`
+* `GET /api/learning/vocabulary/statistics`
+* `GET /api/learning/vocabulary/review`
+
+### Tests
+
+Suite complète exécutée avec :
+
+```bash
+python -m pytest
+```
+
+Résultat :
+
+```text
+42 passed
+```
+
+### Architecture
+
+Le vocabulaire est désormais intégré au cycle pédagogique :
+
+```text
+Apprenant
+    ↓
+LearnerProfile
+    ↓
+LearningEngine
+    ↓
+VocabularyManager
+    ↓
+VocabularyItem
+    ↓
+Réponses de l'apprenant
+    ↓
+Calcul de la maîtrise
+    ↓
+Mots à réviser
+```
+
+### État de V0.6
+
+| Version | Fonctionnalité                  | État |
+| ------- | ------------------------------- | ---- |
+| V0.6.1  | Modèle pédagogique              | ✅    |
+| V0.6.2  | Génération de cours             | ✅    |
+| V0.6.3  | Génération d'exercices          | ✅    |
+| V0.6.4  | Correction intelligente         | ✅    |
+| V0.6.5  | Gestion du vocabulaire          | ✅    |
+| V0.6.6  | Gestion de la grammaire         | ⏳    |
+| V0.6.7  | Recommandations personnalisées  | ⏳    |
+| V0.6.8  | Plan d'apprentissage            | ⏳    |
+| V0.6.9  | Intégration pédagogique avancée | ⏳    |

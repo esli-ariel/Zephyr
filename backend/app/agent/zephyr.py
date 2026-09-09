@@ -3,6 +3,7 @@ from app.llm.openrouter import OpenRouterClient
 from app.memory.memory_manager import MemoryManager
 from app.learning.learner_manager import LearnerProfileManager
 from app.learning.profile_extractor import ProfileExtractor
+from app.learning.learning_engine import LearningEngine
 
 
 class ZephyrAgent:
@@ -15,6 +16,10 @@ class ZephyrAgent:
         self.memory = MemoryManager()
 
         self.learner = LearnerProfileManager()
+
+        self.learning_engine = LearningEngine(
+            learner_manager=self.learner
+        )
 
         self.profile_extractor = ProfileExtractor()
 
@@ -102,3 +107,30 @@ class ZephyrAgent:
         self.learner.apply_assessment_result(
             result
         )
+
+    def get_learning_context(self) -> dict:
+        """
+        Retourne le contexte pédagogique actuel
+        de l'apprenant.
+        """
+
+        return self.learning_engine.get_learning_context()
+
+    async def evaluate_exercise(
+        self,
+        exercise,
+        answer: str,
+    ) -> dict:
+
+        result = (
+            await self.learning_engine.evaluate_exercise(
+                exercise,
+                answer,
+            )
+        )
+
+        self.learner.apply_exercise_result(
+            result
+        )
+
+        return result

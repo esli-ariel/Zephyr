@@ -270,3 +270,177 @@ async def reset_assessment():
             "L'évaluation a été réinitialisée."
         ),
     }
+
+@app.get("/api/learning/context")
+async def get_learning_context():
+    return zephyr.get_learning_context()
+
+class LessonRequest(BaseModel):
+    topic: str = Field(
+        ...,
+        min_length=2,
+        max_length=200,
+    )
+
+@app.post("/api/learning/lesson")
+async def generate_lesson(
+    request: LessonRequest,
+):
+    try:
+        lesson = await zephyr.learning_engine.generate_lesson(
+            request.topic
+        )
+
+        return lesson.to_dict()
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=str(exc),
+        )
+
+class ExerciseRequest(BaseModel):
+    topic: str = Field(
+        ...,
+        min_length=2,
+        max_length=200,
+    )
+
+    skill: str = Field(
+        ...,
+        min_length=2,
+        max_length=50,
+    )
+
+    count: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+    )
+
+@app.post("/api/learning/exercises")
+async def generate_exercises(
+    request: ExerciseRequest,
+):
+    try:
+        exercises = (
+            await zephyr.learning_engine.generate_exercises(
+                topic=request.topic,
+                skill=request.skill,
+                count=request.count,
+            )
+        )
+
+        return {
+            "count": len(exercises),
+            "exercises": [
+                exercise.to_dict()
+                for exercise in exercises
+            ],
+        }
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=502,
+            detail=str(exc),
+        )
+
+class VocabularyRequest(BaseModel):
+    word: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+    )
+
+    translation: str = Field(
+        ...,
+        min_length=1,
+        max_length=200,
+    )
+
+    category: str = Field(
+        default="general",
+        max_length=50,
+    )
+
+    examples: list[str] = Field(
+        default_factory=list,
+    )
+
+    difficulty: int = Field(
+        default=1,
+        ge=1,
+        le=5,
+    )
+
+@app.post("/api/learning/vocabulary")
+async def add_vocabulary(
+    request: VocabularyRequest,
+):
+    try:
+        item = zephyr.learning_engine.add_vocabulary(
+            word=request.word,
+            translation=request.translation,
+            category=request.category,
+            examples=request.examples,
+            difficulty=request.difficulty,
+        )
+
+        return item.to_dict()
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )
+
+@app.get("/api/learning/vocabulary")
+async def get_vocabulary():
+    items = (
+        zephyr.learning_engine
+        .vocabulary
+        .get_all_words()
+    )
+
+    return {
+        "count": len(items),
+        "vocabulary": [
+            item.to_dict()
+            for item in items
+        ],
+    }
+
+@app.get("/api/learning/vocabulary/statistics")
+async def get_vocabulary_statistics():
+    return (
+        zephyr.learning_engine
+        .get_vocabulary_statistics()
+    )
+
+@app.get("/api/learning/vocabulary/review")
+async def get_vocabulary_to_review():
+    items = (
+        zephyr.learning_engine
+        .vocabulary
+        .get_words_to_review()
+    )
+
+    return {
+        "count": len(items),
+        "words": [
+            item.to_dict()
+            for item in items
+        ],
+    }

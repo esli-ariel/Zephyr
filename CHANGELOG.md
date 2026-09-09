@@ -96,3 +96,41 @@ Toutes les modifications importantes du projet sont enregistrées ici.
 - Historique des évaluations.
 - Identifiant unique des sessions d'évaluation.
 - Tests automatisés.
+
+## [0.6.5] - 2026-09-09
+
+### Added
+
+* Ajout du `VocabularyManager`.
+* Ajout du modèle `VocabularyItem`.
+* Gestion des mots appris.
+* Gestion des traductions.
+* Gestion des catégories lexicales.
+* Gestion des exemples.
+* Gestion de la difficulté des mots.
+* Détection des doublons.
+* Suivi des réponses correctes et incorrectes.
+* Calcul du taux de maîtrise.
+* Identification des mots à réviser.
+* Identification des mots maîtrisés.
+* Statistiques du vocabulaire.
+* Intégration du vocabulaire au `LearningEngine`.
+* Intégration du vocabulaire au `LearnerProfileManager`.
+* Ajout de `learned_vocabulary` au profil apprenant.
+* Ajout des endpoints REST du vocabulaire.
+
+### Tests
+
+* Ajout des tests du `VocabularyManager`.
+* Validation de l'intégration du vocabulaire avec le `LearningEngine`.
+* Validation de l'intégration avec le profil apprenant.
+* Suite complète : **42 tests passés**.
+
+### Fixed
+
+* Correction de l'initialisation du `VocabularyManager` dans `LearningEngine`.
+* Ajout de `add_learned_vocabulary()` dans `LearnerProfileManager`.
+
+### Status
+
+**V0.6.5 — TERMINÉE**

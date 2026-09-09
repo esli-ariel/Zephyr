@@ -188,3 +188,109 @@ V0.5 validée.
 ### Statut
 
 ✅ Terminé
+
+## 2026-09-09 — V0.6.5 : Vocabulary Manager
+
+### Travail réalisé
+
+Finalisation du système de gestion du vocabulaire de Zéphyr.
+
+Le `VocabularyManager` permet maintenant de créer et gérer les éléments du vocabulaire de l'apprenant tout en conservant des informations pédagogiques permettant de suivre la progression.
+
+### Fonctionnalités
+
+Chaque élément du vocabulaire contient notamment :
+
+* le mot ;
+* sa traduction ;
+* la langue ;
+* le niveau ;
+* la catégorie ;
+* des exemples ;
+* la difficulté ;
+* le nombre de révisions ;
+* le nombre de réponses correctes ;
+* le nombre de réponses incorrectes ;
+* le taux de maîtrise.
+
+La maîtrise est calculée automatiquement à partir des réponses de l'apprenant.
+
+### Intégration
+
+Le `VocabularyManager` a été intégré au `LearningEngine`.
+
+Lorsqu'un nouveau mot est ajouté :
+
+```text
+LearningEngine
+      ↓
+VocabularyManager
+      ↓
+VocabularyItem
+```
+
+Le mot est également ajouté au profil de l'apprenant :
+
+```text
+VocabularyManager
+      ↓
+LearnerProfileManager
+      ↓
+learned_vocabulary
+```
+
+Cette intégration permet à Zéphyr de conserver une vision globale des connaissances lexicales de l'apprenant.
+
+### API
+
+Les endpoints suivants ont été ajoutés :
+
+```text
+POST /api/learning/vocabulary
+GET  /api/learning/vocabulary
+GET  /api/learning/vocabulary/statistics
+GET  /api/learning/vocabulary/review
+```
+
+### Tests
+
+Une erreur d'intégration a été rencontrée lors de la première exécution :
+
+```text
+AttributeError:
+'LearningEngine' object has no attribute 'vocabulary'
+```
+
+Le problème a été corrigé en initialisant :
+
+```python
+self.vocabulary = VocabularyManager()
+```
+
+Une seconde erreur concernait l'intégration avec le profil :
+
+```text
+AttributeError:
+'LearnerProfileManager' object has no attribute
+'add_learned_vocabulary'
+```
+
+La méthode `add_learned_vocabulary()` a été ajoutée au `LearnerProfileManager`.
+
+Après correction :
+
+```text
+42 passed
+```
+
+### Conclusion
+
+La V0.6.5 est considérée comme terminée et validée.
+
+Le système dispose maintenant d'une première mémoire pédagogique consacrée au vocabulaire.
+
+### Prochaine étape
+
+La prochaine étape est **V0.6.6 — Grammar Manager**.
+
+L'objectif sera de permettre à Zéphyr de suivre les compétences grammaticales de l'apprenant, d'identifier les erreurs récurrentes et d'estimer progressivement la maîtrise de différentes règles grammaticales.

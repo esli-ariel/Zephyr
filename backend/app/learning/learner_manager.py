@@ -204,3 +204,46 @@ class LearnerProfileManager:
         self.add_assessment_result(
             result
         )
+
+    def apply_exercise_result(
+        self,
+        result: dict,
+    ) -> None:
+        """
+        Intègre les résultats d'un exercice
+        dans le profil de l'apprenant.
+        """
+
+        for weak_point in result.get(
+            "weak_points",
+            [],
+        ):
+            self.add_weak_point(
+                weak_point
+            )
+
+        for error in result.get(
+            "errors",
+            [],
+        ):
+            self.add_common_mistake(
+                error
+            )
+
+    def add_learned_vocabulary(
+        self,
+        word: str,
+        ) -> None:
+        """
+        Ajoute un mot au vocabulaire appris.
+        """
+
+        word = word.strip()
+
+        if not word:
+            return
+
+        if word not in self.profile.learned_vocabulary:
+            self.profile.learned_vocabulary.append(
+                word
+            )
