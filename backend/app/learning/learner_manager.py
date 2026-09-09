@@ -45,6 +45,9 @@ class LearnerProfileManager:
     def get_profile(self) -> dict:
         return self.profile.to_dict()
 
+    def get_profile_object(self) -> LearnerProfile:
+        return self.profile
+
     def clear_profile(self) -> None:
         self.profile = LearnerProfile()
 
@@ -247,3 +250,44 @@ class LearnerProfileManager:
             self.profile.learned_vocabulary.append(
                 word
             )
+
+    def update_grammar_mastery(
+        self,
+        rule: str,
+        mastery: float,
+    ) -> None:
+        rule = rule.strip()
+
+        if not rule:
+            return
+
+        self.profile.grammar_mastery[rule] = mastery
+
+
+    def add_grammar_history(
+        self,
+        rule: str,
+        correct: bool,
+        mastery: float,
+    ) -> None:
+        self.profile.grammar_history.append(
+            {
+                "rule": rule,
+                "correct": correct,
+                "mastery": mastery,
+            }
+        )
+
+
+    def get_grammar_mastery(
+        self,
+        rule: str,
+    ) -> float:
+        rule = rule.strip()
+
+        return self.profile.grammar_mastery.get(
+            rule,
+            0.0,
+        )
+
+    

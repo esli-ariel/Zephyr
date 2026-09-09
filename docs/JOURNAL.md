@@ -294,3 +294,63 @@ Le système dispose maintenant d'une première mémoire pédagogique consacrée 
 La prochaine étape est **V0.6.6 — Grammar Manager**.
 
 L'objectif sera de permettre à Zéphyr de suivre les compétences grammaticales de l'apprenant, d'identifier les erreurs récurrentes et d'estimer progressivement la maîtrise de différentes règles grammaticales.
+
+## 2026-09-09 — V0.6.6 Grammar Manager
+
+La V0.6.6 introduit le système de gestion et de suivi des connaissances grammaticales.
+
+### Réalisations
+
+Création de `GrammarRule` permettant de représenter :
+
+- une règle grammaticale ;
+- son explication ;
+- la langue ;
+- le niveau ;
+- la catégorie ;
+- les exemples ;
+- la difficulté ;
+- le nombre de révisions ;
+- les réponses correctes et incorrectes ;
+- le niveau de maîtrise.
+
+Création de `GrammarManager` permettant :
+
+- l'ajout de règles ;
+- la détection des doublons ;
+- la recherche ;
+- la suppression ;
+- le suivi des réponses ;
+- le calcul de la maîtrise ;
+- l'identification des règles à réviser ;
+- l'identification des règles maîtrisées ;
+- le calcul des statistiques.
+
+### Intégration
+
+Le `GrammarManager` a été intégré au `LearningEngine`.
+
+Le profil apprenant possède désormais :
+
+- `grammar_mastery`
+- `grammar_history`
+
+Les résultats des exercices grammaticaux peuvent donc enrichir progressivement le profil de l'apprenant.
+
+### Tests
+
+La suite complète comporte désormais 59 tests.
+
+Résultat final :
+
+59 passed
+
+Une erreur d'intégration concernant `get_learning_context()` a été détectée puis corrigée lorsque le `LearningEngine` fonctionnait sans `LearnerProfileManager`.
+
+### Prochaine étape
+
+La prochaine fonctionnalité est la V0.6.7 :
+
+**Recommendation Engine**
+
+Objectif : permettre à Zéphyr de déterminer automatiquement ce que l'apprenant devrait étudier ensuite en fonction de son profil et de ses performances.

@@ -134,3 +134,39 @@ Toutes les modifications importantes du projet sont enregistrées ici.
 ### Status
 
 **V0.6.5 — TERMINÉE**
+
+## [0.6.6] - 2026-09-09
+
+### Added
+
+- GrammarManager
+- GrammarRule
+- Gestion des règles grammaticales
+- Explications grammaticales
+- Catégories
+- Exemples
+- Difficulté
+- Suivi des réponses
+- Calcul de la maîtrise grammaticale
+- Règles à réviser
+- Règles maîtrisées
+- Statistiques grammaticales
+- Intégration au LearningEngine
+- Intégration au LearnerProfileManager
+- `grammar_mastery`
+- `grammar_history`
+
+### Tests
+
+- Tests GrammarManager
+- Tests d'intégration LearningEngine
+- Tests d'intégration avec le profil apprenant
+- Suite complète : 59 tests réussis
+
+### Fixed
+
+- Correction de `get_learning_context()` lorsque aucun apprenant n'est associé au LearningEngine.
+
+### Status
+
+V0.6.6 TERMINÉE

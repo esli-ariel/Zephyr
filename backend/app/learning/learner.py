@@ -33,6 +33,8 @@ class LearnerProfile:
     assessment_history: list[dict] = field(
         default_factory=list
     )
+    grammar_mastery: dict = field(default_factory=dict)
+    grammar_history: list[dict] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {
@@ -53,4 +55,6 @@ class LearnerProfile:
             "assessment_history": (
                 self.assessment_history
             ),
+            "grammar_mastery": self.grammar_mastery,
+            "grammar_history": self.grammar_history,
         }

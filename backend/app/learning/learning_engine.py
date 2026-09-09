@@ -12,6 +12,7 @@ from app.learning.exercise_evaluator import (
 from app.learning.vocabulary import (
     VocabularyManager,
 )
+from app.learning.grammar import GrammarManager
 
 
 class LearningEngine:
@@ -32,6 +33,7 @@ class LearningEngine:
         self.exercise_evaluator = ExerciseEvaluator()
 
         self.vocabulary = VocabularyManager()
+        self.grammar = GrammarManager()
 
     def create_lesson(
         self,
@@ -104,9 +106,25 @@ class LearningEngine:
                 "common_mistakes": [],
                 "competency_scores": {},
                 "assessment_history": [],
+                "grammar_mastery": {},
+                "grammar_history": [],
             }
 
-        return self.learner.get_profile()
+        profile = self.learner.get_profile()
+
+        return {
+            "name": profile["name"],
+            "target_language": profile["target_language"],
+            "level": profile["level"],
+            "goals": profile["goals"],
+            "weak_points": profile["weak_points"],
+            "learned_vocabulary": profile["learned_vocabulary"],
+            "common_mistakes": profile["common_mistakes"],
+            "competency_scores": profile["competency_scores"],
+            "assessment_history": profile["assessment_history"],
+            "grammar_mastery": profile["grammar_mastery"],
+            "grammar_history": profile["grammar_history"],
+        }
 
     def clear(self) -> None:
         self.lessons.clear()
@@ -289,3 +307,78 @@ class LearningEngine:
         self,
     ) -> dict:
         return self.vocabulary.get_statistics()
+
+    def add_grammar_rule(
+        self,
+        rule: str,
+        explanation: str,
+        category: str = "general",
+        examples: list[str] | None = None,
+        difficulty: int = 1,
+    ):
+        context = self.get_learning_context()
+
+        language = context.get("target_language")
+        level = context.get("level")
+
+        if not language:
+            raise ValueError(
+                "La langue cible de l'apprenant n'est pas définie."
+            )
+
+        if not level:
+            raise ValueError(
+                "Le niveau de l'apprenant n'est pas défini."
+            )
+
+        return self.grammar.add_rule(
+            rule=rule,
+            explanation=explanation,
+            language=language,
+            level=level,
+            category=category,
+            examples=examples,
+            difficulty=difficulty,
+        )
+
+
+    def register_grammar_answer(
+        self,
+        rule: str,
+        correct: bool,
+    ) -> None:
+
+        self.grammar.register_answer(
+            rule,
+            correct,
+        )
+
+        grammar_rule = self.grammar.get_rule(rule)
+
+        if grammar_rule is None:
+            return
+
+        if self.learner is not None:
+            self.learner.update_grammar_mastery(
+                rule=grammar_rule.rule,
+                mastery=grammar_rule.mastery,
+            )
+
+            self.learner.add_grammar_history(
+                rule=grammar_rule.rule,
+                correct=correct,
+                mastery=grammar_rule.mastery,
+            )
+        
+
+
+    def get_grammar_statistics(self) -> dict:
+        return self.grammar.get_statistics()
+
+
+    def get_grammar_to_review(self):
+        return self.grammar.get_rules_to_review()
+
+
+    def get_mastered_grammar(self):
+        return self.grammar.get_mastered_rules()

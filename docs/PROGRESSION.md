@@ -347,3 +347,39 @@ Mots à réviser
 | V0.6.7  | Recommandations personnalisées  | ⏳    |
 | V0.6.8  | Plan d'apprentissage            | ⏳    |
 | V0.6.9  | Intégration pédagogique avancée | ⏳    |
+
+## V0.6.6 — Grammar Manager ✅
+
+**Statut : TERMINÉ**
+
+### Fonctionnalités réalisées
+
+- [x] Modèle `GrammarRule`
+- [x] Ajout des règles grammaticales
+- [x] Explication des règles
+- [x] Langue cible
+- [x] Niveau CECRL
+- [x] Catégories grammaticales
+- [x] Exemples
+- [x] Difficulté de 1 à 5
+- [x] Détection des doublons
+- [x] Recherche d'une règle
+- [x] Suppression d'une règle
+- [x] Suivi des réponses correctes/incorrectes
+- [x] Calcul de la maîtrise grammaticale
+- [x] Identification des règles à réviser
+- [x] Identification des règles maîtrisées
+- [x] Statistiques grammaticales
+- [x] Intégration au `LearningEngine`
+- [x] Intégration au profil apprenant
+- [x] `grammar_mastery`
+- [x] `grammar_history`
+- [x] Tests unitaires
+- [x] Tests d'intégration
+
+### Tests
+
+Commande :
+
+```bash
+python -m pytest
