@@ -334,3 +334,40 @@ def test_add_vocabulary_updates_profile():
     assert "customer" in (
         profile["learned_vocabulary"]
     )
+
+def test_learning_engine_has_recommendation_engine():
+    learner = LearnerProfileManager()
+
+    engine = LearningEngine(
+        learner_manager=learner,
+    )
+
+    assert engine.recommendation is not None
+    assert engine.recommendation.learner is learner
+    assert engine.recommendation.vocabulary is engine.vocabulary
+    assert engine.recommendation.grammar is engine.grammar
+
+def test_learning_engine_returns_recommendations():
+    learner = LearnerProfileManager()
+
+    learner.update_competency_scores(
+        {
+            "grammar": 40,
+            "vocabulary": 80,
+        }
+    )
+
+    engine = LearningEngine(
+        learner_manager=learner,
+    )
+
+    recommendations = engine.get_recommendations()
+
+    assert isinstance(recommendations, list)
+    assert len(recommendations) == 1
+
+    recommendation = recommendations[0]
+
+    assert recommendation["category"] == "competency"
+    assert recommendation["target"] == "grammar"
+    assert recommendation["mastery"] == 40

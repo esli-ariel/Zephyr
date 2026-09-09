@@ -170,3 +170,44 @@ Toutes les modifications importantes du projet sont enregistrées ici.
 ### Status
 
 V0.6.6 TERMINÉE
+
+## [0.6.7] — Recommendation Engine
+
+### Added
+
+* Ajout du `RecommendationEngine`.
+* Ajout du modèle `Recommendation`.
+* Génération de recommandations à partir du profil apprenant.
+* Analyse des points faibles.
+* Analyse des erreurs fréquentes.
+* Analyse des compétences.
+* Analyse du vocabulaire.
+* Analyse de la grammaire.
+* Prise en compte des objectifs de l'apprenant.
+* Prise en compte de la difficulté des notions.
+* Système de calcul de priorité de 0 à 100.
+* Fusion automatique des recommandations similaires.
+* Tri des recommandations par priorité.
+* Limitation du nombre de recommandations.
+* Intégration du Recommendation Engine au `LearningEngine`.
+* Ajout de l'endpoint REST :
+  `GET /api/learning/recommendations`.
+* Ajout du paramètre `limit`.
+* Validation de `limit` entre 1 et 50.
+* Ajout de cinq tests API pour les recommandations.
+
+### Tests
+
+* 21 tests du Recommendation Engine validés.
+* Tests d'intégration du Learning Engine validés.
+* 5 tests API validés.
+* Suite complète : **87 tests réussis**.
+* **0 échec**.
+
+### Notes
+
+Deux warnings provenant des dépendances de test (`Starlette/httpx` et `AnyIO`) sont actuellement présents mais n'affectent pas le fonctionnement du projet.
+
+### Next
+
+* V0.6.8 — Learning Plan Engine.

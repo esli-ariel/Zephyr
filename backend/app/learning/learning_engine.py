@@ -13,6 +13,7 @@ from app.learning.vocabulary import (
     VocabularyManager,
 )
 from app.learning.grammar import GrammarManager
+from app.learning.recommendation import RecommendationEngine
 
 
 class LearningEngine:
@@ -34,6 +35,15 @@ class LearningEngine:
 
         self.vocabulary = VocabularyManager()
         self.grammar = GrammarManager()
+
+        self.vocabulary = VocabularyManager()
+        self.grammar = GrammarManager()
+
+        self.recommendation = RecommendationEngine(
+            learner_manager=self.learner,
+            vocabulary_manager=self.vocabulary,
+            grammar_manager=self.grammar,
+        )
 
     def create_lesson(
         self,
@@ -382,3 +392,16 @@ class LearningEngine:
 
     def get_mastered_grammar(self):
         return self.grammar.get_mastered_rules()
+
+    def get_recommendations(
+        self,
+        limit: int = 5,
+    ) -> list[dict]:
+        recommendations = self.recommendation.generate(
+            limit=limit
+        )
+
+        return [
+            recommendation.to_dict()
+            for recommendation in recommendations
+        ]

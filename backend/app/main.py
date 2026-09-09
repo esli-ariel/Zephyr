@@ -444,3 +444,41 @@ async def get_vocabulary_to_review():
             for item in items
         ],
     }
+
+@app.get("/api/learning/recommendations")
+async def get_learning_recommendations(
+    limit: int = 5,
+):
+    """
+    Retourne les recommandations pédagogiques
+    personnalisées de l'apprenant.
+    """
+
+    if limit < 1:
+        raise HTTPException(
+            status_code=400,
+            detail="La limite doit être supérieure ou égale à 1.",
+        )
+
+    if limit > 50:
+        raise HTTPException(
+            status_code=400,
+            detail="La limite ne peut pas dépasser 50.",
+        )
+
+    try:
+        recommendations = (
+            zephyr.learning_engine
+            .get_recommendations(limit=limit)
+        )
+
+        return {
+            "count": len(recommendations),
+            "recommendations": recommendations,
+        }
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )

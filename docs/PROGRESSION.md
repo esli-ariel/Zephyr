@@ -383,3 +383,150 @@ Commande :
 
 ```bash
 python -m pytest
+
+# V0.6.7 — Recommendation Engine
+
+## Objectif
+
+L'objectif de cette version est d'ajouter à Zéphyr un moteur de recommandation pédagogique capable d'analyser le profil de l'apprenant et de proposer automatiquement les notions à travailler en priorité.
+
+Le moteur exploite plusieurs sources d'information :
+
+* niveau de maîtrise des compétences ;
+* points faibles identifiés ;
+* erreurs fréquentes ;
+* maîtrise du vocabulaire ;
+* maîtrise de la grammaire ;
+* objectifs de l'apprenant ;
+* difficulté des notions ;
+* activité récente.
+
+## Fonctionnalités développées
+
+### 1. Modèle de recommandation
+
+Création de la classe `Recommendation` permettant de représenter une recommandation pédagogique.
+
+Chaque recommandation contient :
+
+* `category` : catégorie de la recommandation ;
+* `target` : notion ou compétence concernée ;
+* `priority` : niveau de priorité ;
+* `reason` : justification ;
+* `mastery` : niveau de maîtrise ;
+* `suggested_action` : action pédagogique proposée ;
+* `metadata` : informations complémentaires.
+
+### 2. RecommendationEngine
+
+Création du `RecommendationEngine`.
+
+Le moteur analyse actuellement cinq types de signaux :
+
+1. grammaire ;
+2. vocabulaire ;
+3. compétences ;
+4. points faibles ;
+5. erreurs fréquentes.
+
+Les recommandations sont ensuite fusionnées, triées par priorité et limitées au nombre demandé.
+
+### 3. Calcul de la priorité
+
+Le système utilise un score compris entre 0 et 100.
+
+La formule actuelle est basée sur :
+
+```text
+Score de base = (100 - maîtrise) × 0,60
+
++15  si la notion est un point faible
++10  si elle est associée à une erreur fréquente
++5   si elle correspond à un objectif
++0 à +5 selon la difficulté
++5   si une activité récente est détectée
+```
+
+Le score final est limité à 100.
+
+### 4. Catégorisation des priorités
+
+Les recommandations sont interprétées selon les niveaux suivants :
+
+|  Score | Priorité     |
+| -----: | ------------ |
+| 90–100 | Critique     |
+|  75–89 | Très haute   |
+|  50–74 | Prioritaire  |
+|  25–49 | À travailler |
+|   0–24 | Faible       |
+
+### 5. Intégration au Learning Engine
+
+Le `RecommendationEngine` est maintenant intégré au `LearningEngine`.
+
+Le Learning Engine peut donc exposer :
+
+```python
+engine.get_recommendations(limit=5)
+```
+
+La méthode retourne une liste de dictionnaires directement exploitable par l'API ou le frontend.
+
+### 6. API REST
+
+Ajout de l'endpoint :
+
+```text
+GET /api/learning/recommendations
+```
+
+Un paramètre optionnel permet de contrôler le nombre de recommandations :
+
+```text
+GET /api/learning/recommendations?limit=10
+```
+
+La limite est comprise entre 1 et 50.
+
+La réponse contient :
+
+```json
+{
+    "count": 3,
+    "recommendations": []
+}
+```
+
+### 7. Gestion des doublons
+
+Le moteur détecte les recommandations portant sur une même cible et les fusionne.
+
+Lors d'une fusion :
+
+* la priorité maximale est conservée ;
+* les raisons sont combinées ;
+* les actions proposées sont combinées ;
+* les métadonnées sont mises à jour.
+
+## Tests
+
+La version V0.6.7 a été validée par les tests unitaires, les tests d'intégration et les tests API.
+
+Résultat de la suite complète :
+
+```text
+87 passed
+0 failed
+2 warnings
+```
+
+Les deux warnings proviennent des dépendances de l'environnement de test (`Starlette`, `httpx` et `AnyIO`) et ne correspondent pas à des erreurs du projet.
+
+## État
+
+**V0.6.7 — Recommendation Engine : TERMINÉE**
+
+Prochaine étape prévue :
+
+**V0.6.8 — Learning Plan / Plan d'apprentissage personnalisé**
