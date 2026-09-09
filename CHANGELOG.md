@@ -211,3 +211,79 @@ Deux warnings provenant des dépendances de test (`Starlette/httpx` et `AnyIO`) 
 ### Next
 
 * V0.6.8 — Learning Plan Engine.
+
+## [0.6.8] - Learning Plan Engine
+
+### Added
+
+- `LearningPlanItem`
+- `LearningPlan`
+- `LearningPlanEngine`
+- génération de plans personnalisés ;
+- transformation des recommandations en activités ;
+- activités grammaticales ;
+- activités lexicales ;
+- activités de compétences ;
+- activités de révision des points faibles ;
+- activités de correction des erreurs ;
+- classement des activités par priorité ;
+- endpoint `GET /api/learning/plan` ;
+- validation du paramètre `limit`.
+
+### Tests
+
+- tests unitaires du Learning Plan Engine ;
+- tests API du plan d'apprentissage.
+
+### Limitations
+
+Le plan ne gère pas encore :
+
+- le temps disponible ;
+- la durée des activités ;
+- le calendrier ;
+- la complétion ;
+- l'adaptation dynamique ;
+- l'historique des plans.
+
+### Next
+
+V0.6.9 — Adaptive Learning Plan.
+
+## [0.6.8] - Septembre 2026
+
+### Added
+
+- Ajout du `LearningPlanEngine`.
+- Ajout de `LearningPlan`.
+- Ajout de `LearningPlanItem`.
+- Génération de plans personnalisés à partir des recommandations.
+- Génération d'activités adaptées au niveau de maîtrise.
+- Gestion des activités de :
+  - grammaire ;
+  - vocabulaire ;
+  - compétences ;
+  - points faibles ;
+  - erreurs fréquentes.
+- Ajout de durées estimées par activité.
+- Ajout d'un système de priorité des activités.
+- Ajout du paramètre `available_minutes`.
+- Ajout de l'endpoint `GET /api/learning/plan`.
+- Ajout des tests unitaires du Learning Plan.
+- Ajout des tests d'intégration du Learning Plan.
+- Ajout des tests API.
+
+### Changed
+
+- Intégration du `LearningPlanEngine` dans `LearningEngine`.
+- Le système de recommandations peut maintenant être transformé en plan d'activités concret.
+
+### Tests
+
+Tous les tests du backend sont au vert.
+
+### Next
+
+- Adaptive Learning Plan.
+- Réorganisation dynamique du plan après les performances de l'apprenant.
+- Intégration progressive de la répétition espacée.

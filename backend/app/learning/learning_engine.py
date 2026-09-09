@@ -14,6 +14,9 @@ from app.learning.vocabulary import (
 )
 from app.learning.grammar import GrammarManager
 from app.learning.recommendation import RecommendationEngine
+from app.learning.learning_plan import (
+    LearningPlanEngine,
+)
 
 
 class LearningEngine:
@@ -44,6 +47,9 @@ class LearningEngine:
             vocabulary_manager=self.vocabulary,
             grammar_manager=self.grammar,
         )
+        self.learning_plan = LearningPlanEngine(
+        recommendation_engine=self.recommendation,
+)
 
     def create_lesson(
         self,
@@ -405,3 +411,22 @@ class LearningEngine:
             recommendation.to_dict()
             for recommendation in recommendations
         ]
+
+    def get_learning_plan(
+        self,
+        limit: int = 5,
+        available_minutes: int | None = None,
+    ) -> dict:
+        """
+        Génère un plan d'apprentissage personnalisé
+        en tenant compte du temps disponible.
+        """
+
+        plan = self.learning_plan.generate(
+            limit=limit,
+            available_minutes=available_minutes,
+        )
+
+        return plan.to_dict()
+
+    

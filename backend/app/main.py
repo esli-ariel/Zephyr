@@ -482,3 +482,54 @@ async def get_learning_recommendations(
             status_code=400,
             detail=str(exc),
         )
+
+@app.get("/api/learning/plan")
+async def get_learning_plan(
+    limit: int = 5,
+    available_minutes: int | None = None,
+):
+    """
+    Retourne un plan d'apprentissage
+    personnalisé.
+    """
+
+    if limit < 1:
+        raise HTTPException(
+            status_code=400,
+            detail="La limite doit être supérieure ou égale à 1.",
+        )
+
+    if limit > 20:
+        raise HTTPException(
+            status_code=400,
+            detail="La limite ne peut pas dépasser 20.",
+        )
+
+    if (
+        available_minutes is not None
+        and available_minutes < 1
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Le temps disponible doit être "
+                "supérieur ou égal à 1 minute."
+            ),
+        )
+
+    try:
+        plan = (
+            zephyr.learning_engine
+            .get_learning_plan(
+                limit=limit,
+                available_minutes=available_minutes,
+            )
+        )
+
+        return plan
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=str(exc),
+        )

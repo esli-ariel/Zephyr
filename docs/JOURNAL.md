@@ -475,3 +475,60 @@ La prochaine évolution sera la création du :
 **Learning Plan Engine**
 
 Il devra transformer les recommandations en un véritable programme d'apprentissage personnalisé.
+
+
+# V0.6.8 — Learning Plan Engine
+
+## Objectif
+
+Après avoir développé le Recommendation Engine en V0.6.7,
+l'objectif de V0.6.8 est de transformer les recommandations
+en activités pédagogiques ordonnées.
+
+## Implémentation
+
+Création de :
+
+text
+learning_plan.py
+
+
+
+## V0.6.8 — Learning Plan Engine
+
+### Date
+
+Septembre 2026
+
+### Objectif
+
+Transformer les recommandations pédagogiques de Zéphyr en un plan d'apprentissage concret, ordonné et adapté au temps disponible.
+
+### Implémentation
+
+Création du fichier :
+
+`backend/app/learning/learning_plan.py`
+
+Classes principales :
+
+- `LearningPlanItem`
+- `LearningPlan`
+- `LearningPlanEngine`
+
+Le LearningPlanEngine dépend du RecommendationEngine.
+
+Le flux est désormais :
+
+
+LearnerProfile
+      ↓
+RecommendationEngine
+      ↓
+Recommendation
+      ↓
+LearningPlanEngine
+      ↓
+LearningPlan
+      ↓
+LearningPlanItem

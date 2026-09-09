@@ -530,3 +530,160 @@ Les deux warnings proviennent des dépendances de l'environnement de test (`Star
 Prochaine étape prévue :
 
 **V0.6.8 — Learning Plan / Plan d'apprentissage personnalisé**
+
+# V0.6.8 — Learning Plan Engine
+
+## Objectif
+
+Transformer les recommandations pédagogiques du Recommendation Engine
+en un plan d'apprentissage personnalisé et ordonné.
+
+## Architecture
+
+Le Learning Plan Engine utilise les recommandations générées par le
+Recommendation Engine.
+
+text
+LearnerProfile
+      ↓
+RecommendationEngine
+      ↓
+Recommendations
+      ↓
+LearningPlanEngine
+      ↓
+LearningPlan
+      ↓
+LearningPlanItem
+
+
+## V0.6.8 — Learning Plan Engine
+
+### Objectif
+
+La version V0.6.8 introduit le moteur de génération de plans d'apprentissage personnalisés.
+
+L'objectif est de transformer les recommandations pédagogiques générées par le `RecommendationEngine` en une séquence concrète d'activités adaptées à l'apprenant.
+
+Architecture :
+
+LearnerProfile
+    ↓
+RecommendationEngine
+    ↓
+Recommendations
+    ↓
+LearningPlanEngine
+    ↓
+LearningPlan
+    ↓
+LearningPlanItem
+
+### Fonctionnement
+
+Le `LearningPlanEngine` récupère les recommandations pédagogiques et génère automatiquement les activités correspondantes.
+
+Les catégories actuellement prises en charge sont :
+
+- `grammar`
+- `vocabulary`
+- `competency`
+- `weak_point`
+- `mistake`
+
+### Types d'activités
+
+Les activités disponibles sont :
+
+| Activité | Durée estimée |
+|---|---:|
+| lesson | 10 min |
+| exercise | 15 min |
+| review | 5 min |
+| practice | 15 min |
+| correction | 10 min |
+
+### Adaptation selon la maîtrise
+
+#### Grammaire
+
+- maîtrise < 40 % :
+  - lesson
+  - exercise
+  - review
+
+- maîtrise entre 40 % et 70 % :
+  - review
+  - exercise
+
+- maîtrise ≥ 70 % :
+  - exercise
+
+#### Vocabulaire
+
+- maîtrise < 40 % :
+  - lesson
+  - review
+  - exercise
+
+- maîtrise entre 40 % et 70 % :
+  - review
+  - exercise
+
+- maîtrise ≥ 70 % :
+  - review
+
+#### Compétence
+
+Une compétence génère :
+
+- practice
+- exercise
+
+#### Point faible
+
+Un point faible génère :
+
+- review
+- exercise
+
+#### Erreur fréquente
+
+Une erreur génère :
+
+- correction
+- exercise
+
+### Priorisation
+
+Chaque recommandation possède une priorité.
+
+La priorité de l'activité est ensuite ajustée selon son type :
+
+| Activité | Multiplicateur |
+|---|---:|
+| lesson | 1.00 |
+| exercise | 0.95 |
+| review | 0.85 |
+| practice | 0.90 |
+| correction | 0.90 |
+
+Formule :
+
+activity_priority = recommendation_priority × multiplier
+
+La priorité est arrondie à deux décimales.
+
+### Gestion du temps disponible
+
+Le moteur accepte un paramètre :
+
+`available_minutes`
+
+Ce paramètre permet de limiter le plan au temps disponible pour la session.
+
+Exemple :
+
+
+available_minutes = 30
+
