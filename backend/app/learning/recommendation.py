@@ -90,6 +90,7 @@ class RecommendationEngine:
 
         return self.learner.get_profile()
 
+
     def _get_weak_points(self) -> list[str]:
 
         profile = self._get_profile()
@@ -99,6 +100,17 @@ class RecommendationEngine:
             [],
         )
 
+
+    def _get_strengths(self) -> list[str]:
+
+        profile = self._get_profile()
+
+        return profile.get(
+            "strengths",
+            [],
+        )
+
+
     def _get_common_mistakes(self) -> list[str]:
 
         profile = self._get_profile()
@@ -107,6 +119,7 @@ class RecommendationEngine:
             "common_mistakes",
             [],
         )
+
 
     def _get_goals(self) -> list[str]:
 

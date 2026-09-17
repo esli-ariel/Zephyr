@@ -1,32 +1,38 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-
+from datetime import datetime, timezone
+import uuid
 
 @dataclass
 class LearningPlanItem:
-    """
-    Représente une activité dans un plan d'apprentissage.
-    """
-
-    order: int
-    category: str
-    target: str
-    activity_type: str
-    priority: float
-    activity_priority: float
-    estimated_minutes: int
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    order: int = 0
+    category: str = ""
+    target: str = ""
+    activity_type: str = ""
+    priority: float = 0
+    activity_priority: float = 0
+    estimated_minutes: int = 10
     suggested_action: str = ""
     reason: str = ""
     mastery: float | None = None
     metadata: dict = field(default_factory=dict)
+    completed: bool = False
+    score: float | None = None
+    completed_at: str | None = None
+
+    def complete(self, score: float) -> None:
+        if not 0 <= score <= 100:
+            raise ValueError("Le score doit être compris entre 0 et 100.")
+
+        self.score = score
+        self.completed = True
+        self.completed_at = datetime.now(timezone.utc).isoformat()
 
     def to_dict(self) -> dict:
-        """
-        Convertit l'activité en dictionnaire.
-        """
-
         return {
+            "id": self.id,
             "order": self.order,
             "category": self.category,
             "target": self.target,
@@ -38,15 +44,14 @@ class LearningPlanItem:
             "reason": self.reason,
             "mastery": self.mastery,
             "metadata": self.metadata,
+            "completed": self.completed,
+            "score": self.score,
+            "completed_at": self.completed_at,
         }
 
 
 @dataclass
 class LearningPlan:
-    """
-    Représente un plan personnalisé d'apprentissage.
-    """
-
     items: list[LearningPlanItem] = field(default_factory=list)
     recommendation_count: int = 0
 
@@ -99,7 +104,14 @@ class LearningPlan:
         self.items.append(item)
 
         return item
-            
+
+    def complete_item(self, item_id: str, score: float) -> LearningPlanItem:
+        for item in self.items:
+            if item.id == item_id:
+                item.complete(score)
+                return item
+
+        raise ValueError("Activité introuvable.")
 
     def get_items(self) -> list[LearningPlanItem]:
         """

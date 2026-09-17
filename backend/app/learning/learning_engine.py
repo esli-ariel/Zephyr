@@ -106,10 +106,6 @@ class LearningEngine:
         return self.exercises.copy()
 
     def get_learning_context(self) -> dict:
-        """
-        Retourne le contexte pédagogique actuel
-        de l'apprenant.
-        """
 
         if self.learner is None:
             return {
@@ -118,6 +114,7 @@ class LearningEngine:
                 "level": None,
                 "goals": [],
                 "weak_points": [],
+                "strengths": [],
                 "learned_vocabulary": [],
                 "common_mistakes": [],
                 "competency_scores": {},
@@ -129,17 +126,51 @@ class LearningEngine:
         profile = self.learner.get_profile()
 
         return {
-            "name": profile["name"],
-            "target_language": profile["target_language"],
-            "level": profile["level"],
-            "goals": profile["goals"],
-            "weak_points": profile["weak_points"],
-            "learned_vocabulary": profile["learned_vocabulary"],
-            "common_mistakes": profile["common_mistakes"],
-            "competency_scores": profile["competency_scores"],
-            "assessment_history": profile["assessment_history"],
-            "grammar_mastery": profile["grammar_mastery"],
-            "grammar_history": profile["grammar_history"],
+            "name": profile.get(
+                "name"
+            ),
+            "target_language": profile.get(
+                "target_language"
+            ),
+            "level": profile.get(
+                "level"
+            ),
+            "goals": profile.get(
+                "goals",
+                [],
+            ),
+            "weak_points": profile.get(
+                "weak_points",
+                [],
+            ),
+            "strengths": profile.get(
+                "strengths",
+                [],
+            ),
+            "learned_vocabulary": profile.get(
+                "learned_vocabulary",
+                [],
+            ),
+            "common_mistakes": profile.get(
+                "common_mistakes",
+                [],
+            ),
+            "competency_scores": profile.get(
+                "competency_scores",
+                {},
+            ),
+            "assessment_history": profile.get(
+                "assessment_history",
+                [],
+            ),
+            "grammar_mastery": profile.get(
+                "grammar_mastery",
+                {},
+            ),
+            "grammar_history": profile.get(
+                "grammar_history",
+                [],
+            ),
         }
 
     def clear(self) -> None:
@@ -429,4 +460,20 @@ class LearningEngine:
 
         return plan.to_dict()
 
-    
+    def complete_learning_plan_item(
+        self,
+        item_id: str,
+        score: float,
+    ) -> dict:
+        if self.current_learning_plan is None:
+            raise ValueError(
+                "Aucun plan d'apprentissage actif."
+            )
+
+        item = self.current_learning_plan.complete_item(
+            item_id=item_id,
+            score=score,
+        )
+
+        return item.to_dict()
+

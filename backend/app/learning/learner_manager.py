@@ -9,6 +9,10 @@ class LearnerProfileManager:
     def __init__(self):
         self.profile = LearnerProfile()
 
+    # ==========================================================
+    # IDENTITÉ
+    # ==========================================================
+
     def set_name(self, name: str) -> None:
         self.profile.name = name.strip()
 
@@ -18,229 +22,62 @@ class LearnerProfileManager:
     def set_level(self, level: str) -> None:
         self.profile.level = level.strip()
 
+    # ==========================================================
+    # OBJECTIFS
+    # ==========================================================
+
     def add_goal(self, goal: str) -> None:
         goal = goal.strip()
 
         if goal and goal not in self.profile.goals:
             self.profile.goals.append(goal)
 
+    # ==========================================================
+    # DIFFICULTÉS
+    # ==========================================================
+
     def add_weak_point(self, weak_point: str) -> None:
         weak_point = weak_point.strip()
 
-        if weak_point and weak_point not in self.profile.weak_points:
-            self.profile.weak_points.append(weak_point)
+        if (
+            weak_point
+            and weak_point not in self.profile.weak_points
+        ):
+            self.profile.weak_points.append(
+                weak_point
+            )
+
+    # ==========================================================
+    # FORCES
+    # ==========================================================
+
+    def add_strength(self, strength: str) -> None:
+        strength = strength.strip()
+
+        if (
+            strength
+            and strength not in self.profile.strengths
+        ):
+            self.profile.strengths.append(
+                strength
+            )
+
+    # ==========================================================
+    # VOCABULAIRE
+    # ==========================================================
 
     def add_vocabulary(self, word: str) -> None:
         word = word.strip()
 
-        if word and word not in self.profile.learned_vocabulary:
-            self.profile.learned_vocabulary.append(word)
-
-    def add_common_mistake(self, mistake: str) -> None:
-        mistake = mistake.strip()
-
-        if mistake and mistake not in self.profile.common_mistakes:
-            self.profile.common_mistakes.append(mistake)
-
-    def get_profile(self) -> dict:
-        return self.profile.to_dict()
-
-    def get_profile_object(self) -> LearnerProfile:
-        return self.profile
-
-    def clear_profile(self) -> None:
-        self.profile = LearnerProfile()
-
-    def apply_assessment_result(
-            self,
-            result: dict,
-        ) -> None:
-        """
-        Applique les résultats d'une évaluation
-        au profil de l'apprenant.
-        """
-
-        estimated_level = result.get(
-            "estimated_level"
-        )
-
-        if estimated_level:
-            self.set_level(
-                estimated_level
-            )
-
-        for weak_point in result.get(
-            "weak_points",
-            [],
+        if (
+            word
+            and word not in self.profile.learned_vocabulary
         ):
-            self.add_weak_point(
-                weak_point
+            self.profile.learned_vocabulary.append(
+                word
             )
 
-        for strength in result.get(
-            "strengths",
-            [],
-        ):
-            if strength not in (
-                self.profile.common_mistakes
-            ):
-                # Les forces ne sont pas encore
-                # stockées dans le profil.
-                pass
-
-        for error in result.get(
-            "errors",
-            [],
-        ):
-            self.add_common_mistake(
-                error
-            )
-
-    def update_competency_scores(
-        self,
-        scores: dict,
-        ) -> None:
-        """
-        Enregistre les scores par compétence.
-        """
-
-        for competency, score in scores.items():
-
-            if score is None:
-                continue
-
-            self.profile.competency_scores[
-                competency
-            ] = score
-
-    def add_assessment_result(
-        self,
-        result: dict,
-    ) -> None:
-        """
-        Enregistre une évaluation dans l'historique.
-
-        Une même évaluation ne peut être enregistrée
-        qu'une seule fois.
-        """
-
-        assessment_id = result.get(
-            "assessment_id"
-        )
-
-        if assessment_id:
-
-            for existing in (
-                self.profile.assessment_history
-            ):
-                if (
-                existing.get("assessment_id")
-                == assessment_id
-                ):
-                    return
-
-        assessment_record = {
-            "assessment_id": assessment_id,
-            "estimated_level": result.get(
-                "estimated_level"
-        ),
-        "validated_levels": result.get(
-            "validated_levels",
-            [],
-        ),
-        "overall_score": result.get(
-            "overall_score",
-            0,
-        ),
-        "competency_scores": result.get(
-            "competency_scores",
-            {},
-            ),
-        }
-
-        self.profile.assessment_history.append(
-            assessment_record
-        )
-    
-
-    def apply_assessment_result(
-        self,
-        result: dict,
-    ) -> None:
-        """
-        Applique les résultats de l'évaluation
-        au profil de l'apprenant.
-        """
-
-        estimated_level = result.get(
-            "estimated_level"
-        )
-
-        if estimated_level:
-            self.set_level(
-                estimated_level
-            )
-
-        self.update_competency_scores(
-            result.get(
-                "competency_scores",
-                {},
-            )
-        )
-
-        for weak_point in result.get(
-            "weak_points",
-            [],
-        ):
-            self.add_weak_point(
-                weak_point
-            )
-
-        for error in result.get(
-            "errors",
-            [],
-        ):
-            self.add_common_mistake(
-                error
-            )
-
-        self.add_assessment_result(
-            result
-        )
-
-    def apply_exercise_result(
-        self,
-        result: dict,
-    ) -> None:
-        """
-        Intègre les résultats d'un exercice
-        dans le profil de l'apprenant.
-        """
-
-        for weak_point in result.get(
-            "weak_points",
-            [],
-        ):
-            self.add_weak_point(
-                weak_point
-            )
-
-        for error in result.get(
-            "errors",
-            [],
-        ):
-            self.add_common_mistake(
-                error
-            )
-
-    def add_learned_vocabulary(
-        self,
-        word: str,
-        ) -> None:
-        """
-        Ajoute un mot au vocabulaire appris.
-        """
-
+    def add_learned_vocabulary(self, word: str) -> None:
         word = word.strip()
 
         if not word:
@@ -251,18 +88,245 @@ class LearnerProfileManager:
                 word
             )
 
+    # ==========================================================
+    # ERREURS
+    # ==========================================================
+
+    def add_common_mistake(self, mistake: str) -> None:
+        mistake = mistake.strip()
+
+        if (
+            mistake
+            and mistake not in self.profile.common_mistakes
+        ):
+            self.profile.common_mistakes.append(
+                mistake
+            )
+
+    # ==========================================================
+    # PROFIL
+    # ==========================================================
+
+    def get_profile(self) -> dict:
+        return self.profile.to_dict()
+
+    def get_profile_object(self) -> LearnerProfile:
+        return self.profile
+
+    def clear_profile(self) -> None:
+        self.profile = LearnerProfile()
+
+    # ==========================================================
+    # COMPÉTENCES
+    # ==========================================================
+
+    def update_competency_scores(
+        self,
+        scores: dict,
+    ) -> None:
+
+        for competency, score in scores.items():
+
+            if score is None:
+                continue
+
+            self.profile.competency_scores[
+                competency
+            ] = score
+
+    # ==========================================================
+    # ÉVALUATIONS
+    # ==========================================================
+
+    def add_assessment_result(
+        self,
+        result: dict,
+    ) -> None:
+
+        assessment_id = result.get(
+            "assessment_id"
+        )
+
+        if assessment_id:
+
+            for existing in self.profile.assessment_history:
+
+                if (
+                    existing.get("assessment_id")
+                    == assessment_id
+                ):
+                    return
+
+        assessment_record = {
+            "assessment_id": assessment_id,
+            "estimated_level": result.get(
+                "estimated_level"
+            ),
+            "validated_levels": result.get(
+                "validated_levels",
+                [],
+            ),
+            "overall_score": result.get(
+                "overall_score",
+                0,
+            ),
+            "competency_scores": result.get(
+                "competency_scores",
+                {},
+            ),
+        }
+
+        self.profile.assessment_history.append(
+            assessment_record
+        )
+
+    def apply_assessment_result(
+        self,
+        result: dict,
+    ) -> None:
+
+        # ------------------------------------------------------
+        # NIVEAU
+        # ------------------------------------------------------
+
+        estimated_level = result.get(
+            "estimated_level"
+        )
+
+        if estimated_level:
+            self.set_level(
+                estimated_level
+            )
+
+        # ------------------------------------------------------
+        # COMPÉTENCES
+        # ------------------------------------------------------
+
+        self.update_competency_scores(
+            result.get(
+                "competency_scores",
+                {},
+            )
+        )
+
+        # ------------------------------------------------------
+        # POINTS FAIBLES
+        # ------------------------------------------------------
+
+        for weak_point in result.get(
+            "weak_points",
+            [],
+        ):
+            self.add_weak_point(
+                weak_point
+            )
+
+        # ------------------------------------------------------
+        # FORCES
+        # ------------------------------------------------------
+
+        for strength in result.get(
+            "strengths",
+            [],
+        ):
+            self.add_strength(
+                strength
+            )
+
+        # ------------------------------------------------------
+        # ERREURS
+        # ------------------------------------------------------
+
+        for error in result.get(
+            "errors",
+            [],
+        ):
+            self.add_common_mistake(
+                error
+            )
+
+        # ------------------------------------------------------
+        # HISTORIQUE
+        # ------------------------------------------------------
+
+        self.add_assessment_result(
+            result
+        )
+
+    # ==========================================================
+    # RÉSULTATS D'EXERCICES
+    # ==========================================================
+
+    def apply_exercise_result(
+        self,
+        result: dict,
+    ) -> None:
+
+        # ------------------------------------------------------
+        # COMPÉTENCES
+        # ------------------------------------------------------
+
+        self.update_competency_scores(
+            result.get(
+                "competency_scores",
+                {},
+            )
+        )
+
+        # ------------------------------------------------------
+        # POINTS FAIBLES
+        # ------------------------------------------------------
+
+        for weak_point in result.get(
+            "weak_points",
+            [],
+        ):
+            self.add_weak_point(
+                weak_point
+            )
+
+        # ------------------------------------------------------
+        # FORCES
+        # ------------------------------------------------------
+
+        for strength in result.get(
+            "strengths",
+            [],
+        ):
+            self.add_strength(
+                strength
+            )
+
+        # ------------------------------------------------------
+        # ERREURS
+        # ------------------------------------------------------
+
+        for error in result.get(
+            "errors",
+            [],
+        ):
+            self.add_common_mistake(
+                error
+            )
+
+    # ==========================================================
+    # GRAMMAIRE
+    # ==========================================================
+
     def update_grammar_mastery(
         self,
         rule: str,
         mastery: float,
     ) -> None:
+
         rule = rule.strip()
 
         if not rule:
             return
 
-        self.profile.grammar_mastery[rule] = mastery
-
+        self.profile.grammar_mastery[
+            rule
+        ] = mastery
 
     def add_grammar_history(
         self,
@@ -270,6 +334,7 @@ class LearnerProfileManager:
         correct: bool,
         mastery: float,
     ) -> None:
+
         self.profile.grammar_history.append(
             {
                 "rule": rule,
@@ -278,16 +343,14 @@ class LearnerProfileManager:
             }
         )
 
-
     def get_grammar_mastery(
         self,
         rule: str,
     ) -> float:
+
         rule = rule.strip()
 
         return self.profile.grammar_mastery.get(
             rule,
             0.0,
         )
-
-    

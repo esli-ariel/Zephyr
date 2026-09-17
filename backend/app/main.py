@@ -533,3 +533,41 @@ async def get_learning_plan(
             status_code=400,
             detail=str(exc),
         )
+
+class CompleteLearningItemRequest(BaseModel):
+    score: float = Field(
+        ...,
+        ge=0,
+        le=100,
+        description="Score compris entre 0 et 100.",
+    )
+
+
+@app.post("/api/learning/plan/items/{item_id}/complete")
+async def complete_learning_plan_item(
+    item_id: str,
+    request: CompleteLearningItemRequest,
+):
+    """
+    Marque une activité du plan comme terminée.
+    """
+
+    try:
+        item = (
+            zephyr.learning_engine
+            .complete_learning_plan_item(
+                item_id=item_id,
+                score=request.score,
+            )
+        )
+
+        return {
+            "status": "completed",
+            "item": item,
+        }
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=404,
+            detail=str(exc),
+        )

@@ -250,7 +250,7 @@ Le plan ne gère pas encore :
 
 V0.6.9 — Adaptive Learning Plan.
 
-## [0.6.8] - Septembre 2026
+## [0.6.8] — Septembre 2026
 
 ### Added
 
@@ -259,31 +259,42 @@ V0.6.9 — Adaptive Learning Plan.
 - Ajout de `LearningPlanItem`.
 - Génération de plans personnalisés à partir des recommandations.
 - Génération d'activités adaptées au niveau de maîtrise.
-- Gestion des activités de :
-  - grammaire ;
-  - vocabulaire ;
-  - compétences ;
-  - points faibles ;
-  - erreurs fréquentes.
+- Activités de grammaire, vocabulaire et compétences.
+- Activités de révision des points faibles.
+- Activités de correction des erreurs fréquentes.
+- Classement des activités par priorité.
 - Ajout de durées estimées par activité.
-- Ajout d'un système de priorité des activités.
 - Ajout du paramètre `available_minutes`.
 - Ajout de l'endpoint `GET /api/learning/plan`.
-- Ajout des tests unitaires du Learning Plan.
-- Ajout des tests d'intégration du Learning Plan.
-- Ajout des tests API.
+- Validation du paramètre `limit`.
+- Tests unitaires, d'intégration et API.
 
 ### Changed
 
 - Intégration du `LearningPlanEngine` dans `LearningEngine`.
-- Le système de recommandations peut maintenant être transformé en plan d'activités concret.
+- Transformation des recommandations en activités concrètes.
+- Adaptation du plan au temps disponible de l'apprenant.
 
-### Tests
+### Limitations
 
-Tous les tests du backend sont au vert.
+Le plan ne gère pas encore :
+
+- la complétion des activités ;
+- l'adaptation selon les performances ;
+- l'historique des plans ;
+- la répétition espacée ;
+- le calendrier d'apprentissage.
+
+### Status
+
+**V0.6.8 — TERMINÉE**
 
 ### Next
 
-- Adaptive Learning Plan.
-- Réorganisation dynamique du plan après les performances de l'apprenant.
-- Intégration progressive de la répétition espacée.
+**V0.6.9 — Adaptive Learning Plan**
+
+- Complétion des activités.
+- Enregistrement des scores.
+- Adaptation dynamique du plan.
+- Historique des plans.
+- Préparation de la répétition espacée.
