@@ -34,6 +34,18 @@ Prochain jalon : V0.7.2 (validation des réponses IA et liens exercices/notions)
 puis première interface permettant de parcourir profil → évaluation → plan →
 exercice → correction. Ajouter l’authentification avant une ouverture publique.
 
+## Documents de référence
+
+- [Journal](JOURNAL.md) : travaux et validations des V0.6.9, V0.7.0 et V0.7.1.
+- [Décisions](DECISIONS.md) : SQLite, sélection de l’apprenant, transactions,
+  concurrence et stratégie de tests (ADR-007 à ADR-010).
+- [Bugs et limites](BUGS.md) : points résolus et travaux B003 à B007.
+
+La V0.7.1 est publiée sur `main` au commit
+[f01c4d4](https://github.com/esli-ariel/Zephyr/commit/f01c4d4).
+Les 159 tests indiqués proviennent de la dernière validation locale du code.
+La synchronisation documentaire du 21 octobre n’ajoute pas de fonctionnalité.
+
 ---
 
 # Historique des notes de progression

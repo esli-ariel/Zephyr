@@ -532,3 +532,71 @@ LearningPlanEngine
 LearningPlan
       ↓
 LearningPlanItem
+
+## 21/10/2026 — V0.6.9 : intégration pédagogique et revue du dépôt
+
+### Travaux réalisés
+
+- Revue du code, des versions documentées et des points d’intégration manquants.
+- Ajout des routes de correction d’exercice, de grammaire et d’autoévaluation du vocabulaire.
+- Mise à jour des difficultés du profil après correction d’exercice.
+- Masquage de la réponse attendue dans l’énoncé public et tri du plan sur `activity_priority`.
+- Ajout des dépendances de développement, de la configuration pytest et de GitHub Actions.
+
+### Validation
+
+129 tests réussis localement, 2 avertissements de dépendances. Appels OpenRouter
+simulés. Le backend restait mono-apprenant et ses données étaient temporaires.
+
+## 21/10/2026 — V0.7.0 : sauvegarde durable
+
+### Travaux réalisés
+
+- Ajout de la sauvegarde SQLite et de la restauration du profil, conversation,
+  contenus pédagogiques, vocabulaire, grammaire, plan actif et évaluation.
+- Annulation des mutations lors d’un échec de requête ou d’écriture ; erreur `503`
+  lorsqu’une sauvegarde ne peut pas être confirmée.
+- Ajout de la commande de copie `python -m app.backup` et exclusion des données de Git.
+- Correction de l’initialisation du plan actif et ajout de sa consultation.
+- Intégration du commit distant `726a307`, qui enrichissait le profil et le suivi des activités.
+
+### Validation et publication
+
+143 tests réussis localement, 2 avertissements de dépendances : redémarrage,
+effacements, rollback, état invalide et copie/restauration SQLite.
+Publication sur `main` : [5f9478a](https://github.com/esli-ariel/Zephyr/commit/5f9478a).
+
+## 21/10/2026 — V0.7.1 : séparation des apprenants
+
+### Travaux réalisés
+
+- Création des apprenants via `POST /api/learners` ; sélection explicite par `X-Learner-ID`.
+- Remplacement de l’agent et de l’évaluation globaux par des instances propres à chaque apprenant.
+- Injection de ces instances dans toutes les routes pédagogiques.
+- Sauvegardes par identifiant, restauration à la demande et verrou par apprenant.
+- Migration transactionnelle de l’ancienne base vers le profil historique
+  `00000000-0000-0000-0000-000000000001`.
+- Documentation de la nouvelle sélection, de la migration et des limites d’accès.
+
+### Validation et publication
+
+159 tests réussis localement, 2 avertissements de dépendances. Vérifications :
+séparation de deux profils et de leurs ressources, redémarrage, effacements,
+échecs de sauvegarde/création, identifiants refusés, migration, copie multi-apprenant
+et concurrence. Un appel IA lent d’un apprenant ne bloque pas les autres.
+Publication sur `main` : [f01c4d4](https://github.com/esli-ariel/Zephyr/commit/f01c4d4).
+Aucun appel OpenRouter réel ni résultat CI distant n’a été vérifié pendant ces validations.
+
+### Limites et suite
+
+L’identifiant sélectionne les données sans authentifier leur propriétaire ; un seul
+processus API est pris en charge. La V0.7.2 doit renforcer la validation des réponses
+IA et relier les exercices aux mots/règles pour actualiser leur maîtrise.
+L’interface web et l’authentification restent à réaliser.
+
+## 21/10/2026 — Synchronisation des documents de suivi
+
+Mise à jour coordonnée de `BUGS.md`, `DECISIONS.md`, `JOURNAL.md` et
+`PROGRESSION.md` après la V0.7.1. Ajout des ADR-007 à ADR-010 et clarification
+de l’ADR-005. Les résultats ci-dessus correspondent aux validations du code
+réalisées pour chaque version ; cette synchronisation modifie uniquement la documentation.
