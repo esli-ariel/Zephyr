@@ -1,9 +1,14 @@
+import httpx
+import asyncio
+import logging
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+from starlette.responses import JSONResponse
 
 from app.config import settings
 from app.agent.zephyr import ZephyrAgent
-from pydantic import BaseModel, Field
+from app.persistence import StateStore, capture_state, restore_state
 from app.learning.adaptive_assessment import (
     AdaptiveAssessment,
 )
@@ -11,15 +16,63 @@ from app.learning.adaptive_assessment import (
 
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.state.store = None
+    app.state.state_lock = asyncio.Lock()
+    if settings.persistence_enabled:
+        store = StateStore(settings.database_path)
+        snapshot = store.load()
+        if snapshot is not None:
+            restore_state(snapshot, zephyr, adaptive_assessment)
+        app.state.store = store
+    try:
+        yield
+    finally:
+        app.state.store = None
+
+
 app = FastAPI(
     title=settings.app_name,
     description="API de l'assistant intelligent Zéphyr",
-    version="0.2.0",
+    version="0.7.0",
+    lifespan=lifespan,
 )
 
 
 zephyr = ZephyrAgent()
 adaptive_assessment = AdaptiveAssessment()
+
+
+@app.middleware("http")
+async def persist_learning_state(request, call_next):
+    store = getattr(app.state, "store", None)
+    if store is None:
+        return await call_next(request)
+    # Le prototype mono-apprenant traite les mutations dans l'ordre et ne
+    # confirme une requête qu'après la validation de la transaction SQLite.
+    async with app.state.state_lock:
+        before = capture_state(zephyr, adaptive_assessment)
+        try:
+            response = await call_next(request)
+            if response.status_code >= 400:
+                restore_state(before, zephyr, adaptive_assessment)
+                return response
+            after = capture_state(zephyr, adaptive_assessment)
+            if after != before:
+                try:
+                    store.save(after)
+                except Exception:
+                    logging.getLogger(__name__).exception("Échec de sauvegarde de l'état")
+                    restore_state(before, zephyr, adaptive_assessment)
+                    return JSONResponse(
+                        status_code=503,
+                        content={"detail": "Sauvegarde indisponible. Veuillez réessayer."},
+                    )
+            return response
+        except BaseException:
+            restore_state(before, zephyr, adaptive_assessment)
+            raise
 
 
 class ChatRequest(BaseModel):
@@ -34,7 +87,7 @@ async def root():
     return {
         "agent": settings.app_name,
         "status": "online",
-        "version": "0.2.0",
+        "version": app.version,
     }
 
 
@@ -340,7 +393,7 @@ async def generate_exercises(
         return {
             "count": len(exercises),
             "exercises": [
-                exercise.to_dict()
+                exercise.to_public_dict()
                 for exercise in exercises
             ],
         }
@@ -534,6 +587,14 @@ async def get_learning_plan(
             detail=str(exc),
         )
 
+@app.get("/api/learning/plan/current")
+async def get_current_learning_plan():
+    plan = zephyr.learning_engine.current_learning_plan
+    if plan is None:
+        raise HTTPException(status_code=404, detail="Aucun plan d'apprentissage actif.")
+    return plan.to_dict()
+
+
 class CompleteLearningItemRequest(BaseModel):
     score: float = Field(
         ...,
@@ -571,3 +632,88 @@ async def complete_learning_plan_item(
             status_code=404,
             detail=str(exc),
         )
+
+class ExerciseAnswerRequest(BaseModel):
+    answer: str = Field(min_length=1, max_length=5000)
+
+
+@app.post("/api/learning/exercises/{exercise_id}/answer")
+async def answer_exercise(exercise_id: str, request: ExerciseAnswerRequest):
+    exercise = next(
+        (item for item in zephyr.learning_engine.get_exercises()
+         if item.id == exercise_id),
+        None,
+    )
+    if exercise is None:
+        raise HTTPException(status_code=404, detail="Exercice introuvable.")
+    try:
+        result = await zephyr.evaluate_exercise(exercise, request.answer)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except (RuntimeError, httpx.HTTPError) as exc:
+        raise HTTPException(
+            status_code=502, detail="Le service de correction est indisponible."
+        ) from exc
+    return {"exercise_id": exercise.id, "evaluation": result}
+
+
+class VocabularyAnswerRequest(BaseModel):
+    word: str = Field(min_length=1, max_length=100, pattern=r"\S")
+    correct: bool = Field(strict=True)
+
+
+@app.post("/api/learning/vocabulary/answer")
+async def answer_vocabulary(request: VocabularyAnswerRequest):
+    item = zephyr.learning_engine.vocabulary.get_word(request.word)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Mot introuvable.")
+    zephyr.learning_engine.register_vocabulary_answer(request.word, request.correct)
+    return item.to_dict()
+
+
+class GrammarRequest(BaseModel):
+    rule: str = Field(min_length=1, max_length=200, pattern=r"\S")
+    explanation: str = Field(min_length=1, max_length=5000, pattern=r"\S")
+    category: str = Field(default="general", max_length=50)
+    examples: list[str] = Field(default_factory=list)
+    difficulty: int = Field(default=1, ge=1, le=5)
+
+
+@app.post("/api/learning/grammar")
+async def add_grammar(request: GrammarRequest):
+    try:
+        item = zephyr.learning_engine.add_grammar_rule(**request.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return item.to_dict()
+
+
+@app.get("/api/learning/grammar")
+async def get_grammar():
+    items = zephyr.learning_engine.grammar.get_all_rules()
+    return {"count": len(items), "rules": [item.to_dict() for item in items]}
+
+
+@app.get("/api/learning/grammar/statistics")
+async def get_grammar_statistics():
+    return zephyr.learning_engine.get_grammar_statistics()
+
+
+@app.get("/api/learning/grammar/review")
+async def get_grammar_to_review():
+    items = zephyr.learning_engine.get_grammar_to_review()
+    return {"count": len(items), "rules": [item.to_dict() for item in items]}
+
+
+class GrammarAnswerRequest(BaseModel):
+    rule: str = Field(min_length=1, max_length=200, pattern=r"\S")
+    correct: bool = Field(strict=True)
+
+
+@app.post("/api/learning/grammar/answer")
+async def answer_grammar(request: GrammarAnswerRequest):
+    item = zephyr.learning_engine.grammar.get_rule(request.rule)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Règle introuvable.")
+    zephyr.learning_engine.register_grammar_answer(request.rule, request.correct)
+    return item.to_dict()

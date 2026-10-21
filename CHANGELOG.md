@@ -2,6 +2,26 @@
 
 Toutes les modifications importantes du projet sont enregistrées ici.
 
+## [0.7.0] — 21/10/2026
+
+- Persistance SQLite automatique du profil, conversation, contenus pédagogiques, vocabulaire, grammaire, plan actif et évaluation en cours.
+- Restauration au démarrage avec validation du format ; annulation des mutations en cas de requête ou d’écriture en échec.
+- Configuration `DATABASE_PATH` / `PERSISTENCE_ENABLED` ; données exclues de Git.
+- Commande de copie cohérente `python -m app.backup` sans écrasement.
+- Reprise du plan via `GET /api/learning/plan/current` et correction de son initialisation.
+- Intégration du commit distant `726a307` (forces du profil et suivi des activités).
+- 143 tests réussis localement, dont redémarrage, effacement, rollback et restauration d’une copie SQLite.
+
+## [0.6.9] — 21/10/2026
+
+- Correction d’un exercice par identifiant via API, avec mise à jour des difficultés du profil.
+- API grammaticale : ajout, liste, statistiques, notions à réviser et autoévaluation.
+- Autoévaluation du vocabulaire via API ; erreur 404 pour une cible inconnue.
+- Masquage du corrigé dans les exercices générés et tri du plan sur `activity_priority`.
+- Dépendances de test, configuration pytest et GitHub Actions.
+- Tests d’intégration du parcours pédagogique et des erreurs ; 129 tests réussis localement.
+- Documentation de l’état réel et des limites du prototype.
+
 ## [0.1.0] — 04/09/2026
 
 ### Added

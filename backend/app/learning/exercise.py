@@ -33,3 +33,9 @@ class Exercise:
             "expected_answer": self.expected_answer,
             "difficulty": self.difficulty,
         }
+
+    def to_public_dict(self) -> dict:
+        """Retourne l'énoncé sans révéler le corrigé à l'apprenant."""
+        data = self.to_dict()
+        data.pop("expected_answer")
+        return data

@@ -16,6 +16,7 @@ from app.learning.grammar import GrammarManager
 from app.learning.recommendation import RecommendationEngine
 from app.learning.learning_plan import (
     LearningPlanEngine,
+    LearningPlan,
 )
 
 
@@ -32,12 +33,10 @@ class LearningEngine:
         
         self.lessons: list[Lesson] = []
         self.exercises: list[Exercise] = []
+        self.current_learning_plan: LearningPlan | None = None
         self.lesson_generator = LessonGenerator()
         self.exercise_generator = ExerciseGenerator()
         self.exercise_evaluator = ExerciseEvaluator()
-
-        self.vocabulary = VocabularyManager()
-        self.grammar = GrammarManager()
 
         self.vocabulary = VocabularyManager()
         self.grammar = GrammarManager()
@@ -48,8 +47,8 @@ class LearningEngine:
             grammar_manager=self.grammar,
         )
         self.learning_plan = LearningPlanEngine(
-        recommendation_engine=self.recommendation,
-)
+            recommendation_engine=self.recommendation,
+        )
 
     def create_lesson(
         self,
@@ -176,6 +175,7 @@ class LearningEngine:
     def clear(self) -> None:
         self.lessons.clear()
         self.exercises.clear()
+        self.current_learning_plan = None
 
     async def generate_lesson(
         self,
@@ -458,6 +458,7 @@ class LearningEngine:
             available_minutes=available_minutes,
         )
 
+        self.current_learning_plan = plan
         return plan.to_dict()
 
     def complete_learning_plan_item(

@@ -496,7 +496,7 @@ class LearningPlanEngine:
         """
 
         plan.items.sort(
-            key=lambda item: item.priority,
+            key=lambda item: item.activity_priority,
             reverse=True,
         )
 

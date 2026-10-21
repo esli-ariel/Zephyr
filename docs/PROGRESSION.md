@@ -1,3 +1,38 @@
+# État actuel — 21 octobre 2026
+
+**Version backend : 0.7.0 — sauvegarde SQLite et reprise après redémarrage.**
+
+| Domaine | État |
+|---|---|
+| API, OpenRouter, mémoire courte, profil | Implémentés |
+| Évaluation adaptative CECRL | Implémentée |
+| Leçons, exercices et correction | Implémentés ; correction accessible par API |
+| Vocabulaire et grammaire | Ajout, consultation, statistiques, révision et autoévaluation accessibles par API |
+| Recommandations et plans | Implémentés ; tri sur la priorité calculée des activités |
+| Tests | 143 réussis localement, 2 avertissements de dépendances |
+| CI | Configuration GitHub Actions ajoutée ; exécution distante non vérifiée |
+| Persistance | SQLite : profil, conversation, contenus, maîtrise, plan actif et évaluation |
+| Copie de sauvegarde | Commande `python -m app.backup` ; restauration testée |
+| Isolation des apprenants | À réaliser ; un apprenant et un processus API |
+| Interface, voix, vision, avatar | À réaliser |
+
+La V0.6.9 relie les réponses aux exercices aux points faibles et erreurs du profil.
+Les révisions actualisent la maîtrise utilisée par les recommandations et plans.
+La V0.7.0 ajoute la sauvegarde automatique, la reprise du plan actif et une commande
+de copie SQLite. Elle ne fournit pas encore l’exécution automatique d’un plan
+ni le rattachement automatique d’un exercice à une règle ou un mot.
+Aucun appel réel à OpenRouter n’a été effectué pendant cette validation.
+
+Prochain jalon : isolation des apprenants, puis première
+interface permettant de parcourir profil → évaluation → plan → exercice → correction.
+
+---
+
+# Historique des notes de progression
+
+Les pourcentages et cases ci-dessous décrivent des étapes antérieures et ne
+constituent pas l’état actuel du projet. Le tableau ci-dessus fait référence.
+
 # 🚀 Zéphyr — Suivi de progression
 
 > Assistant intelligent autonome dédié à l'apprentissage des langues.
@@ -383,6 +418,7 @@ Commande :
 
 ```bash
 python -m pytest
+```
 
 # V0.6.7 — Recommendation Engine
 

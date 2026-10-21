@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -6,6 +7,10 @@ class Settings(BaseSettings):
     app_name: str = "Zéphyr"
     app_env: str = "development"
     debug: bool = True
+    persistence_enabled: bool = True
+    database_path: str = str(
+        Path(__file__).resolve().parents[1] / "data" / "zephyr.sqlite3"
+    )
 
     # OpenRouter
     openrouter_api_key: str = ""

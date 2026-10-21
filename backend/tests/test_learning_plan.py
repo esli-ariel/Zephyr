@@ -337,3 +337,19 @@ def test_plan_rejects_invalid_available_time():
             "Le temps disponible doit être "
             "supérieur ou égal à 1 minute."
         )
+
+def test_activity_priority_can_reorder_recommendations():
+    plan = LearningPlan()
+    plan.add_item(
+        category="vocabulary", target="hello", activity_type="review",
+        priority=90, activity_priority=76.5,
+    )
+    plan.add_item(
+        category="grammar", target="Present Simple", activity_type="lesson",
+        priority=80, activity_priority=80,
+    )
+    engine = LearningPlanEngine()
+    engine._reorder(plan)
+    engine._filter_by_available_time(plan, 10)
+    assert [item.target for item in plan.items] == ["Present Simple"]
+    assert plan.items[0].order == 1
