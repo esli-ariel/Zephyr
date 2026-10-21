@@ -600,3 +600,40 @@ Mise à jour coordonnée de `BUGS.md`, `DECISIONS.md`, `JOURNAL.md` et
 `PROGRESSION.md` après la V0.7.1. Ajout des ADR-007 à ADR-010 et clarification
 de l’ADR-005. Les résultats ci-dessus correspondent aux validations du code
 réalisées pour chaque version ; cette synchronisation modifie uniquement la documentation.
+
+
+## 21/10/2026 — V0.7.2 : validation IA et maîtrise des notions
+
+### Préparation locale
+
+Création de `backend/.env` et `backend/app/.env` depuis leurs exemples, hors Git.
+Dépendances de développement vérifiées dans `.venv`, sans conflit. La clé ajoutée
+par l’utilisateur est chargée depuis `backend/.env` ; aucune clé n’est consignée ici.
+
+### Travaux réalisés
+
+- Schémas stricts communs aux cinq types de réponses structurées du modèle.
+- Rejet des types/bornes invalides, clés dupliquées, champs manquants ou supplémentaires.
+- Contrôles des QCM et de la conformité des générations à la demande.
+- Erreurs OpenRouter normalisées sans recopier les réponses brutes.
+- Suppression de la note zéro artificielle en cas d’échec d’évaluation ouverte.
+- Lien explicite et facultatif des exercices vers une règle ou un mot appartenant à l’apprenant.
+- Identifiants d’exercices générés par le serveur, maîtrise actualisée après correction,
+  et historique grammatical synchronisé avec le profil.
+- Mise à jour coordonnée de BUGS, DECISIONS, JOURNAL et PROGRESSION.
+
+### Validation
+
+**258 tests réussis localement, 2 avertissements de dépendances.** Scénarios :
+formats invalides, erreurs HTTP et transport, absence de mutation sur erreur,
+correction réessayable, maîtrise correcte/incorrecte, séparation entre apprenants,
+restauration du lien et compatibilité des anciens exercices sans lien.
+Aucun appel OpenRouter réel n’a été effectué ; les réponses du fournisseur sont simulées.
+Le résultat CI distant n’a pas été vérifié.
+
+### Limites et suite
+
+L’association est explicite : aucun lien n’est inventé pour les anciens exercices.
+Chaque nouvelle soumission compte comme une tentative. Les contrôles de format
+ne valident pas la qualité pédagogique d’un modèle réel. Prochain jalon : première
+interface web V0.8.0 ; authentification et droits requis avant ouverture publique.

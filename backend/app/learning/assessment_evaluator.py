@@ -1,4 +1,4 @@
-import json
+from app.learning.llm_schemas import EvaluationResponse, parse_response
 
 from app.llm.openrouter import OpenRouterClient
 from app.learning.assessment_questions import (
@@ -310,132 +310,18 @@ Règles :
             },
         ]
 
-        try:
+        response = await self.llm.chat(messages)
+        return self._parse_open_result(question, response)
 
-            response = await self.llm.chat(
-                messages
-            )
-
-            return self._parse_open_result(
-                question,
-                response,
-            )
-
-        except Exception as exc:
-
-            return {
-                "question_id": question["id"],
-                "level": question["level"],
-                "category": question["category"],
-                "type": "open",
-                "score": 0,
-                "correct": False,
-                "feedback": (
-                    "Impossible d'évaluer "
-                    "cette réponse."
-                ),
-                "errors": [
-                    str(exc)
-                ],
-                "strengths": [],
-                "weak_points": [],
-            }
-
-    # ==========================================================
-    # PARSING
-    # ==========================================================
-
-    def _parse_open_result(
-        self,
-        question: dict,
-        response: str,
-    ) -> dict:
-        """
-        Transforme la réponse du LLM
-        en résultat standardisé.
-        """
-
-        try:
-
-            data = json.loads(response)
-
-        except json.JSONDecodeError:
-
-            return {
-                "question_id": question["id"],
-                "level": question["level"],
-                "category": question["category"],
-                "type": "open",
-                "score": 0,
-                "correct": False,
-                "feedback": (
-                    "Réponse d'évaluation invalide."
-                ),
-                "errors": [
-                    (
-                        "Le modèle n'a pas retourné "
-                        "un JSON valide."
-                    )
-                ],
-                "strengths": [],
-                "weak_points": [],
-            }
-
-        score = data.get(
-            "score",
-            0,
-        )
-
-        try:
-            score = int(score)
-
-        except (TypeError, ValueError):
-            score = 0
-
-        score = max(
-            0,
-            min(score, 100),
-        )
-
+    def _parse_open_result(self, question: dict, response: str) -> dict:
+        data = parse_response(EvaluationResponse, response)
         return {
             "question_id": question["id"],
             "level": question["level"],
             "category": question["category"],
             "type": "open",
-            "score": score,
-            "correct": bool(
-                data.get(
-                    "correct",
-                    False,
-                )
-            ),
-            "feedback": data.get(
-                "feedback",
-                "",
-            ),
-            "errors": self._ensure_list(
-                data.get(
-                    "errors",
-                    [],
-                )
-            ),
-            "strengths": self._ensure_list(
-                data.get(
-                    "strengths",
-                    [],
-                )
-            ),
-            "weak_points": self._ensure_list(
-                data.get(
-                    "weak_points",
-                    [],
-                )
-            ),
+            **data,
         }
-
-    # ==========================================================
-    # SCORES PAR COMPÉTENCE
-    # ==========================================================
 
     def _calculate_competency_scores(
         self,

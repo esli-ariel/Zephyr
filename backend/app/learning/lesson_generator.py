@@ -1,4 +1,4 @@
-import json
+from app.learning.llm_schemas import LessonResponse, parse_response
 import uuid
 
 from app.learning.lesson import Lesson
@@ -106,6 +106,8 @@ Règles :
 
         data = self._parse_response(response)
 
+        if data["language"].casefold() != language.strip().casefold() or data["level"] != level:
+            raise RuntimeError("La leçon générée ne correspond pas à la langue ou au niveau demandé.")
         return self._build_lesson(data)
 
     def _build_prompt(
@@ -147,37 +149,7 @@ Crée maintenant une leçon complète et adaptée.
         response: str,
     ) -> dict:
 
-        try:
-            data = json.loads(response)
-
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(
-                "Le générateur de leçons a retourné "
-                "un JSON invalide."
-            ) from exc
-
-        required_fields = [
-            "title",
-            "language",
-            "level",
-            "topic",
-            "objectives",
-            "sections",
-        ]
-
-        for field in required_fields:
-            if field not in data:
-                raise RuntimeError(
-                    f"Leçon invalide : champ "
-                    f"'{field}' manquant."
-                )
-
-        if not isinstance(data["sections"], list):
-            raise RuntimeError(
-                "Le champ 'sections' doit être une liste."
-            )
-
-        return data
+        return parse_response(LessonResponse, response)
 
     def _build_lesson(
         self,

@@ -1,4 +1,4 @@
-import json
+from app.learning.llm_schemas import EvaluationResponse, parse_response
 
 from app.learning.exercise import Exercise
 from app.llm.openrouter import OpenRouterClient
@@ -171,61 +171,4 @@ Règles :
         response: str,
     ) -> dict:
 
-        try:
-            data = json.loads(response)
-
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(
-                "Le correcteur a retourné "
-                "un JSON invalide."
-            ) from exc
-
-        required_fields = [
-            "score",
-            "correct",
-            "feedback",
-            "errors",
-            "strengths",
-            "weak_points",
-        ]
-
-        for field in required_fields:
-            if field not in data:
-                raise RuntimeError(
-                    f"Résultat invalide : "
-                    f"champ '{field}' manquant."
-                )
-
-        try:
-            score = int(data["score"])
-        except (TypeError, ValueError) as exc:
-            raise RuntimeError(
-                "Le score retourné est invalide."
-            ) from exc
-
-        score = max(0, min(score, 100))
-
-        return {
-            "score": score,
-            "correct": bool(data["correct"]),
-            "feedback": str(data["feedback"]),
-            "errors": self._ensure_list(
-                data["errors"]
-            ),
-            "strengths": self._ensure_list(
-                data["strengths"]
-            ),
-            "weak_points": self._ensure_list(
-                data["weak_points"]
-            ),
-        }
-
-    @staticmethod
-    def _ensure_list(value) -> list:
-        if value is None:
-            return []
-
-        if isinstance(value, list):
-            return value
-
-        return [str(value)]
+        return parse_response(EvaluationResponse, response)

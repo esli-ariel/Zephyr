@@ -1,6 +1,6 @@
 # 🧠 Décisions techniques — Zéphyr
 
-Mise à jour : 21 octobre 2026 — backend V0.7.1.
+Mise à jour : 21 octobre 2026 — backend V0.7.2.
 
 ## ADR-001 — Backend Python
 
@@ -157,3 +157,44 @@ Les scénarios nécessitant l’IA utilisent des réponses simulées.
 La configuration GitHub Actions est présente ; son résultat distant n’a pas été
 vérifié dans cette session. Ces tests ne valident pas la qualité pédagogique d’un
 modèle réel ni la disponibilité d’OpenRouter.
+
+
+## ADR-011 — Contrats stricts des réponses IA
+
+**Date :** 21/10/2026 — V0.7.2.
+
+**Décision :** centraliser les schémas Pydantic dans `learning/llm_schemas.py`
+pour les corrections, évaluations, profils extraits, leçons et exercices.
+Refuser les coercitions, champs inconnus, champs requis manquants, clés JSON
+dupliquées et valeurs hors bornes. Contrôler aussi la cohérence des QCM et la
+conformité des générations au niveau, à la compétence et au nombre demandés.
+
+**Raison :** une réponse techniquement reçue du fournisseur ne suffit pas à
+produire des données pédagogiques valides. Une erreur du fournisseur ou un
+format invalide ne doit ni enrichir le profil ni pénaliser l’apprenant.
+
+**Conséquences :** erreur `502` et rollback par apprenant ; plus de note zéro
+par défaut sur une évaluation ouverte indisponible. L’extraction invalide du
+profil interrompt le chat. Les erreurs ne recopient pas le corps de réponse brut.
+Les tests simulent le fournisseur ; la validité du format ne garantit pas la
+justesse pédagogique du contenu.
+
+## ADR-012 — Lien explicite des exercices et calcul de maîtrise
+
+**Date :** 21/10/2026 — V0.7.2.
+
+**Décision :** accepter `target_category` (`grammar` ou `vocabulary`) et `target`
+ensemble à la génération. Vérifier l’existence de la notion dans les données de
+l’apprenant et sa langue avant l’appel IA. Le serveur attache sa désignation
+canonique aux exercices et leur attribue des UUID ; le modèle ne décide pas du lien.
+
+**Raison :** éviter une association déduite du texte qui pourrait modifier la
+maîtrise de la mauvaise notion ou d’un autre apprenant.
+
+**Conséquences :** chaque correction réussie ajoute une tentative correcte ou
+incorrecte selon le booléen `correct` et recalcule la maîtrise avec les gestionnaires
+existants. La grammaire alimente aussi `grammar_mastery` et `grammar_history`.
+Le score de correction n’est pas assimilé à la maîtrise. Les soumissions répétées
+comptent comme de nouvelles tentatives. Sans lien, seuls les résultats généraux
+du profil sont intégrés. Les liens facultatifs sont compatibles avec les anciens
+snapshots de version 1 ; aucune nouvelle migration SQLite n’est requise.

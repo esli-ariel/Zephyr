@@ -2,6 +2,16 @@
 
 Toutes les modifications importantes du projet sont enregistrées ici.
 
+## [0.7.2] — 21/10/2026
+
+- Schémas stricts pour corrections, évaluations, profils extraits, leçons et exercices ; champs et clés dupliqués contrôlés.
+- Contrôle des QCM et de la conformité des contenus générés à la demande.
+- Erreurs fournisseur/format renvoyées en 502 sans note zéro artificielle ni mutation sauvegardée.
+- Champs facultatifs `target_category` / `target` pour relier un exercice à un mot ou une règle de l’apprenant.
+- Mise à jour de la maîtrise et de l’historique grammatical après correction ; liens persistés et anciens exercices compatibles.
+- UUID d’exercices attribués côté serveur ; erreurs OpenRouter sans corps brut du fournisseur.
+- 258 tests réussis localement, 2 avertissements de dépendances ; documentation de suivi synchronisée.
+
 ## [0.7.1] — 21/10/2026
 
 - Création d’apprenants via `POST /api/learners` ; sélection explicite par `X-Learner-ID` sur les routes pédagogiques.

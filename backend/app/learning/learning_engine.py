@@ -230,6 +230,8 @@ class LearningEngine:
         topic: str,
         skill: str,
         count: int = 5,
+        target_category: str | None = None,
+        target: str | None = None,
     ) -> list[Exercise]:
         """
         Génère des exercices adaptés au profil
@@ -253,6 +255,11 @@ class LearningEngine:
                 "n'est pas défini."
             )
 
+        linked_item = self._get_exercise_target(target_category, target, language)
+        if linked_item is not None:
+            target = linked_item.word if target_category == "vocabulary" else linked_item.rule
+            topic = f"{topic}\nNotion à travailler ({target_category}) : {target}"
+
         exercises = await self.exercise_generator.generate(
             language=language,
             level=level,
@@ -269,6 +276,9 @@ class LearningEngine:
             ),
         )
 
+        for exercise in exercises:
+            exercise.target_category = target_category
+            exercise.target = target
         self.exercises.extend(exercises)
 
         return exercises
@@ -282,10 +292,31 @@ class LearningEngine:
         Évalue une réponse à un exercice.
         """
 
-        return await self.exercise_evaluator.evaluate(
+        self._get_exercise_target(exercise.target_category, exercise.target)
+        result = await self.exercise_evaluator.evaluate(
             exercise,
             answer,
         )
+        if exercise.target_category == "vocabulary":
+            self.register_vocabulary_answer(exercise.target, result["correct"])
+        elif exercise.target_category == "grammar":
+            self.register_grammar_answer(exercise.target, result["correct"])
+        return result
+
+    def _get_exercise_target(self, category, target, language=None):
+        if category is None and target is None:
+            return None
+        if category not in {"vocabulary", "grammar"} or not target or not target.strip():
+            raise ValueError("La catégorie et la notion doivent être fournies ensemble.")
+        item = (
+            self.vocabulary.get_word(target) if category == "vocabulary"
+            else self.grammar.get_rule(target)
+        )
+        if item is None:
+            raise ValueError("La notion ciblée n'existe pas dans le profil de cet apprenant.")
+        if language and item.language.strip().casefold() != language.strip().casefold():
+            raise ValueError("La notion ciblée ne correspond pas à la langue de l'apprenant.")
+        return item
 
     def add_vocabulary(
         self,

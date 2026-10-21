@@ -1,15 +1,16 @@
 # État actuel — 21 octobre 2026
 
-**Version backend : 0.7.1 — données et sauvegardes séparées par apprenant.**
+**Version backend : 0.7.2 — validation IA stricte et exercices liés aux notions.**
 
 | Domaine | État |
 |---|---|
 | API, OpenRouter, mémoire courte, profil | Implémentés |
 | Évaluation adaptative CECRL | Implémentée |
-| Leçons, exercices et correction | Implémentés ; correction accessible par API |
+| Leçons, exercices et correction | Implémentés ; lien explicite vers mot/règle et maîtrise actualisée |
+| Réponses IA structurées | Schémas stricts, générations contrôlées, erreurs 502 sans progrès partiel |
 | Vocabulaire et grammaire | Ajout, consultation, statistiques, révision et autoévaluation accessibles par API |
 | Recommandations et plans | Implémentés ; tri sur la priorité calculée des activités |
-| Tests | 159 réussis localement, 2 avertissements de dépendances |
+| Tests | 258 réussis localement, 2 avertissements de dépendances |
 | CI | Configuration GitHub Actions ajoutée ; exécution distante non vérifiée |
 | Persistance | SQLite : profil, conversation, contenus, maîtrise, plan actif et évaluation |
 | Copie de sauvegarde | Commande `python -m app.backup` ; restauration testée |
@@ -21,8 +22,9 @@
 La V0.6.9 relie les réponses aux exercices aux points faibles et erreurs du profil.
 Les révisions actualisent la maîtrise utilisée par les recommandations et plans.
 La V0.7.0 ajoute la sauvegarde automatique, la reprise du plan actif et une commande
-de copie SQLite. Elle ne fournit pas encore l’exécution automatique d’un plan
-ni le rattachement automatique d’un exercice à une règle ou un mot.
+de copie SQLite. Elle ne fournit pas encore l’exécution automatique d’un plan.
+La V0.7.2 permet de lier explicitement un exercice à un mot ou une règle lors
+de sa génération, sans déduire ce lien du texte.
 Aucun appel réel à OpenRouter n’a été effectué pendant cette validation.
 
 La V0.7.1 ajoute `POST /api/learners` et exige `X-Learner-ID` sur les routes
@@ -30,21 +32,25 @@ pédagogiques. Les états sont restaurés à la demande et les requêtes verroui
 par apprenant. Les tests couvrent la séparation de deux profils, le redémarrage,
 les suppressions, les erreurs de sauvegarde, la concurrence et l’ancienne base.
 
-Prochain jalon : V0.7.2 (validation des réponses IA et liens exercices/notions),
-puis première interface permettant de parcourir profil → évaluation → plan →
-exercice → correction. Ajouter l’authentification avant une ouverture publique.
+La V0.7.2 refuse les réponses structurées invalides et ne compte plus une erreur
+fournisseur comme un échec de l’apprenant. Les corrections de notions explicitement
+liées mettent à jour leur maîtrise et restent isolées/sauvegardées par apprenant.
+Les anciennes sauvegardes restent compatibles ; aucune migration supplémentaire.
+
+Prochain jalon : V0.8.0, première interface permettant de parcourir profil →
+évaluation → plan → exercice → correction. Ajouter l’authentification avant une
+ouverture publique. Un seul processus API reste pris en charge.
 
 ## Documents de référence
 
-- [Journal](JOURNAL.md) : travaux et validations des V0.6.9, V0.7.0 et V0.7.1.
+- [Journal](JOURNAL.md) : travaux et validations jusqu’à la V0.7.2.
 - [Décisions](DECISIONS.md) : SQLite, sélection de l’apprenant, transactions,
-  concurrence et stratégie de tests (ADR-007 à ADR-010).
-- [Bugs et limites](BUGS.md) : points résolus et travaux B003 à B007.
+  concurrence, tests, validation IA et liens vers les notions (ADR-007 à ADR-012).
+- [Bugs et limites](BUGS.md) : points résolus B001 à B004 et travaux B005 à B007.
 
-La V0.7.1 est publiée sur `main` au commit
-[f01c4d4](https://github.com/esli-ariel/Zephyr/commit/f01c4d4).
-Les 159 tests indiqués proviennent de la dernière validation locale du code.
-La synchronisation documentaire du 21 octobre n’ajoute pas de fonctionnalité.
+Les 258 tests indiqués proviennent de la validation locale de la V0.7.2.
+Les résultats historiques restent dans le journal ; aucun test de cette version
+n’a appelé OpenRouter réellement.
 
 ---
 

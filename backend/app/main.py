@@ -1,11 +1,11 @@
 import logging
 from contextlib import asynccontextmanager
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from starlette.responses import JSONResponse
 
 from app.config import settings
@@ -13,6 +13,7 @@ from app.agent.zephyr import ZephyrAgent
 from app.learning.adaptive_assessment import AdaptiveAssessment
 from app.persistence import StateStore, capture_state, restore_state
 from app.sessions import LearnerSessions
+from app.learning.llm_schemas import Level, Skill
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.app_name,
     description="API de l'assistant intelligent Zéphyr",
-    version="0.7.1",
+    version="0.7.2",
     lifespan=lifespan,
 )
 
@@ -210,7 +211,7 @@ async def clear_learner_profile(agent: Agent):
 class LearnerProfileRequest(BaseModel):
     name: str | None = None
     target_language: str | None = None
-    level: str | None = None
+    level: Level | None = None
     goal: str | None = None
 
 @app.put("/api/learner/profile")
@@ -320,6 +321,9 @@ async def submit_assessment_answer(
             detail=str(exc),
         )
 
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
 @app.get("/api/assessment/progress")
 async def get_assessment_progress(assessment: Assessment):
     """
@@ -345,9 +349,10 @@ async def get_assessment_result(agent: Agent, assessment: Assessment):
             ),
         )
 
-    result = (
-        await assessment.get_final_result()
-    )
+    try:
+        result = await assessment.get_final_result()
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     agent.apply_assessment_result(
         result
@@ -406,17 +411,23 @@ async def generate_lesson(
         )
 
 class ExerciseRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    target_category: Literal["vocabulary", "grammar"] | None = None
+    target: str | None = Field(default=None, min_length=1, max_length=200, pattern=r"\S")
+
+    @model_validator(mode="after")
+    def validate_target(self):
+        if (self.target_category is None) != (self.target is None):
+            raise ValueError("La catégorie et la notion doivent être fournies ensemble.")
+        return self
+
     topic: str = Field(
         ...,
         min_length=2,
         max_length=200,
     )
 
-    skill: str = Field(
-        ...,
-        min_length=2,
-        max_length=50,
-    )
+    skill: Skill
 
     count: int = Field(
         default=5,
@@ -435,6 +446,8 @@ async def generate_exercises(
                 topic=request.topic,
                 skill=request.skill,
                 count=request.count,
+                target_category=request.target_category,
+                target=request.target,
             )
         )
 

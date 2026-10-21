@@ -1,6 +1,6 @@
 # 🌪️ Zéphyr
 
-Assistant d’apprentissage des langues. La version **0.7.1** fournit un
+Assistant d’apprentissage des langues. La version **0.7.2** fournit un
 prototype backend Python/FastAPI : conversation avec OpenRouter, profil apprenant,
 évaluation adaptative CECRL, leçons, exercices, correction, vocabulaire,
 grammaire, recommandations et plans personnalisés.
@@ -94,6 +94,58 @@ un redémarrage. `POST /api/learning/plan/items/{item_id}/complete` enregistre
 son avancement avec `{"score": 80}`. Un nouvel appel à `/api/learning/plan`
 génère un nouveau plan actif.
 
+## Exercices liés à une notion
+
+Pour entraîner un mot ou une règle déjà enregistré chez l’apprenant, ajouter
+`target_category` et `target` à `POST /api/learning/exercises` :
+
+```json
+{
+  "topic": "Habitudes quotidiennes",
+  "skill": "grammar",
+  "count": 2,
+  "target_category": "grammar",
+  "target": "Present Simple"
+}
+```
+
+`target_category` accepte `grammar` ou `vocabulary`. Les deux champs doivent être
+fournis ensemble ; la notion doit exister chez l’apprenant sélectionné et dans
+sa langue cible. Le serveur attache le lien aux exercices générés et attribue
+des identifiants uniques. Le modèle ne peut pas choisir ou modifier ce lien.
+
+Chaque soumission corrigée met à jour la maîtrise de la notion liée à partir de
+`correct` : réponse correcte ou incorrecte. Pour la grammaire, la maîtrise et
+l’historique du profil sont également actualisés. Le score détaillé reste disponible
+dans la correction ; il n’est pas utilisé comme pourcentage de maîtrise du mot
+ou de la règle. Chaque nouvelle soumission compte comme une tentative.
+
+Les exercices sans lien, y compris les anciens, restent corrigeables et actualisent
+les difficultés du profil sans modifier une notion par déduction. Le lien est
+conservé dans SQLite et dans les copies de sauvegarde.
+
+## Validation des réponses IA
+
+Les réponses structurées de correction, évaluation, extraction de profil,
+génération de leçons et d’exercices sont validées strictement : champs requis,
+types, bornes, valeurs autorisées, champs supplémentaires et clés JSON dupliquées.
+Les scores doivent être des entiers entre 0 et 100 et `correct` un vrai booléen ;
+`"false"`, les scores hors limites et les listes mal formées sont refusés.
+Les QCM exigent au moins trois options distinctes et une réponse présente parmi elles.
+Le niveau, la compétence et le nombre d’exercices générés doivent correspondre
+à la demande ; la langue et le niveau des leçons sont aussi vérifiés.
+
+Une réponse IA invalide ou une panne du fournisseur renvoie `502`. La requête
+n’enregistre alors ni contenu partiel ni progrès ; une évaluation indisponible
+ne devient plus une note de zéro. Une nouvelle soumission peut être tentée.
+L’extraction d’un profil invalide interrompt également le chat sans modifier l’état.
+Les erreurs exposées ne recopient pas les réponses brutes du fournisseur.
+
+Le niveau envoyé à `PUT /api/learner/profile` doit être A1, A2, B1, B2, C1 ou C2.
+La compétence d’un exercice doit être `vocabulary`, `grammar`, `comprehension`,
+`expression` ou `translation`. Une valeur invalide renvoie `422` avant génération.
+Ces contrôles garantissent le format, pas la justesse pédagogique d’un modèle réel.
+
 ## Sauvegarde durable
 
 SQLite conserve automatiquement le profil (dont les forces et historiques), les
@@ -146,8 +198,9 @@ Le prototype gère plusieurs apprenants dans **un seul processus API**
 (`--workers 1`, valeur par défaut). Ses sessions et verrous restent en mémoire :
 plusieurs processus pourraient écraser leurs sauvegardes respectives pour un même
 apprenant. Il ne dispose pas encore d’authentification ni d’interface web.
-Les corrections d’exercices enrichissent les difficultés du profil ; elles ne
-sont pas encore reliées automatiquement à un mot ou une règle précis.
+Les corrections enrichissent les difficultés du profil et la maîtrise des notions
+explicitement liées. La qualité pédagogique du contenu généré n’a pas été validée
+par des appels réels pendant les tests de cette version.
 
 La vision reste une application avec interface Next.js, voix, caméra et avatar.
 Ces composants ne sont pas encore présents dans le dépôt.

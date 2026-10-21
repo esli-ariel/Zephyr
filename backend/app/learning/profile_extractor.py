@@ -1,4 +1,4 @@
-import json
+from app.learning.llm_schemas import ProfileResponse, parse_response
 
 from app.llm.openrouter import OpenRouterClient
 
@@ -30,7 +30,7 @@ Règles :
 
 - name : prénom ou nom donné par l'utilisateur.
 - target_language : langue que l'utilisateur souhaite apprendre.
-- level : niveau indiqué par l'utilisateur.
+- level : uniquement A1, A2, B1, B2, C1 ou C2 si indiqué explicitement ; sinon null.
 - goals : liste des objectifs d'apprentissage.
 - Si une information n'est pas présente, utilise null.
 - Si aucun objectif n'est indiqué, utilise [].
@@ -74,26 +74,4 @@ Message utilisateur :
         Convertit la réponse du modèle en dictionnaire.
         """
 
-        try:
-            data = json.loads(response)
-
-        except json.JSONDecodeError:
-            return self._empty_profile()
-
-        return {
-            "name": data.get("name"),
-            "target_language": data.get(
-                "target_language"
-            ),
-            "level": data.get("level"),
-            "goals": data.get("goals", []),
-        }
-
-    @staticmethod
-    def _empty_profile() -> dict:
-        return {
-            "name": None,
-            "target_language": None,
-            "level": None,
-            "goals": [],
-        }
+        return parse_response(ProfileResponse, response)

@@ -1,4 +1,4 @@
-"""Sauvegarde atomique de l'état du apprenants."""
+"""Sauvegarde atomique de l'état des apprenants."""
 import json
 import sqlite3
 from contextlib import closing

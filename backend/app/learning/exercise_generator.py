@@ -1,4 +1,6 @@
-import json
+import uuid
+
+from app.learning.llm_schemas import ExerciseBatch, parse_response
 
 from app.learning.exercise import Exercise
 from app.llm.openrouter import OpenRouterClient
@@ -33,7 +35,6 @@ Structure obligatoire :
 {
     "exercises": [
         {
-            "id": "ex1",
             "exercise_type": "multiple_choice",
             "question": "Question",
             "level": "A1",
@@ -43,7 +44,7 @@ Structure obligatoire :
                 "option 2",
                 "option 3"
             ],
-            "expected_answer": "option correcte",
+            "expected_answer": "option 1",
             "difficulty": 1
         }
     ]
@@ -75,7 +76,11 @@ Règles :
    une réponse ouverte.
 6. La difficulté doit être comprise entre 1 et 5.
 7. Génère exactement le nombre d'exercices demandé.
-8. Retourne uniquement le JSON.
+8. Retourne uniquement le JSON, sans champ supplémentaire.
+9. Les champs level et skill doivent être identiques à ceux demandés.
+10. Pour un exercice fermé, expected_answer est obligatoire.
+11. La réponse du QCM doit être l'une des options, et les options sont distinctes.
+12. Ne fournis ni identifiant, ni lien vers une notion : le serveur les attribue.
 """
 
     def __init__(self):
@@ -123,12 +128,19 @@ Règles :
 
         data = self._parse_response(response)
 
-        return self._build_exercises(
+        if len(data["exercises"]) != count:
+            raise RuntimeError("Le nombre d'exercices générés ne correspond pas à la demande.")
+        if any(item["level"] != level or item["skill"] != skill for item in data["exercises"]):
+            raise RuntimeError("Les exercices générés ne correspondent pas au niveau ou à la compétence demandés.")
+        exercises = self._build_exercises(
             data,
             language=language,
             level=level,
             skill=skill,
         )
+        for exercise in exercises:
+            exercise.id = str(uuid.uuid4())
+        return exercises
 
     def _build_prompt(
         self,
@@ -173,29 +185,7 @@ Génère maintenant les exercices.
         response: str,
     ) -> dict:
 
-        try:
-            data = json.loads(response)
-
-        except json.JSONDecodeError as exc:
-            raise RuntimeError(
-                "Le générateur d'exercices a retourné "
-                "un JSON invalide."
-            ) from exc
-
-        if "exercises" not in data:
-            raise RuntimeError(
-                "Le champ 'exercises' est manquant."
-            )
-
-        if not isinstance(
-            data["exercises"],
-            list,
-        ):
-            raise RuntimeError(
-                "Le champ 'exercises' doit être une liste."
-            )
-
-        return data
+        return parse_response(ExerciseBatch, response)
 
     def _build_exercises(
         self,

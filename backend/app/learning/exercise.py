@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from typing import Literal
 
 
 @dataclass
@@ -21,6 +22,8 @@ class Exercise:
     expected_answer: str | None = None
 
     difficulty: int = 1
+    target_category: Literal["vocabulary", "grammar"] | None = None
+    target: str | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -32,6 +35,8 @@ class Exercise:
             "options": self.options,
             "expected_answer": self.expected_answer,
             "difficulty": self.difficulty,
+            "target_category": self.target_category,
+            "target": self.target,
         }
 
     def to_public_dict(self) -> dict:
