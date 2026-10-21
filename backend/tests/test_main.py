@@ -1,12 +1,18 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 
 
-client = TestClient(app)
+@pytest.fixture
+def client():
+    with TestClient(app) as client:
+        learner_id = client.post("/api/learners").json()["learner_id"]
+        client.headers["X-Learner-ID"] = learner_id
+        yield client
 
 
-def test_get_learning_recommendations():
+def test_get_learning_recommendations(client):
     response = client.get(
         "/api/learning/recommendations"
     )
@@ -22,7 +28,7 @@ def test_get_learning_recommendations():
     assert isinstance(data["recommendations"], list)
 
 
-def test_get_learning_recommendations_with_limit():
+def test_get_learning_recommendations_with_limit(client):
     response = client.get(
         "/api/learning/recommendations?limit=2"
     )
@@ -35,7 +41,7 @@ def test_get_learning_recommendations_with_limit():
     assert len(data["recommendations"]) <= 2
 
 
-def test_get_learning_recommendations_invalid_limit_zero():
+def test_get_learning_recommendations_invalid_limit_zero(client):
     response = client.get(
         "/api/learning/recommendations?limit=0"
     )
@@ -47,7 +53,7 @@ def test_get_learning_recommendations_invalid_limit_zero():
     )
 
 
-def test_get_learning_recommendations_invalid_limit_negative():
+def test_get_learning_recommendations_invalid_limit_negative(client):
     response = client.get(
         "/api/learning/recommendations?limit=-1"
     )
@@ -55,7 +61,7 @@ def test_get_learning_recommendations_invalid_limit_negative():
     assert response.status_code == 400
 
 
-def test_get_learning_recommendations_limit_too_high():
+def test_get_learning_recommendations_limit_too_high(client):
     response = client.get(
         "/api/learning/recommendations?limit=51"
     )
@@ -66,7 +72,7 @@ def test_get_learning_recommendations_limit_too_high():
         "La limite ne peut pas dépasser 50."
     )
 
-def test_get_learning_plan():
+def test_get_learning_plan(client):
     response = client.get(
         "/api/learning/plan"
     )
@@ -82,7 +88,7 @@ def test_get_learning_plan():
     assert isinstance(data["items"], list)
 
 
-def test_get_learning_plan_with_limit():
+def test_get_learning_plan_with_limit(client):
     response = client.get(
         "/api/learning/plan?limit=2"
     )
@@ -94,7 +100,7 @@ def test_get_learning_plan_with_limit():
     assert data["count"] >= 0
 
 
-def test_get_learning_plan_invalid_limit_zero():
+def test_get_learning_plan_invalid_limit_zero(client):
     response = client.get(
         "/api/learning/plan?limit=0"
     )
@@ -106,7 +112,7 @@ def test_get_learning_plan_invalid_limit_zero():
     )
 
 
-def test_get_learning_plan_invalid_limit_negative():
+def test_get_learning_plan_invalid_limit_negative(client):
     response = client.get(
         "/api/learning/plan?limit=-1"
     )
@@ -114,7 +120,7 @@ def test_get_learning_plan_invalid_limit_negative():
     assert response.status_code == 400
 
 
-def test_get_learning_plan_limit_too_high():
+def test_get_learning_plan_limit_too_high(client):
     response = client.get(
         "/api/learning/plan?limit=21"
     )
@@ -125,7 +131,7 @@ def test_get_learning_plan_limit_too_high():
         "La limite ne peut pas dépasser 20."
     )
 
-def test_get_learning_plan_with_available_time():
+def test_get_learning_plan_with_available_time(client):
     response = client.get(
         "/api/learning/plan"
         "?limit=5&available_minutes=30"
@@ -146,7 +152,7 @@ def test_get_learning_plan_with_available_time():
     assert total_minutes <= 30
 
 
-def test_get_learning_plan_invalid_available_time():
+def test_get_learning_plan_invalid_available_time(client):
     response = client.get(
         "/api/learning/plan"
         "?available_minutes=0"

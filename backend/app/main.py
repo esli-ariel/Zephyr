@@ -1,78 +1,122 @@
-import httpx
-import asyncio
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException
+from typing import Annotated
+from uuid import UUID
+
+import httpx
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from pydantic import BaseModel, Field
 from starlette.responses import JSONResponse
 
 from app.config import settings
 from app.agent.zephyr import ZephyrAgent
+from app.learning.adaptive_assessment import AdaptiveAssessment
 from app.persistence import StateStore, capture_state, restore_state
-from app.learning.adaptive_assessment import (
-    AdaptiveAssessment,
-)
+from app.sessions import LearnerSessions
 
-
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.store = None
-    app.state.state_lock = asyncio.Lock()
-    if settings.persistence_enabled:
-        store = StateStore(settings.database_path)
-        snapshot = store.load()
-        if snapshot is not None:
-            restore_state(snapshot, zephyr, adaptive_assessment)
-        app.state.store = store
+    store = StateStore(settings.database_path) if settings.persistence_enabled else None
+    app.state.store = store
+    app.state.learners = LearnerSessions(store)
     try:
         yield
     finally:
+        app.state.learners = None
         app.state.store = None
 
 
 app = FastAPI(
     title=settings.app_name,
     description="API de l'assistant intelligent Zéphyr",
-    version="0.7.0",
+    version="0.7.1",
     lifespan=lifespan,
 )
 
 
-zephyr = ZephyrAgent()
-adaptive_assessment = AdaptiveAssessment()
-
-
 @app.middleware("http")
-async def persist_learning_state(request, call_next):
-    store = getattr(app.state, "store", None)
-    if store is None:
+async def persist_learning_state(request: Request, call_next):
+    if not request.url.path.startswith("/api/") or (
+        request.url.path == "/api/learners" and request.method == "POST"
+    ):
         return await call_next(request)
-    # Le prototype mono-apprenant traite les mutations dans l'ordre et ne
-    # confirme une requête qu'après la validation de la transaction SQLite.
-    async with app.state.state_lock:
-        before = capture_state(zephyr, adaptive_assessment)
+    values = request.headers.getlist("X-Learner-ID")
+    try:
+        if len(values) != 1:
+            raise ValueError("Un seul identifiant est requis.")
+        learner_id = str(UUID(values[0]))
+    except ValueError:
+        return JSONResponse(status_code=400, content={
+            "detail": "L'en-tête X-Learner-ID doit contenir un identifiant UUID unique.",
+        })
+    registry = request.app.state.learners
+    try:
+        session = registry.get(learner_id)
+    except Exception:
+        logger.exception("Échec de chargement de l'apprenant")
+        return JSONResponse(status_code=503, content={"detail": "Données indisponibles."})
+    if session is None:
+        return JSONResponse(status_code=404, content={"detail": "Apprenant introuvable."})
+    request.state.learner_session = session
+    # Les requêtes d'un même apprenant sont sérialisées, les autres restent indépendantes.
+    async with session.lock:
+        before = capture_state(session.agent, session.assessment)
         try:
             response = await call_next(request)
             if response.status_code >= 400:
-                restore_state(before, zephyr, adaptive_assessment)
+                restore_state(before, session.agent, session.assessment)
                 return response
-            after = capture_state(zephyr, adaptive_assessment)
-            if after != before:
+            after = capture_state(session.agent, session.assessment)
+            if after != before and registry.store is not None:
                 try:
-                    store.save(after)
+                    registry.store.save(after, learner_id)
                 except Exception:
-                    logging.getLogger(__name__).exception("Échec de sauvegarde de l'état")
-                    restore_state(before, zephyr, adaptive_assessment)
-                    return JSONResponse(
-                        status_code=503,
-                        content={"detail": "Sauvegarde indisponible. Veuillez réessayer."},
-                    )
+                    logger.exception("Échec de sauvegarde de l'apprenant")
+                    restore_state(before, session.agent, session.assessment)
+                    return JSONResponse(status_code=503, content={
+                        "detail": "Sauvegarde indisponible. Veuillez réessayer.",
+                    })
+            response.headers["X-Learner-ID"] = learner_id
             return response
         except BaseException:
-            restore_state(before, zephyr, adaptive_assessment)
+            restore_state(before, session.agent, session.assessment)
             raise
+
+
+async def get_agent(
+    request: Request,
+    x_learner_id: Annotated[str, Header(description="Identifiant retourné par POST /api/learners")],
+) -> ZephyrAgent:
+    return request.state.learner_session.agent
+
+
+async def get_assessment(
+    request: Request,
+    x_learner_id: Annotated[str, Header(description="Identifiant retourné par POST /api/learners")],
+) -> AdaptiveAssessment:
+    return request.state.learner_session.assessment
+
+
+Agent = Annotated[ZephyrAgent, Depends(get_agent)]
+Assessment = Annotated[AdaptiveAssessment, Depends(get_assessment)]
+
+
+class LearnerCreated(BaseModel):
+    learner_id: UUID
+
+
+@app.post("/api/learners", status_code=201, response_model=LearnerCreated)
+async def create_learner(request: Request, response: Response):
+    try:
+        session = request.app.state.learners.create()
+    except Exception:
+        logger.exception("Échec de création de l'apprenant")
+        raise HTTPException(status_code=503, detail="Création de l'apprenant indisponible.")
+    response.headers["X-Learner-ID"] = session.learner_id
+    return {"learner_id": session.learner_id}
 
 
 class ChatRequest(BaseModel):
@@ -99,7 +143,7 @@ async def health():
 
 
 @app.post("/api/chat")
-async def chat(request: ChatRequest):
+async def chat(agent: Agent, request: ChatRequest):
 
     if not request.message.strip():
         raise HTTPException(
@@ -109,7 +153,7 @@ async def chat(request: ChatRequest):
 
     try:
 
-        response = await zephyr.process(
+        response = await agent.process(
             request.message
         )
 
@@ -134,9 +178,9 @@ async def chat(request: ChatRequest):
         )
 
 @app.delete("/api/chat/memory")
-async def clear_memory():
+async def clear_memory(agent: Agent):
 
-    zephyr.clear_memory()
+    agent.clear_memory()
 
     return {
         "status": "success",
@@ -144,19 +188,19 @@ async def clear_memory():
     }
 
 @app.get("/api/chat/memory")
-async def get_memory():
+async def get_memory(agent: Agent):
 
-    return zephyr.memory.get_memory_info()
+    return agent.memory.get_memory_info()
 
 @app.get("/api/learner/profile")
-async def get_learner_profile():
+async def get_learner_profile(agent: Agent):
 
-    return zephyr.get_learner_profile()
+    return agent.get_learner_profile()
 
 @app.delete("/api/learner/profile")
-async def clear_learner_profile():
+async def clear_learner_profile(agent: Agent):
 
-    zephyr.clear_learner_profile()
+    agent.clear_learner_profile()
 
     return {
         "status": "success",
@@ -171,35 +215,36 @@ class LearnerProfileRequest(BaseModel):
 
 @app.put("/api/learner/profile")
 async def update_learner_profile(
+    agent: Agent,
     request: LearnerProfileRequest,
 ):
 
     if request.name is not None:
-        zephyr.learner.set_name(request.name)
+        agent.learner.set_name(request.name)
 
     if request.target_language is not None:
-        zephyr.learner.set_target_language(
+        agent.learner.set_target_language(
             request.target_language
         )
 
     if request.level is not None:
-        zephyr.learner.set_level(request.level)
+        agent.learner.set_level(request.level)
 
     if request.goal is not None:
-        zephyr.learner.add_goal(request.goal)
+        agent.learner.add_goal(request.goal)
 
-    return zephyr.get_learner_profile()
+    return agent.get_learner_profile()
 
 @app.post("/api/assessment/start")
-async def start_assessment():
+async def start_assessment(assessment: Assessment):
     """
     Démarre une nouvelle évaluation adaptative.
     """
 
-    adaptive_assessment.reset()
+    assessment.reset()
 
     question = (
-        adaptive_assessment.get_current_question()
+        assessment.get_current_question()
     )
 
     return {
@@ -210,18 +255,18 @@ async def start_assessment():
         ),
         "question": question,
         "progress": (
-            adaptive_assessment.get_progress()
+            assessment.get_progress()
         ),
     }
 
 @app.get("/api/assessment/question")
-async def get_assessment_question():
+async def get_assessment_question(assessment: Assessment):
     """
     Retourne la question actuelle.
     """
 
     question = (
-        adaptive_assessment.get_current_question()
+        assessment.get_current_question()
     )
 
     if question is None:
@@ -229,7 +274,7 @@ async def get_assessment_question():
             "finished": True,
             "question": None,
             "progress": (
-                adaptive_assessment.get_progress()
+                assessment.get_progress()
             ),
         }
 
@@ -237,7 +282,7 @@ async def get_assessment_question():
         "finished": False,
         "question": question,
         "progress": (
-            adaptive_assessment.get_progress()
+            assessment.get_progress()
         ),
     }
 
@@ -250,6 +295,7 @@ class AssessmentAnswerRequest(BaseModel):
 
 @app.post("/api/assessment/answer")
 async def submit_assessment_answer(
+    assessment: Assessment,
     request: AssessmentAnswerRequest,
 ):
     """
@@ -260,7 +306,7 @@ async def submit_assessment_answer(
     try:
 
         result = (
-            await adaptive_assessment.submit_answer(
+            await assessment.submit_answer(
                 request.answer
             )
         )
@@ -275,23 +321,23 @@ async def submit_assessment_answer(
         )
 
 @app.get("/api/assessment/progress")
-async def get_assessment_progress():
+async def get_assessment_progress(assessment: Assessment):
     """
     Retourne la progression de l'évaluation.
     """
 
     return (
-        adaptive_assessment.get_progress()
+        assessment.get_progress()
     )
 
 @app.get("/api/assessment/result")
-async def get_assessment_result():
+async def get_assessment_result(agent: Agent, assessment: Assessment):
     """
     Retourne le résultat pédagogique complet
     de l'évaluation.
     """
 
-    if not adaptive_assessment.session.finished:
+    if not assessment.session.finished:
         raise HTTPException(
             status_code=400,
             detail=(
@@ -300,22 +346,22 @@ async def get_assessment_result():
         )
 
     result = (
-        await adaptive_assessment.get_final_result()
+        await assessment.get_final_result()
     )
 
-    zephyr.apply_assessment_result(
+    agent.apply_assessment_result(
         result
     )
 
     return result
 
 @app.delete("/api/assessment")
-async def reset_assessment():
+async def reset_assessment(assessment: Assessment):
     """
     Réinitialise l'évaluation.
     """
 
-    adaptive_assessment.reset()
+    assessment.reset()
 
     return {
         "status": "success",
@@ -325,8 +371,8 @@ async def reset_assessment():
     }
 
 @app.get("/api/learning/context")
-async def get_learning_context():
-    return zephyr.get_learning_context()
+async def get_learning_context(agent: Agent):
+    return agent.get_learning_context()
 
 class LessonRequest(BaseModel):
     topic: str = Field(
@@ -337,10 +383,11 @@ class LessonRequest(BaseModel):
 
 @app.post("/api/learning/lesson")
 async def generate_lesson(
+    agent: Agent,
     request: LessonRequest,
 ):
     try:
-        lesson = await zephyr.learning_engine.generate_lesson(
+        lesson = await agent.learning_engine.generate_lesson(
             request.topic
         )
 
@@ -379,11 +426,12 @@ class ExerciseRequest(BaseModel):
 
 @app.post("/api/learning/exercises")
 async def generate_exercises(
+    agent: Agent,
     request: ExerciseRequest,
 ):
     try:
         exercises = (
-            await zephyr.learning_engine.generate_exercises(
+            await agent.learning_engine.generate_exercises(
                 topic=request.topic,
                 skill=request.skill,
                 count=request.count,
@@ -440,10 +488,11 @@ class VocabularyRequest(BaseModel):
 
 @app.post("/api/learning/vocabulary")
 async def add_vocabulary(
+    agent: Agent,
     request: VocabularyRequest,
 ):
     try:
-        item = zephyr.learning_engine.add_vocabulary(
+        item = agent.learning_engine.add_vocabulary(
             word=request.word,
             translation=request.translation,
             category=request.category,
@@ -460,9 +509,9 @@ async def add_vocabulary(
         )
 
 @app.get("/api/learning/vocabulary")
-async def get_vocabulary():
+async def get_vocabulary(agent: Agent):
     items = (
-        zephyr.learning_engine
+        agent.learning_engine
         .vocabulary
         .get_all_words()
     )
@@ -476,16 +525,16 @@ async def get_vocabulary():
     }
 
 @app.get("/api/learning/vocabulary/statistics")
-async def get_vocabulary_statistics():
+async def get_vocabulary_statistics(agent: Agent):
     return (
-        zephyr.learning_engine
+        agent.learning_engine
         .get_vocabulary_statistics()
     )
 
 @app.get("/api/learning/vocabulary/review")
-async def get_vocabulary_to_review():
+async def get_vocabulary_to_review(agent: Agent):
     items = (
-        zephyr.learning_engine
+        agent.learning_engine
         .vocabulary
         .get_words_to_review()
     )
@@ -500,6 +549,7 @@ async def get_vocabulary_to_review():
 
 @app.get("/api/learning/recommendations")
 async def get_learning_recommendations(
+    agent: Agent,
     limit: int = 5,
 ):
     """
@@ -521,7 +571,7 @@ async def get_learning_recommendations(
 
     try:
         recommendations = (
-            zephyr.learning_engine
+            agent.learning_engine
             .get_recommendations(limit=limit)
         )
 
@@ -538,6 +588,7 @@ async def get_learning_recommendations(
 
 @app.get("/api/learning/plan")
 async def get_learning_plan(
+    agent: Agent,
     limit: int = 5,
     available_minutes: int | None = None,
 ):
@@ -572,7 +623,7 @@ async def get_learning_plan(
 
     try:
         plan = (
-            zephyr.learning_engine
+            agent.learning_engine
             .get_learning_plan(
                 limit=limit,
                 available_minutes=available_minutes,
@@ -588,8 +639,8 @@ async def get_learning_plan(
         )
 
 @app.get("/api/learning/plan/current")
-async def get_current_learning_plan():
-    plan = zephyr.learning_engine.current_learning_plan
+async def get_current_learning_plan(agent: Agent):
+    plan = agent.learning_engine.current_learning_plan
     if plan is None:
         raise HTTPException(status_code=404, detail="Aucun plan d'apprentissage actif.")
     return plan.to_dict()
@@ -606,6 +657,7 @@ class CompleteLearningItemRequest(BaseModel):
 
 @app.post("/api/learning/plan/items/{item_id}/complete")
 async def complete_learning_plan_item(
+    agent: Agent,
     item_id: str,
     request: CompleteLearningItemRequest,
 ):
@@ -615,7 +667,7 @@ async def complete_learning_plan_item(
 
     try:
         item = (
-            zephyr.learning_engine
+            agent.learning_engine
             .complete_learning_plan_item(
                 item_id=item_id,
                 score=request.score,
@@ -638,16 +690,16 @@ class ExerciseAnswerRequest(BaseModel):
 
 
 @app.post("/api/learning/exercises/{exercise_id}/answer")
-async def answer_exercise(exercise_id: str, request: ExerciseAnswerRequest):
+async def answer_exercise(agent: Agent, exercise_id: str, request: ExerciseAnswerRequest):
     exercise = next(
-        (item for item in zephyr.learning_engine.get_exercises()
+        (item for item in agent.learning_engine.get_exercises()
          if item.id == exercise_id),
         None,
     )
     if exercise is None:
         raise HTTPException(status_code=404, detail="Exercice introuvable.")
     try:
-        result = await zephyr.evaluate_exercise(exercise, request.answer)
+        result = await agent.evaluate_exercise(exercise, request.answer)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except (RuntimeError, httpx.HTTPError) as exc:
@@ -663,11 +715,11 @@ class VocabularyAnswerRequest(BaseModel):
 
 
 @app.post("/api/learning/vocabulary/answer")
-async def answer_vocabulary(request: VocabularyAnswerRequest):
-    item = zephyr.learning_engine.vocabulary.get_word(request.word)
+async def answer_vocabulary(agent: Agent, request: VocabularyAnswerRequest):
+    item = agent.learning_engine.vocabulary.get_word(request.word)
     if item is None:
         raise HTTPException(status_code=404, detail="Mot introuvable.")
-    zephyr.learning_engine.register_vocabulary_answer(request.word, request.correct)
+    agent.learning_engine.register_vocabulary_answer(request.word, request.correct)
     return item.to_dict()
 
 
@@ -680,28 +732,28 @@ class GrammarRequest(BaseModel):
 
 
 @app.post("/api/learning/grammar")
-async def add_grammar(request: GrammarRequest):
+async def add_grammar(agent: Agent, request: GrammarRequest):
     try:
-        item = zephyr.learning_engine.add_grammar_rule(**request.model_dump())
+        item = agent.learning_engine.add_grammar_rule(**request.model_dump())
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return item.to_dict()
 
 
 @app.get("/api/learning/grammar")
-async def get_grammar():
-    items = zephyr.learning_engine.grammar.get_all_rules()
+async def get_grammar(agent: Agent):
+    items = agent.learning_engine.grammar.get_all_rules()
     return {"count": len(items), "rules": [item.to_dict() for item in items]}
 
 
 @app.get("/api/learning/grammar/statistics")
-async def get_grammar_statistics():
-    return zephyr.learning_engine.get_grammar_statistics()
+async def get_grammar_statistics(agent: Agent):
+    return agent.learning_engine.get_grammar_statistics()
 
 
 @app.get("/api/learning/grammar/review")
-async def get_grammar_to_review():
-    items = zephyr.learning_engine.get_grammar_to_review()
+async def get_grammar_to_review(agent: Agent):
+    items = agent.learning_engine.get_grammar_to_review()
     return {"count": len(items), "rules": [item.to_dict() for item in items]}
 
 
@@ -711,9 +763,9 @@ class GrammarAnswerRequest(BaseModel):
 
 
 @app.post("/api/learning/grammar/answer")
-async def answer_grammar(request: GrammarAnswerRequest):
-    item = zephyr.learning_engine.grammar.get_rule(request.rule)
+async def answer_grammar(agent: Agent, request: GrammarAnswerRequest):
+    item = agent.learning_engine.grammar.get_rule(request.rule)
     if item is None:
         raise HTTPException(status_code=404, detail="Règle introuvable.")
-    zephyr.learning_engine.register_grammar_answer(request.rule, request.correct)
+    agent.learning_engine.register_grammar_answer(request.rule, request.correct)
     return item.to_dict()

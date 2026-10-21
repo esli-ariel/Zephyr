@@ -10,7 +10,7 @@ from app.agent.zephyr import ZephyrAgent
 from app.learning.adaptive_assessment import AdaptiveAssessment
 from app.learning.exercise import Exercise
 from app.learning.lesson import Lesson, LessonSection
-from app.persistence import StateStore, capture_state
+from app.persistence import StateStore, capture_state, LEGACY_LEARNER_ID
 
 
 @pytest.fixture
@@ -18,14 +18,17 @@ def boot(tmp_path, monkeypatch):
     monkeypatch.setattr(main.settings, "persistence_enabled", True)
     monkeypatch.setattr(main.settings, "database_path", str(tmp_path / "data" / "state.sqlite3"))
 
+    learner_id = None
+
     @contextmanager
     def start():
-        agent = ZephyrAgent()
-        assessment = AdaptiveAssessment()
-        monkeypatch.setattr(main, "zephyr", agent)
-        monkeypatch.setattr(main, "adaptive_assessment", assessment)
+        nonlocal learner_id
         with TestClient(main.app) as client:
-            yield client, agent, assessment
+            if learner_id is None:
+                learner_id = client.post("/api/learners").json()["learner_id"]
+            client.headers["X-Learner-ID"] = learner_id
+            session = main.app.state.learners.get(learner_id)
+            yield client, session.agent, session.assessment
 
     return start
 
@@ -122,7 +125,7 @@ def test_failed_save_rolls_back_and_returns_503(boot, monkeypatch):
     with boot() as (client, agent, _):
         assert client.put("/api/learner/profile", json={"name": "Avant"}).status_code == 200
 
-        def fail(snapshot):
+        def fail(snapshot, learner_id):
             raise sqlite3.OperationalError("disk full")
 
         monkeypatch.setattr(main.app.state.store, "save", fail)
@@ -146,17 +149,17 @@ def test_failed_llm_request_does_not_save_partial_mutations(boot, monkeypatch):
         before = capture_state(agent, assessment)
         assert client.post("/api/chat", json={"message": "Bonjour"}).status_code == 502
         assert capture_state(agent, assessment) == before
-        assert main.app.state.store.load() is None
+        assert main.app.state.store.load(client.headers["X-Learner-ID"]) == before
 
 
 def test_corrupt_state_is_rejected_without_overwriting_database(tmp_path):
     store = StateStore(str(tmp_path / "state.sqlite3"))
     with sqlite3.connect(store.path) as connection:
-        connection.execute("INSERT INTO app_state VALUES (1, ?)", ('{"version":999}',))
+        connection.execute("INSERT INTO learner_states VALUES (?, ?)", (LEGACY_LEARNER_ID, '{"version":999}'))
     with pytest.raises(ValidationError):
-        store.load()
+        store.load(LEGACY_LEARNER_ID)
     with sqlite3.connect(store.path) as connection:
-        assert connection.execute("SELECT payload FROM app_state").fetchone()[0] == '{"version":999}'
+        assert connection.execute("SELECT payload FROM learner_states").fetchone()[0] == '{"version":999}'
 
 
 def test_backup_restores_the_saved_state_and_refuses_overwrite(tmp_path):
@@ -166,13 +169,13 @@ def test_backup_restores_the_saved_state_and_refuses_overwrite(tmp_path):
     agent = ZephyrAgent()
     agent.learner.set_name("Sauvegardé")
     snapshot = capture_state(agent, AdaptiveAssessment())
-    source.save(snapshot)
+    source.save(snapshot, LEGACY_LEARNER_ID)
     destination = tmp_path / "backup.sqlite3"
     backup_database(str(source.path), str(destination))
-    assert StateStore(str(destination)).load() == snapshot
+    assert StateStore(str(destination)).load(LEGACY_LEARNER_ID) == snapshot
     with pytest.raises(FileExistsError):
         backup_database(str(source.path), str(destination))
-    assert StateStore(str(destination)).load() == snapshot
+    assert StateStore(str(destination)).load(LEGACY_LEARNER_ID) == snapshot
 
 
 def test_backup_missing_source_does_not_create_empty_files(tmp_path):

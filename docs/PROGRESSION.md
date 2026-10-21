@@ -1,6 +1,6 @@
 # État actuel — 21 octobre 2026
 
-**Version backend : 0.7.0 — sauvegarde SQLite et reprise après redémarrage.**
+**Version backend : 0.7.1 — données et sauvegardes séparées par apprenant.**
 
 | Domaine | État |
 |---|---|
@@ -9,11 +9,13 @@
 | Leçons, exercices et correction | Implémentés ; correction accessible par API |
 | Vocabulaire et grammaire | Ajout, consultation, statistiques, révision et autoévaluation accessibles par API |
 | Recommandations et plans | Implémentés ; tri sur la priorité calculée des activités |
-| Tests | 143 réussis localement, 2 avertissements de dépendances |
+| Tests | 159 réussis localement, 2 avertissements de dépendances |
 | CI | Configuration GitHub Actions ajoutée ; exécution distante non vérifiée |
 | Persistance | SQLite : profil, conversation, contenus, maîtrise, plan actif et évaluation |
 | Copie de sauvegarde | Commande `python -m app.backup` ; restauration testée |
-| Isolation des apprenants | À réaliser ; un apprenant et un processus API |
+| Isolation des apprenants | Identifiants UUID, agents/évaluations/verrous distincts ; un processus API |
+| Migration V0.7.0 | Automatique et transactionnelle, profil ancien conservé |
+| Authentification et droits | À réaliser ; l’identifiant sélectionne le profil |
 | Interface, voix, vision, avatar | À réaliser |
 
 La V0.6.9 relie les réponses aux exercices aux points faibles et erreurs du profil.
@@ -23,8 +25,14 @@ de copie SQLite. Elle ne fournit pas encore l’exécution automatique d’un pl
 ni le rattachement automatique d’un exercice à une règle ou un mot.
 Aucun appel réel à OpenRouter n’a été effectué pendant cette validation.
 
-Prochain jalon : isolation des apprenants, puis première
-interface permettant de parcourir profil → évaluation → plan → exercice → correction.
+La V0.7.1 ajoute `POST /api/learners` et exige `X-Learner-ID` sur les routes
+pédagogiques. Les états sont restaurés à la demande et les requêtes verrouillées
+par apprenant. Les tests couvrent la séparation de deux profils, le redémarrage,
+les suppressions, les erreurs de sauvegarde, la concurrence et l’ancienne base.
+
+Prochain jalon : V0.7.2 (validation des réponses IA et liens exercices/notions),
+puis première interface permettant de parcourir profil → évaluation → plan →
+exercice → correction. Ajouter l’authentification avant une ouverture publique.
 
 ---
 

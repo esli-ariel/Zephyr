@@ -1,4 +1,4 @@
-"""Sauvegarde atomique de l'état du prototype mono-apprenant."""
+"""Sauvegarde atomique de l'état du apprenants."""
 import json
 import sqlite3
 from contextlib import closing
@@ -83,27 +83,45 @@ def restore_state(snapshot: StateSnapshot, agent, assessment) -> None:
             setattr(assessment.session, key, value)
 
 
+LEGACY_LEARNER_ID = "00000000-0000-0000-0000-000000000001"
+
+
 class StateStore:
     def __init__(self, path: str):
         self.path = Path(path).expanduser()
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with closing(sqlite3.connect(self.path)) as connection, connection:
+            connection.execute("BEGIN IMMEDIATE")
             connection.execute(
-                "CREATE TABLE IF NOT EXISTS app_state "
-                "(id INTEGER PRIMARY KEY CHECK (id = 1), payload TEXT NOT NULL)"
+                "CREATE TABLE IF NOT EXISTS learner_states "
+                "(learner_id TEXT PRIMARY KEY, payload TEXT NOT NULL)"
             )
+            legacy = connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'app_state'"
+            ).fetchone()
+            if legacy:
+                row = connection.execute("SELECT payload FROM app_state WHERE id = 1").fetchone()
+                if row:
+                    # Valider avant de migrer ; une erreur annule toute la transaction.
+                    StateSnapshot.model_validate_json(row[0])
+                    connection.execute(
+                        "INSERT OR IGNORE INTO learner_states VALUES (?, ?)",
+                        (LEGACY_LEARNER_ID, row[0]),
+                    )
+                connection.execute("DROP TABLE app_state")
 
-    def load(self) -> StateSnapshot | None:
+    def load(self, learner_id: str) -> StateSnapshot | None:
         with closing(sqlite3.connect(self.path)) as connection:
-            row = connection.execute("SELECT payload FROM app_state WHERE id = 1").fetchone()
-        # Refuser un état invalide au démarrage plutôt que l'écraser silencieusement.
+            row = connection.execute(
+                "SELECT payload FROM learner_states WHERE learner_id = ?", (learner_id,)
+            ).fetchone()
         return StateSnapshot.model_validate_json(row[0]) if row else None
 
-    def save(self, snapshot: StateSnapshot) -> None:
+    def save(self, snapshot: StateSnapshot, learner_id: str) -> None:
         payload = json.dumps(snapshot.model_dump(mode="json"), ensure_ascii=False)
         with closing(sqlite3.connect(self.path)) as connection, connection:
             connection.execute(
-                "INSERT INTO app_state(id, payload) VALUES (1, ?) "
-                "ON CONFLICT(id) DO UPDATE SET payload = excluded.payload",
-                (payload,),
+                "INSERT INTO learner_states(learner_id, payload) VALUES (?, ?) "
+                "ON CONFLICT(learner_id) DO UPDATE SET payload = excluded.payload",
+                (learner_id, payload),
             )

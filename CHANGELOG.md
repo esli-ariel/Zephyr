@@ -2,6 +2,16 @@
 
 Toutes les modifications importantes du projet sont enregistrées ici.
 
+## [0.7.1] — 21/10/2026
+
+- Création d’apprenants via `POST /api/learners` ; sélection explicite par `X-Learner-ID` sur les routes pédagogiques.
+- Suppression de l’agent et de l’évaluation globaux ; dépendances FastAPI liées à la requête.
+- États SQLite séparés par identifiant, restauration à la demande et verrou par apprenant.
+- Migration atomique de la V0.7.0 vers le profil historique `00000000-0000-0000-0000-000000000001`.
+- Identifiants invalides/inconnus refusés sans création implicite ; copie SQLite couvrant tous les apprenants.
+- 159 tests réussis localement : séparation, redémarrage, migration, rollback et concurrence.
+- Un seul processus API reste pris en charge ; authentification à réaliser.
+
 ## [0.7.0] — 21/10/2026
 
 - Persistance SQLite automatique du profil, conversation, contenus pédagogiques, vocabulaire, grammaire, plan actif et évaluation en cours.

@@ -3,16 +3,16 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import main
-from app.agent.zephyr import ZephyrAgent
 
 
 @pytest.fixture
-def learning(monkeypatch):
-    agent = ZephyrAgent()
-    agent.learner.set_target_language("anglais")
-    agent.learner.set_level("A1")
-    monkeypatch.setattr(main, "zephyr", agent)
+def learning():
     with TestClient(main.app) as client:
+        learner_id = client.post("/api/learners").json()["learner_id"]
+        client.headers["X-Learner-ID"] = learner_id
+        agent = main.app.state.learners.get(learner_id).agent
+        agent.learner.set_target_language("anglais")
+        agent.learner.set_level("A1")
         yield client, agent
 
 
