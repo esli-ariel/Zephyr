@@ -40,7 +40,7 @@ Une configuration GitHub Actions exécute la même suite sous Python 3.12.
 ## Comptes et sélection de l’apprenant
 
 Les comptes sont activés par défaut. Ouvrir `/ui/`, cliquer **Créer un compte**,
-puis renseigner prénom, e-mail et phrase secrète de 15 à 128 caractères. La session
+puis renseigner prénom, e-mail et phrase secrète de 8 à 128 caractères. La session
 est conservée dans un cookie HttpOnly ; **Mon compte** permet de se déconnecter.
 Le serveur rattache chaque profil à son compte et refuse l’accès aux autres profils.
 
@@ -283,7 +283,11 @@ clic, une erreur, l’ouverture du profil/compte ou le passage en arrière-plan 
 le mode ; il ne reprend pas automatiquement au rechargement. La dictée dépend du
 navigateur. La boucle avec une voix réelle reste à essayer avec l’utilisateur.
 
-Validation de cette version : **273 tests Python et 7 tests Node réussis**, deux
+Validation de cette version : **274 tests Python et 7 tests Node réussis**, deux
 avertissements Python connus. L’authentification, l’isolement des comptes et le
 contrôleur de boucle vocale sont testés. Aucun compte personnel n’est créé par l’agent.
 La récupération par e-mail et les écrans plan/exercices restent à réaliser.
+
+L’écran de compte propose maintenant une présentation en deux panneaux sur
+ordinateur, un formulaire compact sur mobile et des onglets Connexion/Inscription.
+Le bouton en forme d’œil affiche ou masque chaque champ de mot de passe.

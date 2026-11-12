@@ -14,6 +14,11 @@ Toutes les modifications importantes du projet sont enregistrées ici.
 
 ## [0.8.0-alpha.1] — 12/11/2026 — comptes et vocal continu
 
+- Ajustement utilisateur : inscription avec 8 à 128 caractères, test de limite 7/8 et connexion à huit.
+- Écrans de compte recomposés : panneau Zéphyr, onglets, champs structurés et affichage/masquage du mot de passe.
+- Validation actuelle : 274 tests Python et 7 Node ; contrôle mobile/ordinateur.
+
+
 - Inscription, connexion et déconnexion avec mots de passe scrypt, sessions opaques et cookies HttpOnly.
 - Contrôle de propriété des profils, transaction d’inscription, limitation des tentatives et garde de mutation/origine.
 - Écran de compte ; anciens profils conservés, rattachement réservé à une commande locale.

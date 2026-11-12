@@ -320,3 +320,13 @@ prévenir l’auto-transcription de la voix de Zéphyr. Arrêter la boucle au cl
 sur erreur, à l’ouverture d’un dialogue personnel, à la déconnexion ou en
 arrière-plan. Le contrôleur isolé est testé sans appareil audio. Cette décision
 remplace la limitation antérieure « pas d’écoute continue » de l’ADR-013.
+
+### Complément ADR-015 — minimum demandé et ergonomie de connexion
+
+Le 12 novembre, l’utilisateur demande explicitement un mot de passe de huit
+caractères. Accepter 8–128 caractères à l’inscription, sans modifier le hachage,
+les sessions ou les anciens mots de passe. Documenter la même limite dans l’API
+et le formulaire, avec test de refus à sept et d’acceptation/connexion à huit.
+Le dialogue possède des onglets, des champs d’affichage/masquage et un panneau
+visuel sur ordinateur. Les champs secrets sont vidés à la fermeture quel que
+soit leur type courant ; aucun mot de passe ni jeton n’est enregistré dans localStorage.

@@ -12,7 +12,7 @@
 | Microphone | Analyse du volume par Web Audio ; validation avec une voix réelle restante |
 | Dictée | Web Speech `fr-FR` si disponible ; validation réelle restante |
 | Lecture vocale | Synthèse du navigateur ; activation observée dans l’interface |
-| Tests actuels | 273 Python et 7 Node réussis ; 2 avertissements Python ; appels IA simulés dans pytest |
+| Tests actuels | 274 Python et 7 Node réussis ; 2 avertissements Python ; appels IA simulés dans pytest |
 | Validation manuelle | Chat OpenRouter réel, lecture vocale déclenchée, reprise des messages et responsive |
 | Comptes et droits | Inscription/connexion/déconnexion, cookies, sessions révocables et propriété des profils |
 | Vocal continu | Contrôleur et bouton ajoutés ; boucle réelle à essayer après inscription |
@@ -95,6 +95,15 @@ il s’arrête sur erreur, dialogue personnel, déconnexion ou arrière-plan.
 Validation : 273 tests Python, 7 Node ; formulaires connexion/inscription sur
 mobile/ordinateur. Aucune inscription personnelle réalisée par l’agent. La boucle
 avec une voix réelle et les fonctions de récupération e-mail restent ouvertes.
+
+
+### Connexion soignée et minimum de huit caractères — 12 novembre 2026
+
+Minimum d’inscription de huit caractères dans l’API et le navigateur ; anciens
+mots de passe conservés. Nouvelle présentation de compte à deux panneaux sur
+ordinateur, compacte sur mobile ; onglets et boutons d’affichage/masquage.
+Validation : limite 7/8 testée, connexion à huit caractères, rendu à 319/1200 px
+et bascule de visibilité vérifiés. Référence actuelle : 274 Python et 7 Node.
 
 ## Prochaines étapes proposées
 

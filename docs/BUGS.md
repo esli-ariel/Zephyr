@@ -133,3 +133,10 @@ cette évolution : 3 tests Python interface et 4 tests Node réussis.
 - Les anciennes données restent sauvegardées sans rattachement automatique. La procédure locale est dans ACCOUNTS.
 - B007 reste ouvert : apprentissage limité à un processus. Les avertissements B005 et la limitation de dictée française B011 restent ouverts.
 - 273 tests Python et 7 Node réussis ; UI 319/1100 px sans débordement.
+
+## Ajustement de l’inscription — 12 novembre 2026
+
+- Ancien minimum de 15 caractères remplacé par huit à la demande de l’utilisateur, dans l’API et le formulaire.
+- Message de validation et guide de compte synchronisés ; test de limite 7/8 et connexion ajoutés.
+- Champs de mot de passe vidés à la fermeture même après affichage en clair.
+- Nouvelle interface mobile/ordinateur contrôlée sans débordement horizontal.

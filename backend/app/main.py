@@ -64,7 +64,7 @@ app.include_router(auth_router)
 @app.exception_handler(RequestValidationError)
 async def safe_validation_error(request: Request, exc: RequestValidationError):
     if request.url.path.startswith('/api/auth/'):
-        return JSONResponse(status_code=422, content={'detail': 'Vérifiez votre adresse e-mail, votre prénom et votre mot de passe (15 à 128 caractères à l’inscription).'})
+        return JSONResponse(status_code=422, content={'detail': 'Vérifiez votre adresse e-mail, votre prénom et votre mot de passe (8 à 128 caractères à l’inscription).'})
     return await request_validation_exception_handler(request, exc)
 
 

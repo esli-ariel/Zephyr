@@ -1,4 +1,15 @@
 # 📓 Journal de développement — Zéphyr
+
+## 12/11/2026 — Mot de passe huit caractères et nouvelle interface de compte
+
+- Demande explicite : accepter un mot de passe de huit caractères et soigner connexion/inscription.
+- Minimum serveur/formulaire abaissé à huit, maximum inchangé (128). Mots de passe existants toujours valides.
+- Nouveau panneau de marque, mise en page à deux colonnes sur ordinateur et compacte sur mobile, onglets Connexion/Inscription, champs structurés et CTA plus lisible.
+- Affichage/masquage pour mot de passe et confirmation ; vidage à la fermeture indépendamment du type visible/masqué.
+- Test de limite : sept refusés, huit acceptés puis connexion réussie.
+- Vérification navigateur : minimum=8, affichage en texte puis retour au formulaire masqué, rendu 319/1200 px sans débordement. Aucun identifiant personnel saisi.
+- Validation : 274 tests Python et 7 Node ; deux avertissements connus. Suivi et documentation actualisés, livraison Git dans la continuité des demandes de push.
+
 ## 12/11/2026 — Comptes locaux et vocal continu
 
 - Demandes : création de compte, bouton vocal continu et push.

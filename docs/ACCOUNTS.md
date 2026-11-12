@@ -3,7 +3,7 @@
 ## Utilisation
 
 Dans `/ui/`, ouvrir **Se connecter → Créer un compte**. Renseigner prénom, adresse
-e-mail et mot de passe de 15 à 128 caractères, puis sa confirmation. Le compte est
+e-mail et mot de passe de 8 à 128 caractères, puis sa confirmation. Le compte est
 utilisable immédiatement. Le bouton **Mon compte** permet de se déconnecter.
 Les comptes appartiennent à cette installation de Zéphyr : aucune vérification
 ou réinitialisation par e-mail n’est encore disponible. Aucun e-mail n’est envoyé.
@@ -108,7 +108,7 @@ encore configurée en français ; la prononciation des mots visuels utilise leur
 
 ## Validation
 
-273 tests Python et 7 tests Node réussis, 2 avertissements de dépendances connus.
+274 tests Python et 7 tests Node réussis, 2 avertissements de dépendances connus.
 Les tests couvrent comptes distincts, cookies, rotation/révocation/expiration,
 redémarrage, transaction d’inscription, anciennes données, limitation et mutations
 interdites. Trois tests du contrôleur vocal valident l’activation explicite,
@@ -116,3 +116,15 @@ l’annulation et le blocage de capture pendant un état occupé. Les formulaire
 été inspectés sur mobile et ordinateur ; aucun compte personnel n’a été créé à
 la place de l’utilisateur. La boucle avec une voix réelle reste à essayer après
 création du compte et autorisation du micro.
+
+## Ajustement du 12 novembre : mot de passe et présentation
+
+À la demande de l’utilisateur, le minimum d’inscription est passé de 15 à **8 caractères**
+sur le serveur et dans le formulaire. Le maximum reste de 128 et les anciens mots
+de passe restent valides. Un test refuse sept caractères, accepte exactement huit
+et vérifie la connexion avec ce mot de passe.
+
+Connexion/inscription : panneau Zéphyr sur ordinateur, champs et espacements
+recomposés, navigation par onglets et affichage/masquage des mots de passe. À la
+fermeture du dialogue, ces champs sont vidés même s’ils étaient visibles.
+Le formulaire a été vérifié à 319 et 1200 px, sans débordement horizontal.

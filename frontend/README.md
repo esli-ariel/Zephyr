@@ -171,3 +171,13 @@ ou erreurs de service désactivent le mode. Une absence de parole permet une nou
 Tests : 7 Node (dont 3 sur activation/arrêt/blocage de la boucle) et 273 Python.
 La boucle microphone/réponse réelle reste à essayer après inscription et autorisation.
 Voir `docs/ACCOUNTS.md` pour la sécurité et la récupération des anciens profils.
+
+## Connexion/inscription — ajustement du 12 novembre
+
+Nouvelle composition à deux panneaux sur ordinateur et un panneau sur mobile.
+Minimum d’inscription huit caractères (maximum 128), aligné sur l’API. Boutons
+d’affichage/masquage des deux champs secrets avec labels accessibles ; ces champs
+sont vidés à la fermeture même après affichage. L’adresse e-mail est conservée
+en mémoire pendant un changement d’onglet, sans stockage local.
+Rendu vérifié à 319/1200 px et minimum=8 observé dans le DOM. Tests de limite et
+connexion à huit caractères dans `backend/tests/test_auth.py`.

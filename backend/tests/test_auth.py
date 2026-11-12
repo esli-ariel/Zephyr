@@ -157,3 +157,12 @@ def test_auth_routes_do_not_require_a_learner_header_and_document_request_marker
             names = [item['name'].lower() for item in operation.get('parameters', [])]
             assert 'x-learner-id' not in names
             assert 'x-zephyr-request' in names
+
+
+def test_registration_accepts_eight_characters_and_rejects_seven(client):
+    rejected = client.post('/api/auth/register', json={'name': 'Boundary test', 'email': 'boundary@example.invalid', 'password': 'abcdef7'})
+    assert rejected.status_code == 422
+    accepted = client.post('/api/auth/register', json={'name': 'Boundary test', 'email': 'boundary@example.invalid', 'password': 'abcdefg8'})
+    assert accepted.status_code == 201
+    assert client.post('/api/auth/logout').status_code == 200
+    assert client.post('/api/auth/login', json={'email': 'boundary@example.invalid', 'password': 'abcdefg8'}).status_code == 200
