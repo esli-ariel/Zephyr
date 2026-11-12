@@ -198,3 +198,92 @@ Le score de correction n’est pas assimilé à la maîtrise. Les soumissions r�
 comptent comme de nouvelles tentatives. Sans lien, seuls les résultats généraux
 du profil sont intégrés. Les liens facultatifs sont compatibles avec les anciens
 snapshots de version 1 ; aucune nouvelle migration SQLite n’est requise.
+
+
+## ADR-013 — Interface locale servie par FastAPI et voix navigateur
+
+**Date :** 12/11/2026.
+
+**Décision :** interface sans compilation dans `frontend/`, montage `/ui/` sur le backend
+existant. Les routes API et la version 0.7.2 sont préservées. L’interface utilise
+le même origin et `X-Learner-ID`, stocké dans localStorage.
+
+**Raison :** fournir immédiatement une interface locale utilisable sans installation
+d’un second serveur ni exposition de clé API au navigateur. La V0.8 complète reste ouverte.
+
+**Voix :** activation explicite, analyse Web Audio du micro sans connexion aux enceintes,
+dictée Web Speech selon compatibilité, synthèse native du navigateur. Les pistes sont
+arrêtées à la fin de l’écoute, sur erreur et au départ de la page. Pas d’écoute continue.
+L’animation de sortie suit les événements de synthèse et une enveloppe visuelle ; elle
+ne prétend pas mesurer le son PCM de la voix synthétisée. La dictée peut dépendre
+d’un service distant du navigateur ; aucun audio n’est envoyé à l’API Zephyr.
+
+**Limites :** reconnaissance et synthèse en français, qualité et disponibilité selon
+le navigateur, microphone/dictée réels à valider. L’identifiant local n’est toujours
+pas une authentification. Caméra, avatar, Next.js et streaming vocal non implémentés.
+
+### Complément ADR-013 — état conversation et interaction du champ
+
+Le mode visuel épuré est activé lors du premier échange, de l’écoute effective,
+de la synthèse ou de la restauration d’un historique. L’état est déduit de la session,
+sans nouvel enregistrement persistant. Les notifications restent dans le chat ;
+les annonces de statut sont conservées pour les technologies d’assistance.
+Les interactions des points ne démarrent ni microphone ni appel IA. La rotation
+progresse par delta de temps ; le pointeur influence les positions projetées,
+et une enveloppe amortit les pulsations. Les préférences de mouvement réduit
+limitent les déplacements.
+
+### Complément ADR-013 — thème et détachement des points
+
+Le thème est local au navigateur (`zephyr.theme`), indépendant des profils et de
+l’API. En l’absence de choix sauvegardé, il suit le système. Les points détachables
+sont un sous-ensemble fixe avec enveloppes périodiques décalées ; les mêmes points
+reviennent à leur emplacement sans création de particules supplémentaires. Les
+couleurs sont calculées en HSL avec transition de palette indépendante du rendu CSS.
+`prefers-reduced-motion` suspend détachement, rotation et évolution temporelle des teintes.
+
+### Complément ADR-013 — halo et animation par état
+
+Conserver les 2 100 points et renforcer le relief par taille, opacité, perspective
+et tri en profondeur. Deux dégradés radiaux produisent le halo ; seuls quelques
+points reçoivent un disque lumineux supplémentaire, sans flou par particule.
+Des poids interpolés d’écoute, réflexion et parole pilotent les formes, teintes et
+intensités ; les transitions restent progressives. Le mouvement réduit conserve
+un rendu calme. La voix synthétisée ne fournit toujours pas de PCM à l’analyseur.
+
+### Complément ADR-013 — objets 3D et vocabulaire visuel hors ligne
+
+Les mêmes points interpolent entre positions libres et modèles volumétriques.
+Les surfaces sont construites avec des primitives (boîtes, sphères, cylindres,
+tores, prismes et cœur gonflé), puis tournées et projetées sur le canvas existant.
+La première ébauche en silhouettes a été remplacée après retour utilisateur.
+Les noms/traductions restent indépendants de la rotation.
+
+La table locale de six objets/six langues évite un appel IA pendant les animations.
+Aucune traduction n’est substituée pour une langue inconnue. Le profil reste
+la référence pour `target_language` ; sélection et sauvegarde utilisent l’API
+existante et l’identifiant apprenant. Une sauvegarde échouée reste un aperçu local.
+La prononciation définit la langue de l’énoncé ; elle ne change pas la langue de
+la dictée ni celle du chat. Aucun progrès n’est attribué à l’observation d’un objet.
+
+## ADR-014 — Profil et évaluation sur l’API existante
+
+**Date :** 12/11/2026.
+
+**Décision :** ajouter un dialogue natif avec les sections profil et niveau, sans
+modifier les routes ni la version 0.7.2 du backend. Le même client et l’identifiant
+apprenant sont partagés ; l’ouverture suspend voix/micro et verrouille le chat.
+
+**Langue :** la banque de questions est anglaise. Une garde explicite dans le
+parcours vérifie le profil à l’entrée et avant réponse/bilan, sans modifier
+implicitement sa langue. Cette garde d’interface n’est pas une nouvelle règle
+d’authentification ou une restriction des appels API directs.
+
+**Reprise :** lire la progression/question existante ; ne réinitialiser que sur
+démarrage vierge ou recommencement explicite. Une réponse incertaine est conciliée
+avec le serveur avant un éventuel renvoi. Le bilan utilise l’idempotence existante
+de l’identifiant d’évaluation. Les objectifs sont ajoutés sans réécrire leur liste.
+
+**Validation :** tests d’intégration en profils isolés, suite Python complète,
+syntaxe/tests Node et contrôle UI mobile/ordinateur. Les cas nécessitant l’IA
+sont simulés par la suite de tests ; aucune fausse note enregistrée pour l’utilisateur.

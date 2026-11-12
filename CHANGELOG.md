@@ -2,6 +2,62 @@
 
 Toutes les modifications importantes du projet sont enregistrées ici.
 
+### Ajustement de l’interface — conversation immersive
+
+- Dès le premier message, l’écoute ou la lecture vocale, retrait des textes autour de la sphère.
+- Même affichage épuré à la restauration d’un historique ; annonces d’état conservées pour les lecteurs d’écran.
+- Messages d’aide et erreurs déplacés dans le panneau de conversation.
+- Sphère agrandie, rotation accélérée, ondulations et réaction vocale renforcées.
+- Répulsion des points au pointeur, pulsation au clic/toucher ou avec Entrée/Espace.
+- Mouvement réduit respecté ; contrôle mobile à 319 px et ordinateur à 1440 px, sans débordement.
+- JavaScript et diff vérifiés ; trois tests d’intégration interface réussis, deux avertissements existants.
+
+## [Non publié] — 12/11/2026 — aperçu interface V0.8
+
+### Profil et évaluation accessibles dans l’interface
+
+- Dialogue « Mon profil et mon niveau » : prénom, langue, niveau déclaré, objectifs.
+- Parcours adaptatif d’anglais : reprise, QCM/texte libre, feedback, bilan et recommencement explicite.
+- Vérification de la langue et relecture serveur avant renvoi d’une réponse réseau incertaine.
+- 263 tests Python et 4 tests Node réussis ; CI enrichie avec les vérifications frontend.
+
+
+### Nuage libre, objets 3D et traductions
+
+- Promenade libre, formation d’objets au repos, rassemblement pendant la synthèse.
+- Six objets en volume tournant lentement ; silhouettes plates de l’ébauche remplacées.
+- Noms français et traductions en six langues, choix relié au profil et prononciation cible.
+- Boutons « Autre objet » et « Écouter », légendes affichées après stabilisation.
+- Brillance rétablie : luminosité, opacité, cœurs clairs et composition additive nocturne.
+- Quatre tests Node et trois tests Python interface réussis ; validation navigateur jour/nuit/mobile.
+
+
+### Halo, profondeur et personnalité de la sphère
+
+- Halo diffus, plus intense pendant l’activité vocale, adapté au mode jour.
+- Points de taille et luminosité variables selon leur profondeur, avec accents lumineux discrets.
+- Respiration au repos, ondes à l’écoute, spirale en réflexion, expansion pendant la réponse.
+- Interpolation des états pour des transitions visuelles progressives.
+- Validation navigateur jour/nuit et réflexion/synthèse réelles ; syntaxe JS et diff valides.
+
+
+### Particules libres et thèmes
+
+- Particules qui se détachent puis rejoignent la sphère, avec cycles décalés.
+- Variations discrètes de couleur et palettes jour/nuit adaptées à tout l’écran.
+- Bouton soleil/lune, choix mémorisé, suivi du système en l’absence de préférence.
+- Mouvement réduit respecté ; bascules et mémorisation vérifiées en navigateur.
+- Contrôles à 319 et 1440 px, trois tests interface réussis, deux avertissements connus.
+
+
+- Interface locale `/ui/` : sphère de points cyan, conversation, mémoire restaurée et suggestions.
+- Microphone à activation explicite, analyse du volume et dictée selon compatibilité navigateur.
+- Synthèse vocale, essai vocal et arrêt de lecture ; animation pendant la parole.
+- Adaptation mobile et ordinateur, repli texte, états de chargement et erreurs.
+- Trois tests d’intégration ajoutés ; 261 tests réussis, deux avertissements existants.
+- Chat OpenRouter réel et déclenchement de synthèse vérifiés ; micro/dictée réels à valider.
+- Backend inchangé en version 0.7.2 ; jalon V0.8 pédagogique encore incomplet.
+
 ## [0.7.2] — 21/10/2026
 
 - Schémas stricts pour corrections, évaluations, profils extraits, leçons et exercices ; champs et clés dupliqués contrôlés.

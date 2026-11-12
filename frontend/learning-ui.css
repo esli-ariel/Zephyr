@@ -1,0 +1,21 @@
+.learning-launch{width:100%;min-height:40px;margin-top:13px;text-align:left;background:transparent;border:1px solid var(--line);border-radius:7px;color:var(--cyan);font:inherit;font-size:11px;padding:10px 12px;cursor:pointer}
+.learning-dialog{color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:26px;width:min(640px,calc(100vw - 28px));max-height:90dvh;overflow:auto;box-shadow:0 24px 100px #0005}
+.learning-dialog::backdrop{background:#020a12b8;backdrop-filter:blur(6px)}
+.learning-header{height:auto;padding:0 0 20px;gap:15px}.learning-header h2{margin-top:10px;font-size:24px}
+#learning-close{border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--ink);width:44px;height:44px;font-size:25px;flex-shrink:0}
+.learning-tabs{display:flex;gap:8px;margin:18px 0}.learning-tabs button{min-height:44px;border:1px solid var(--line);border-radius:7px;background:transparent;color:var(--muted);padding:9px 16px;font:inherit}
+.learning-tabs button[aria-pressed="true"]{border-color:var(--cyan);color:var(--cyan);background:var(--panel)}
+.learning-status{font-size:12px;line-height:1.6;color:var(--muted);margin:0}.learning-status:not(:empty){margin:12px 0}.learning-status.error{color:#eaa68e}
+#learning-content{font-size:14px;line-height:1.75}#learning-content h3{font-weight:500;font-size:19px;line-height:1.6;margin:16px 0 10px}#learning-content ul{padding-left:22px}
+.learning-dialog form{display:flex;flex-direction:column;align-items:stretch;gap:15px;border:0;background:transparent;padding:0;margin:12px 0}
+.profile-form label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}
+.learning-dialog input:not([type="radio"]),.learning-dialog select,.learning-dialog textarea{width:100%;font:inherit;font-size:14px;background:var(--panel);color:var(--ink);padding:11px 12px;border:1px solid var(--line);border-radius:7px;min-height:44px}
+.learning-dialog textarea{min-height:100px;resize:vertical}.learning-dialog input:focus-visible,.learning-dialog select:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.learning-primary,.learning-secondary{display:inline-block;min-height:44px;padding:11px 16px;border-radius:7px;font:inherit;font-size:13px;cursor:pointer;margin:6px 8px 6px 0}
+.learning-primary{background:var(--cyan);border:1px solid var(--cyan);color:#08252b}.learning-secondary{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.learning-help{font-size:11px;line-height:1.7;color:var(--muted)}.assessment-progress{font-size:11px;color:var(--cyan);letter-spacing:.5px}.assessment-score{font-size:22px;color:var(--cyan)}
+.assessment-form fieldset{border:0;display:grid;gap:10px;margin:0;padding:0}.assessment-form fieldset label{display:flex;align-items:center;gap:12px;min-height:48px;border:1px solid var(--line);border-radius:7px;padding:10px 14px;cursor:pointer;background:var(--panel)}
+.assessment-form input[type="radio"]{accent-color:var(--cyan);width:18px;height:18px;flex-shrink:0}.assessment-form fieldset label:has(:checked){border-color:var(--cyan)}
+.competency-list{display:grid;grid-template-columns:1fr auto;gap:10px;padding:15px;border:1px solid var(--line);border-radius:8px}.competency-list dd{margin:0;color:var(--cyan)}
+html[data-theme="day"] .learning-primary{color:white}html[data-theme="day"] .learning-status.error{color:#a14629}
+@media(max-width:420px){.learning-dialog{padding:18px}.learning-header h2{font-size:20px}.learning-tabs button{flex:1;padding:9px}.learning-primary,.learning-secondary{width:100%;margin-right:0}}

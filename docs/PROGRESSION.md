@@ -1,3 +1,97 @@
+# État actuel — 12 novembre 2026
+
+**Backend 0.7.2 ; première interface conversationnelle, aperçu V0.8.**
+
+| Domaine | État |
+|---|---|
+| Chat, profils, mémoire, évaluation, leçons, exercices | Backend implémenté |
+| Vocabulaire, grammaire, recommandations, plans | Backend implémenté |
+| Persistance et séparation des apprenants | SQLite, un processus API |
+| Interface `/ui/` | Conversation, historique restauré, suggestions et saisie texte |
+| Visualisation | Nuage libre de 2 100 points, six objets 3D tournants et rassemblement pendant la parole |
+| Microphone | Analyse du volume par Web Audio ; validation avec une voix réelle restante |
+| Dictée | Web Speech `fr-FR` si disponible ; validation réelle restante |
+| Lecture vocale | Synthèse du navigateur ; activation observée dans l’interface |
+| Tests actuels | 263 Python et 4 Node réussis ; 2 avertissements Python ; appels IA simulés dans pytest |
+| Validation manuelle | Chat OpenRouter réel, lecture vocale déclenchée, reprise des messages et responsive |
+| Authentification, multiworkers | À réaliser |
+| Profil et évaluation dans l’interface | Réalisés : profil, reprise, questions, correction, bilan ; banque anglaise uniquement |
+| Plan → exercice → correction dans l’interface | À réaliser |
+| Caméra, avatar, voix temps réel | À réaliser |
+
+Le backend conserve sa version 0.7.2 ; l’aperçu de l’interface ne termine pas le jalon V0.8.
+L’interface est servie par FastAPI, sans Next.js ni processus frontend distinct.
+L’amplitude de la sphère suit le micro à l’écoute. Pendant la synthèse vocale, elle
+utilise une animation liée à la lecture ; aucun accès PCM au son synthétisé.
+La dictée peut utiliser le service du navigateur ; elle n’est pas garantie hors ligne.
+Aucune publication web. Livraison Git sur main préparée après validation locale ; résultat de synchronisation communiqué dans le chat.
+
+
+### Ajustement conversationnel — 12 novembre 2026
+
+Le début de la conversation (ou sa reprise depuis l’historique) active un affichage
+épuré : plus de texte autour de la sphère, bouton micro conservé. Les messages
+d’aide et erreurs sont dans le chat. Les points ondulent davantage, réagissent au
+pointeur et pulsent au clic/toucher ou au clavier. La rotation et l’amplitude vocale
+sont renforcées ; le mouvement réduit reste respecté. Contrôles navigateur à 319
+et 1440 px réussis ; trois tests d’intégration interface, syntaxe JS et diff valides.
+
+
+### Particules et thèmes — 12 novembre 2026
+
+Détachement progressif puis retour d’un sous-ensemble des points. Teintes animées
+discrètement, adaptées au thème. Bouton jour/nuit avec choix mémorisé ; sans choix,
+préférence système suivie. Mouvement réduit respecté. Deux thèmes et persistance
+vérifiés dans le navigateur, sans débordement à 319/1440 px. Trois tests interface
+réussis ; deux avertissements existants. Les limites vocales précédentes restent ouvertes.
+
+
+### Halo et profondeur — 12 novembre 2026
+
+Halo diffus réactif, relief des points renforcé et mouvements distincts : repos
+(respiration), écoute (ondes), réflexion (spirale), réponse (expansion). Transitions
+fluides, thèmes et mouvement réduit conservés. Validation jour/nuit et conversation
+réelle : réflexion, synthèse et retour au repos observés, aucun message d’erreur
+console, aucun débordement à 319 px. Validation technique : syntaxe JS et diff.
+Les limites de dictée/micro et d’accès PCM restent inchangées.
+
+
+### Nuage libre et vocabulaire 3D — 12 novembre 2026
+
+Les points alternent entre promenade libre, objets tournants au repos et rassemblement
+pendant la synthèse. Six modèles en volume, noms/traductions fixes, sélection du
+prochain objet et prononciation. Six langues hors ligne avec sélection sauvegardée
+dans le profil ; langue inconnue signalée. Brillance renforcée après retour utilisateur.
+La première ébauche plate a été remplacée par des géométries volumétriques.
+
+Validation ciblée : quatre tests Node (dont non-planarité) et trois tests Python interface
+réussis ; deux avertissements existants. Contrôles navigateur des traductions/profil,
+prononciation, modèles et nuage brillant ; jour/nuit et 319/1440 px. Micro réel et
+analyse PCM restent hors validation. Aucun crédit automatique de vocabulaire.
+
+
+### Profil et évaluation — 12 novembre 2026
+
+Bouton « Mon profil et mon niveau » : profil éditable, démarrage/reprise du test
+adaptatif d’anglais, questions fermées/ouvertes, feedback et bilan enregistré.
+Garde de langue explicite, recommencement volontaire, relecture du serveur en cas
+d’accusé de réponse perdu. Contrôles du chat rétablis à la fermeture.
+
+Validation : 263 tests Python et 4 tests Node, 2 avertissements existants. Écrans
+profil/première question vérifiés en navigateur à 319/1100 px. La suite du jalon
+est le plan d’apprentissage puis les exercices/corrections visuels.
+
+## Prochaines étapes proposées
+
+1. Valider le micro, la dictée et les autorisations sur le navigateur de l’utilisateur.
+2. Ajouter le choix de langue, de voix et de vitesse de lecture, avec prononciation adaptée.
+3. Mode immersif : sphère centrale et transcription compacte.
+4. Intégrer le plan d’apprentissage puis les exercices/corrections ; profil et évaluation sont disponibles.
+5. Étudier la conversation vocale continue, les interruptions et un moteur vocal plus naturel.
+6. Authentification avant ouverture publique ; coordination avant plusieurs workers.
+
+## Validation antérieure
+
 # État actuel — 21 octobre 2026
 
 **Version backend : 0.7.2 — validation IA stricte et exercices liés aux notions.**

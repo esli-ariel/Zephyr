@@ -1,6 +1,6 @@
 # Points ouverts — Zéphyr
 
-Mise à jour : 21 octobre 2026 — backend V0.7.2.
+Mise à jour : 12 novembre 2026 — backend V0.7.2 et aperçu interface V0.8.
 
 Les points ouverts ci-dessous comprennent des défauts, limites techniques et
 travaux restants. « Résolu » concerne le périmètre indiqué, sans préjuger d’une
@@ -60,3 +60,67 @@ Les décisions associées sont consignées dans ADR-005 et ADR-007 à ADR-012
 Validation dédiée : `backend/tests/test_llm_validation.py` et
 `backend/tests/test_exercise_targets.py`. Les anciennes sauvegardes d’exercices
 sans lien restent compatibles.
+
+## Interface — 12 novembre 2026
+
+| ID | Point | État / prochaine action |
+|---|---|---|
+| B008 | Compatibilité de la dictée et autorisations micro | Ouvert : tester avec l’utilisateur ; repli texte intégré |
+| B009 | Animation de sortie sans analyse du son synthétisé | Limite connue : enveloppe et événements de lecture ; accès audio nécessaire pour synchronisation exacte |
+| B010 | Écrans pédagogiques absents de l’interface | Ouvert : profil, évaluation, plan, exercices, correction |
+| B011 | Reconnaissance et synthèse fixées en français | Ouvert : choix de langue et voix selon la langue pratiquée |
+
+Débordement horizontal à 319 px corrigé ; document et viewport de largeur identique
+après correction. Test visuel ordinateur à 1440 × 960. Chat réel OpenRouter réussi.
+La synthèse a déclenché l’état de parole ; la qualité sonore et la dictée réelle
+restent à tester avec l’utilisateur. 261 tests réussis, 2 avertissements existants.
+
+## Ajustement visuel — 12 novembre 2026
+
+- Textes d’introduction/légendes persistants près de la sphère : masqués dès la conversation, y compris après restauration.
+- Animation peu marquée : amplitude, ondulations, rotation et dimension renforcées.
+- Interaction ajoutée par pointeur, clic/toucher et clavier ; messages d’erreur déplacés dans la conversation pour rester visibles.
+- Aucun débordement observé à 319 ou 1440 px ; aucune erreur console observée.
+- B008/B009/B011 restent ouverts : cette modification n’ajoute ni validation réelle du micro ni analyse PCM de la voix synthétisée.
+
+## Particules et thèmes — 12 novembre 2026
+
+- Modes clair/sombre ajoutés avec contraste des particules adapté au fond.
+- Sélecteur visible sur petit écran (icône à 319 px) et sur ordinateur (icône et texte).
+- Choix mémorisé après rechargement ; repli en session si le stockage est indisponible.
+- Mouvement réduit respecté : les détachements et dérives automatiques sont suspendus.
+- Les limites micro/dictée et animation de synthèse (B008/B009/B011) restent inchangées.
+
+## Halo et relief — 12 novembre 2026
+
+Halo et profondeur renforcés sans ajouter de particules ni appliquer un filtre de
+flou à chaque point. Transitions entre réflexion et synthèse contrôlées avec un
+échange réel ; aucun message d’erreur console observé. Les limites B008/B009/B011
+restent ouvertes : écoute réelle non validée dans cet ajustement, synthèse animée
+sans mesure PCM, reconnaissance et lecture toujours en français.
+
+## Nuage libre et objets 3D — 12 novembre 2026
+
+| ID | Point | État |
+|---|---|---|
+| B012 | Couverture des traductions d’objets | Six objets et six langues hors ligne ; langues inconnues signalées. Élargissement restant. |
+| B013 | Objets plats et points ternes dans l’ébauche | Corrigé : surfaces en volume, rotation Y/X, lumière/opacité et accents renforcés. |
+
+Le sélecteur « Mots en images » sauvegarde la langue cible du profil. Un échec
+d’enregistrement reste signalé comme aperçu local. La prononciation des mots
+utilise la langue sélectionnée ; B011 reste ouvert pour la dictée et la lecture
+des réponses du chat encore en français. B008/B009 restent ouverts pour le micro
+réel et l’absence d’analyse PCM de la voix synthétisée.
+
+L’objet est un support visuel de vocabulaire et ne crédite pas automatiquement la
+maîtrise. La suite backend de référence reste de 261 tests ; validation ciblée de
+cette évolution : 3 tests Python interface et 4 tests Node réussis.
+
+## Profil et évaluation dans l’interface — 12 novembre 2026
+
+- B010 partiellement traité : profil et évaluation disponibles ; plan, exercices et correction visuels restent à intégrer.
+- B014 : banque d’évaluation en anglais uniquement. L’interface bloque le démarrage et la poursuite pour un profil d’une autre langue ; étendre la banque reste à faire.
+- En cas de réponse réseau perdue, la question serveur est relue avant de permettre une nouvelle soumission. Si cette lecture échoue, la reprise est requise.
+- Le niveau déclaré vide ne supprime pas un niveau existant : limite du contrat API, signalée dans l’interface.
+- Tests locaux : 263 Python et 4 Node réussis. Les deux avertissements de dépendances restent ouverts (B005).
+- Authentification, plusieurs workers, micro réel et analyse PCM restent hors périmètre de cette étape.

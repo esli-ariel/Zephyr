@@ -23,7 +23,7 @@ pour les conversations, la génération et les corrections ouvertes.
 Si une variable `DEBUG` existe déjà dans le terminal, elle doit contenir un
 booléen (`true` ou `false`) : les variables du terminal priment sur `.env`.
 
-API : `http://127.0.0.1:8000` ; documentation interactive :
+Interface locale : `http://127.0.0.1:8000/ui/` ; API : `http://127.0.0.1:8000` ; documentation interactive :
 `http://127.0.0.1:8000/docs`.
 
 ## Tests
@@ -197,12 +197,85 @@ nécessite la V0.7.1 ou une version ultérieure.
 Le prototype gère plusieurs apprenants dans **un seul processus API**
 (`--workers 1`, valeur par défaut). Ses sessions et verrous restent en mémoire :
 plusieurs processus pourraient écraser leurs sauvegardes respectives pour un même
-apprenant. Il ne dispose pas encore d’authentification ni d’interface web.
+apprenant. Il ne dispose pas encore d’authentification. Une première interface de conversation est disponible sur `/ui/`.
 Les corrections enrichissent les difficultés du profil et la maîtrise des notions
 explicitement liées. La qualité pédagogique du contenu généré n’a pas été validée
 par des appels réels pendant les tests de cette version.
 
-La vision reste une application avec interface Next.js, voix, caméra et avatar.
-Ces composants ne sont pas encore présents dans le dépôt.
+La première interface est en HTML/CSS/JavaScript, sans dépendance de compilation. Elle propose une sphère de points, le chat, la dictée lorsque le navigateur la prend en charge et la synthèse vocale. Next.js, caméra et avatar ne sont pas implémentés. Voir `frontend/README.md` pour les détails et limites.
 
 Voir [l’état du projet](docs/PROGRESSION.md) et les [points ouverts](docs/BUGS.md).
+
+## Interface conversationnelle — aperçu V0.8 (12 novembre 2026)
+
+Ouvrir `/ui/` sur le même port que FastAPI. Lors de la validation locale du 12 novembre,
+le port 8000 était occupé : lancement avec `python -m uvicorn app.main:app --host 127.0.0.1 --port 8001`,
+puis `http://127.0.0.1:8001/ui/`. Le backend garde sa version 0.7.2.
+
+- Création/restauration de l’apprenant et reprise des messages, identifiant conservé dans le navigateur.
+- Sphère de 2 100 points : volume réel du microphone à l’écoute, animation pendant la lecture vocale.
+- Micro activé par clic, arrêt à la fin d’une dictée ou manuellement, libération des pistes audio.
+- Saisie texte et suggestions, lecture des réponses, coupure et arrêt de la voix.
+- Reconnaissance `fr-FR`, dépendante du navigateur et éventuellement de son service distant.
+- La voix de synthèse utilise le navigateur, pas un fournisseur vocal temps réel. Son animation
+  utilise les événements de lecture et une enveloppe visuelle, pas une analyse de son PCM.
+- Aucun écran d’évaluation, de plan ou de correction n’est encore intégré à cette interface.
+
+Validation : 261 tests réussis (2 avertissements), JavaScript vérifié par `node --check`,
+chat réel OpenRouter depuis l’interface, état de lecture vocale observé, reprise après rechargement
+et affichage mobile/ordinateur contrôlés. Microphone réel et dictée à valider avec l’utilisateur.
+
+Pendant une conversation, les textes près de la sphère disparaissent et les points
+bougent davantage. Ils réagissent au pointeur et pulsent au clic/toucher ou avec
+Entrée/Espace sur la sphère. Les messages utiles restent dans le panneau de discussion.
+Le mode épuré s’applique aussi à la reprise d’un historique.
+
+Les points peuvent désormais se détacher de la surface puis la rejoindre. Leurs
+nuances évoluent lentement. Le bouton soleil/lune en haut à droite sélectionne
+le mode jour ou nuit ; le choix est mémorisé dans le navigateur. Sans choix explicite,
+le thème suit la préférence système. Le mouvement réduit suspend le détachement.
+
+La sphère bénéficie aussi d’un halo diffus, de points de tailles et luminosités
+différentes selon leur profondeur et de mouvements propres aux états : respiration
+au repos, ondulations à l’écoute, torsion en spirale en réflexion, expansion à la parole.
+
+## Nuage libre et objets 3D — 12 novembre 2026
+
+Les points se promènent librement, se rassemblent pendant la synthèse vocale
+et alternent au repos avec six objets en volume tournant lentement : maison, arbre,
+tasse, livre, poisson et cœur. Le nom français et la traduction restent fixes sous
+l’objet ; les points conservent leur éclat, leur halo et leur interaction au pointeur.
+
+Dans « Mots en images », choisir la langue enregistre `target_language` dans le
+profil. La sélection suit également le profil restauré ou actualisé après un chat.
+Traductions hors ligne en anglais, espagnol, allemand, italien, portugais et français.
+Une langue non prise en charge est signalée, sans traduction inventée. « Autre objet »
+force la formation suivante ; « Écouter » prononce le mot dans sa langue. Ces cartes
+ne marquent pas automatiquement le vocabulaire comme appris.
+
+Validation ciblée : 4 tests Node et 3 tests d’intégration interface réussis (2 avertissements
+Python existants). Affichage et profil persisté contrôlés en navigateur, modes jour/nuit
+et mobile 319 px. Aucune publication ni push.
+
+## Profil et évaluation accessibles depuis l’interface
+
+Le bouton **Mon profil et mon niveau** ouvre le parcours pédagogique :
+
+- **Mon profil** : prénom, langue étudiée, niveau déclaré A1–C2 et ajout d’objectifs.
+- **Mon niveau** : démarrer/reprendre une évaluation adaptative d’anglais, répondre
+  aux QCM ou aux questions ouvertes, consulter la correction et le bilan final.
+- Le bilan donne le score global, le niveau estimé, les compétences, forces et
+  points à travailler ; il est enregistré dans le profil sans duplication.
+- Une session peut être reprise après fermeture ou rechargement. Recommencer
+  demande une action explicite et conserve les bilans déjà enregistrés.
+
+La banque actuelle est **uniquement en anglais**. L’interface refuse de l’utiliser
+pour une autre langue cible ; elle ne change pas automatiquement la langue du profil.
+Les questions ouvertes et le bilan qui les reprend nécessitent OpenRouter. Le résultat
+est une estimation pédagogique. Le niveau déclaré peut être modifié, mais le champ
+vide ne supprime pas un niveau déjà enregistré.
+
+Validation locale : **263 tests Python et 4 tests Node réussis**, deux avertissements
+Python existants. CI enrichie avec la syntaxe et les tests frontend. Les écrans
+profil/évaluation ont été vérifiés à 319 et 1100 px. Les écrans de plan d’apprentissage,
+d’exercices et de correction constituent la suite du jalon V0.8.

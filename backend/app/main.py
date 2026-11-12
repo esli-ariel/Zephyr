@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
 from uuid import UUID
@@ -7,6 +8,7 @@ import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from starlette.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.agent.zephyr import ZephyrAgent
@@ -782,3 +784,10 @@ async def answer_grammar(agent: Agent, request: GrammarAnswerRequest):
         raise HTTPException(status_code=404, detail="Règle introuvable.")
     agent.learning_engine.register_grammar_answer(request.rule, request.correct)
     return item.to_dict()
+
+
+# Same-origin local interface; / and the existing API contract remain available.
+app.mount("/ui", StaticFiles(
+    directory=Path(__file__).resolve().parents[2] / "frontend",
+    html=True,
+), name="interface")

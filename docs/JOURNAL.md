@@ -1,4 +1,89 @@
 # 📓 Journal de développement — Zéphyr
+## 12/11/2026 — Prochain jalon : profil et évaluation, préparation du push
+
+- Demande : reporter les prochains ajustements visuels, poursuivre les fonctionnalités et pousser le travail sur GitHub.
+- Ajout du bouton « Mon profil et mon niveau » et d’un dialogue natif avec deux sections.
+- Profil : prénom, langue, niveau déclaré et ajout d’objectifs ; synchronisation avec le vocabulaire visuel.
+- Évaluation : anglais explicitement indiqué, démarrage/reprise, QCM/texte libre, correction et progression adaptative, bilan enregistré, recommencement explicite.
+- Réponse réseau incertaine : relecture du serveur avant de proposer une nouvelle soumission.
+- Chat/micro suspendus pendant le dialogue, contrôles rétablis à sa fermeture.
+- Tests : 263 Python réussis, 4 Node réussis, 2 avertissements de dépendances existants ; syntaxe JS et diff valides.
+- Deux tests d’intégration supplémentaires : profil/reprise et bilan unique/recommencement sans perte d’historique.
+- Navigateur : profil, entrée du test, première question, mobile 319 px, retour aux contrôles du chat. Aucun faux score ajouté au profil de l’utilisateur.
+- CI complétée avec un job Node 22, vérification de syntaxe et tests frontend.
+- Dépôt distant récupéré : aucun écart avec origin/main avant préparation du commit. Livraison sur main demandée ; résultat du push rapporté dans le chat. Aucune publication web.
+- Suite fonctionnelle : affichage du plan, exécution d’exercices et correction.
+
+
+## 12/11/2026 — Nuage libre, objets 3D tournants et vocabulaire visuel
+
+- Nouvelle demande : les points ne sont plus contraints à une sphère ; promenade libre, rassemblement pendant la synthèse et objets au repos.
+- Six objets : maison, arbre, tasse, livre, poisson et cœur ; nom français, traduction et prononciation cible.
+- Six langues hors ligne ; choix relié au profil, restauré et actualisé après le chat. Langues non prises en charge signalées.
+- Cycle de repos de 20 s, transitions progressives, bouton « Autre objet » et lecture seulement quand le mot est affiché.
+- Retour utilisateur : la première ébauche en silhouettes était plate et les points trop ternes. Remplacement par des surfaces 3D volumétriques, rotation lente et légendes fixes.
+- Brillance rétablie : opacité/luminosité renforcées, cœurs clairs et composition additive nocturne. Contraste adapté au jour.
+- Tests : quatre tests Node réussis, dont volume non planaire des six modèles ; trois tests d’intégration interface réussis, deux avertissements existants ; syntaxe JS/diff vérifiés.
+- Navigateur : arbre traduit en espagnol, sauvegarde/restauration de la langue, retour au profil anglais, prononciation et rassemblement, tasse/maison en volume, nuage brillant. Mobile 319 px et jour/nuit sans débordement, aucune erreur console observée.
+- Pas de nouvel appel OpenRouter pour cette évolution ; la prononciation utilise le navigateur. Pas de test micro réel, de push ou de publication.
+- L’affichage des objets n’attribue aucun progrès ni maîtrise automatiquement.
+
+
+## 12/11/2026 — Halo, relief et mouvements selon l’état
+
+- Halo diffus à deux dégradés, intensité liée aux états et à la parole ; palette claire atténuée.
+- Profondeur renforcée par perspective, tri des points, tailles et opacités différenciées, accents lumineux limités.
+- Repos : respiration lente. Écoute : ondes selon le volume. Réflexion : torsion en spirale et rotation plus rapide. Réponse : expansion et ondes.
+- Transitions de forme, halo et teintes interpolées. Détachement et interaction existants conservés.
+- Validation visuelle jour/nuit ; requête réelle « Présente-toi en trois courtes phrases, en français. » : réflexion, synthèse et retour au repos observés.
+- Aucun message d’erreur console observé ; document/viewport égaux à 319 px.
+- `node --check frontend/app.js` et `git diff --check` validés. Pas de nouvelle exécution de pytest pour ce changement de rendu seul ; référence antérieure : 261 tests réussis.
+- Micro réel non testé ; animation de synthèse toujours sans analyse PCM. Aucun push/publication.
+
+
+## 12/11/2026 — Particules détachables et modes jour/nuit
+
+- Points détachables sur cycles décalés : éloignement puis retour fluide à la sphère.
+- Amplitude liée à l’activité, à la voix et aux pulsations ; interaction pointeur conservée.
+- Variation lente et discrète des teintes, adaptée au fond sombre ou clair.
+- Sélecteur soleil/lune dans l’en-tête ; choix mémorisé, sinon suivi de la préférence système.
+- Palette claire pour le fond, le chat, les contrôles et les particules ; transitions douces.
+- Mouvement réduit : détachement/rotation/dérive de teinte suspendus.
+- Vérification navigateur : deux thèmes observés, persistance après rechargement, 319/1440 px sans débordement ; aucune erreur console observée.
+- Trois tests interface réussis, deux avertissements connus ; `node --check` et `git diff --check` valides.
+- Fichiers de suivi complétés ; aucun push/publication ni nouvel appel IA.
+
+
+
+## 12/11/2026 — Conversation épurée et particules interactives
+
+- Demande : retirer les textes près de la sphère au début de la conversation et intensifier/interagir avec les points.
+- Activation au premier message ajouté, à l’écoute effective, au début de la synthèse et à la restauration des messages.
+- Introduction, légendes, phrases décoratives et aide visuelle micro masquées dans la zone de la sphère. Le bouton micro reste disponible et nommé.
+- Notifications et erreurs conservées dans la conversation ; états de lecture/écoute accessibles sans texte visuel près de la sphère.
+- Champ de points plus grand, rotation et déformations fluides renforcées pendant la conversation et la parole.
+- Interaction pointeur (répulsion), clic/toucher (onde), clavier Entrée/Espace (pulsation) ; respect du mouvement réduit.
+- Vérification navigateur : historique restauré avec introduction masquée, pulsation clavier, glissement du pointeur et déformation visibles, aucun débordement à 319/1440 px, aucune erreur console observée.
+- `node --check frontend/app.js`, `git diff --check` et trois tests d’intégration interface réussis ; deux avertissements existants.
+- Pas de nouvel appel IA ni de capture micro réelle dans cette validation.
+
+## 12/11/2026 — Première interface conversationnelle locale
+
+- Interface sombre inspirée d’un assistant futuriste, avec sphère de 2 100 points cyan.
+- Veille, écoute, réflexion et parole ; analyse RMS du micro et enveloppe visuelle de synthèse.
+- Conversation connectée à `/api/chat`, identifiant apprenant stocké localement, mémoire restaurée.
+- Dictée `fr-FR` si disponible ; texte en repli, erreurs explicites, arrêt du micro et de la voix.
+- Bouton d’essai vocal indépendant du fournisseur IA ; affichage mobile et ordinateur.
+- Montage FastAPI `/ui/`, conservation de `/`, `/health`, `/docs` et des contrats API.
+- Trois tests d’intégration : interface/assets, contrat API/identifiant, absence d’exposition backend.
+- Validation : 261 tests réussis, deux avertissements existants, `node --check` réussi.
+- Navigateur : conversation réelle OpenRouter réussie et état de synthèse observé ; aucune erreur console.
+- Contrôle à 319 px (débordement corrigé) et 1440 × 960 ; reprise après rechargement.
+- Le micro réel, la dictée et le son perçu restent à valider avec l’utilisateur.
+- Serveur local port 8001, car 8000 occupé ; aucune publication ni opération Git distante.
+- Suivi : README, PROGRESSION, BUGS, DECISIONS, CHANGELOG et documentation frontend.
+- Suite proposée : langues/voix, mode immersif, écrans pédagogiques, conversation vocale continue.
+
 
 ## 04/09/2026
 
