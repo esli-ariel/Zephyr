@@ -104,7 +104,7 @@ du navigateur et peut utiliser son service distant ; elle n’est pas garantie h
 Le mode s’arrête au second clic, sur erreur de permission/service, à l’ouverture
 du profil/compte, à la déconnexion ou quand l’onglet est masqué. Il ne reprend pas
 automatiquement au rechargement. La saisie texte reste disponible. La dictée est
-encore configurée en français ; la prononciation des mots visuels utilise leur langue.
+en français par défaut et configurable indépendamment de la lecture dans **Réglages vocaux** ; la prononciation des mots visuels utilise leur langue. Le mode relecture attend votre envoi. Voir [VOICE.md](VOICE.md).
 
 ## Validation
 

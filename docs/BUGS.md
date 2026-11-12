@@ -68,7 +68,7 @@ sans lien restent compatibles.
 | B008 | Compatibilité de la dictée et autorisations micro | Ouvert : tester avec l’utilisateur ; repli texte intégré |
 | B009 | Animation de sortie sans analyse du son synthétisé | Limite connue : enveloppe et événements de lecture ; accès audio nécessaire pour synchronisation exacte |
 | B010 | Écrans pédagogiques absents de l’interface | Ouvert : profil, évaluation, plan, exercices, correction |
-| B011 | Reconnaissance et synthèse fixées en français | Ouvert : choix de langue et voix selon la langue pratiquée |
+| B011 | Reconnaissance et synthèse fixées en français | Traité : langues séparées, option profil, choix de voix ; validation acoustique réelle restante |
 
 Débordement horizontal à 319 px corrigé ; document et viewport de largeur identique
 après correction. Test visuel ordinateur à 1440 × 960. Chat réel OpenRouter réussi.
@@ -140,3 +140,7 @@ cette évolution : 3 tests Python interface et 4 tests Node réussis.
 - Message de validation et guide de compte synchronisés ; test de limite 7/8 et connexion ajoutés.
 - Champs de mot de passe vidés à la fermeture même après affichage en clair.
 - Nouvelle interface mobile/ordinateur contrôlée sans débordement horizontal.
+
+## Réglages vocaux — 12 novembre 2026
+
+B011 traité : langues de dictée/lecture configurables et choix de voix. Les mentions françaises précédentes décrivent les versions antérieures. Arrêt prématuré et duplication des résultats couverts par les nouveaux tests. B008/B016 restent ouverts : autorisation micro et essai parlé réels nécessaires. B009 (absence de PCM synthèse), B005 et B007 inchangés. 23 tests Node et 3 Python interface réussis ; exemple natif/persistance vérifiés.

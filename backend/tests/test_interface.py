@@ -8,7 +8,7 @@ def test_public_interface_and_assets():
         page = client.get('/ui/')
         assert page.status_code == 200
         assert '<html lang="fr">' in page.text
-        for asset, media in [('app.js', 'javascript'), ('visual-vocabulary.js', 'javascript'), ('style.css', 'text/css'), ('learning-ui.js', 'javascript'), ('learning-ui.css', 'text/css'), ('account-ui.js', 'javascript'), ('voice-loop.js', 'javascript'), ('account-ui.css', 'text/css')]:
+        for asset, media in [('app.js', 'javascript'), ('visual-vocabulary.js', 'javascript'), ('style.css', 'text/css'), ('learning-ui.js', 'javascript'), ('learning-ui.css', 'text/css'), ('account-ui.js', 'javascript'), ('voice-loop.js', 'javascript'), ('account-ui.css', 'text/css'), ('voice-tools.js', 'javascript'), ('voice-engine.js', 'javascript'), ('voice-settings.js', 'javascript'), ('voice-settings.css', 'text/css')]:
             response = client.get('/ui/' + asset)
             assert response.status_code == 200
             assert media in response.headers['content-type']

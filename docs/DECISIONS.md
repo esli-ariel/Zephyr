@@ -330,3 +330,8 @@ et le formulaire, avec test de refus à sept et d’acceptation/connexion à hui
 Le dialogue possède des onglets, des champs d’affichage/masquage et un panneau
 visuel sur ordinateur. Les champs secrets sont vidés à la fermeture quel que
 soit leur type courant ; aucun mot de passe ni jeton n’est enregistré dans localStorage.
+
+
+## ADR-017 — Configuration vocale et finalisation de la transcription
+
+Conserver les API natives dans un moteur injecté et testable. Séparer langue de dictée et langue de lecture ; ne pas présenter le changement de voix comme une traduction. Filtrer les voix réellement installées et mémoriser uniquement les préférences. Remplacer l’agrégation de fragments par un instantané final/provisoire des résultats. À l’arrêt, demander la finalisation avant de libérer ; en cas d’erreur ou de mots incertains, conserver un brouillon à valider. Le vocal continu attend la fin de la synthèse et la validation éventuelle. Annulations, permissions tardives et lecture bloquée ont des gardes explicites. Diagnostic de volume uniquement, aucun sélecteur d’entrée prétendant piloter SpeechRecognition. Limites et vérifications réelles documentées dans VOICE.md.

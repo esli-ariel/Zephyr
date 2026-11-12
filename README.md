@@ -291,3 +291,11 @@ La récupération par e-mail et les écrans plan/exercices restent à réaliser.
 L’écran de compte propose maintenant une présentation en deux panneaux sur
 ordinateur, un formulaire compact sur mobile et des onglets Connexion/Inscription.
 Le bouton en forme d’œil affiche ou masque chaque champ de mot de passe.
+
+### Réglages vocaux et transcription
+
+Ouvrir **Réglages vocaux ⚙** près du micro pour choisir séparément langues de dictée et de lecture, voix disponible, vitesse, volume, tonalité et pause. Défaut : français, voix recommandée, 0,95× et 1,6 s. L’exemple vocal et le diagnostic de niveau sont accessibles avant connexion.
+
+Les mots provisoires restent distincts ; arrêt manuel attend la finalisation. Désactiver l’envoi automatique pour relire et modifier avant l’envoi. Le vocal continu attend cette validation. Les préférences sont mémorisées localement ; aucun microphone ne démarre au chargement. Le changement de langue de lecture ne traduit pas le texte.
+
+Validation de ce changement : **23 tests Node et 3 Python interface réussis**, deux avertissements connus ; baseline complète précédente 274 Python. Exemple natif et persistance vérifiés, dictée parlée et boucle réelle encore à essayer après autorisation du micro. [Configuration et limites](docs/VOICE.md).

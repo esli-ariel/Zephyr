@@ -1,5 +1,13 @@
 # 📋 Changelog — Zéphyr
 
+## Réglages vocaux et transcription — 12/11/2026
+
+- Langues de dictée/lecture indépendantes, voix disponibles, débit, tonalité, volume et pause configurables ; préférences locales.
+- Résultats provisoires distincts, arrêt attend la finalisation, brouillon conservé et relecture avant envoi optionnelle.
+- Capture libérée après usage, gardes sur événements/permissions tardifs ; synthèse découpée et arrêt si bloquée.
+- Exemple avec arrêt et diagnostic de niveau sans transcription ni envoi audio à Zephyr.
+- 23 tests Node et 3 Python interface réussis (2 avertissements connus), exemple/persistance/mobile contrôlés ; parole réelle restante. Guide `docs/VOICE.md`.
+
 Toutes les modifications importantes du projet sont enregistrées ici.
 
 ### Ajustement de l’interface — conversation immersive

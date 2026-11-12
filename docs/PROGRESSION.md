@@ -10,9 +10,9 @@
 | Interface `/ui/` | Conversation, historique restauré, suggestions et saisie texte |
 | Visualisation | Nuage libre de 2 100 points, six objets 3D tournants et rassemblement pendant la parole |
 | Microphone | Analyse du volume par Web Audio ; validation avec une voix réelle restante |
-| Dictée | Web Speech `fr-FR` si disponible ; validation réelle restante |
-| Lecture vocale | Synthèse du navigateur ; activation observée dans l’interface |
-| Tests actuels | 274 Python et 7 Node réussis ; 2 avertissements Python ; appels IA simulés dans pytest |
+| Dictée | Langue configurable, mots provisoires et relecture ; validation avec parole réelle restante |
+| Lecture vocale | Langue, voix, débit, tonalité et volume réglables ; exemple déclenché |
+| Tests actuels | 23 Node et 3 Python interface réussis pour le vocal ; baseline complète précédente : 274 Python ; 2 avertissements |
 | Validation manuelle | Chat OpenRouter réel, lecture vocale déclenchée, reprise des messages et responsive |
 | Comptes et droits | Inscription/connexion/déconnexion, cookies, sessions révocables et propriété des profils |
 | Vocal continu | Contrôleur et bouton ajoutés ; boucle réelle à essayer après inscription |
@@ -867,3 +867,7 @@ Exemple :
 
 available_minutes = 30
 
+
+### Réglages vocaux et transcription — 12 novembre 2026
+
+Dialogue de configuration, exemple natif, diagnostic de niveau, préférences persistantes et réinitialisation. Finalisation de dictée sans coupure immédiate, résultats provisoires distincts, relecture optionnelle et brouillon préservé. B011 traité ; B008/B016 nécessitent encore une voix réelle et l’autorisation micro. Guide : [VOICE.md](VOICE.md). Validation actuelle : 23 Node et 3 Python interface ; baseline complète précédente 274 Python.

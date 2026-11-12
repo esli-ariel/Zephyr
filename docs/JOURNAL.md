@@ -1,5 +1,15 @@
 # 📓 Journal de développement — Zéphyr
 
+## 12/11/2026 — Réglages vocaux et transcription
+
+- Langues indépendantes, voix réellement disponibles, vitesse/volume/tonalité, pause et validation manuelle optionnelle ; réglages conservés localement.
+- Transcription finale/provisoire reconstruite sans doublons ; arrêt manuel attend la finalisation, brouillon et texte en erreur conservés pour relecture.
+- Moteur isolé : pistes libérées, permissions/événements tardifs neutralisés, longues lectures découpées et garde-fou de synthèse.
+- Exemple/arrêt et diagnostic de niveau sans envoi d’audio à Zephyr. Paramètres du navigateur pour choisir le microphone.
+- 23 tests Node et 3 Python interface réussis, syntaxe/diff valides, 2 avertissements connus. Suite complète Python précédente : 274, non relancée ici.
+- Navigateur : synthèse native et persistance observées, valeurs françaises par défaut restaurées, mobile 319 px sans débordement. Diagnostic arrêté car autorisation micro en attente ; dictée et boucle acoustique restent à valider par l’utilisateur.
+- Guide VOICE, suivi, CI et documentation actualisés ; livraison Git dans la continuité des demandes de push.
+
 ## 12/11/2026 — Mot de passe huit caractères et nouvelle interface de compte
 
 - Demande explicite : accepter un mot de passe de huit caractères et soigner connexion/inscription.

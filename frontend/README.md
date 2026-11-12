@@ -14,9 +14,9 @@ sans mot de passe ni jeton d’authentification dans localStorage.
 ## Interaction vocale
 
 - Clic micro : autorisation, analyse du volume réel et dictée si disponible.
-- Fin de dictée ou second clic : envoi du texte ; microphone libéré.
-- Sans reconnaissance : visualisation du micro disponible, envoi par clavier.
-- Lecture des réponses : voix native française, coupure et arrêt accessibles.
+- Fin de dictée ou second clic : finalisation, puis envoi confirmé ou relecture selon le réglage ; microphone libéré.
+- Sans reconnaissance : saisie clavier et diagnostic du micro dans les réglages.
+- Lecture native : langue, voix, vitesse, tonalité et volume configurables ; arrêt accessible.
 - Le bouton « Essayer la voix » ne consomme pas d’appel OpenRouter.
 - La dictée peut envoyer l’audio au service du navigateur ; pas de garantie hors ligne.
 - La synthèse ne fournit pas de PCM : les points suivent une enveloppe animée et
@@ -32,7 +32,7 @@ de dictée ou de capture avec une voix réelle ; qualité sonore à valider avec
 
 ## Améliorations proposées
 
-1. Langue de conversation, choix de voix et vitesse de lecture.
+1. Réglages vocaux réalisés : langues, choix de voix et vitesse ; guide [VOICE.md](../docs/VOICE.md).
 2. Mode immersif centré sur la sphère, transcription discrète.
 3. Choix de couleur et densité des particules, intensité réduite.
 4. Fiches profil, progression, évaluation, plan et exercices à côté du chat.
@@ -181,3 +181,9 @@ sont vidés à la fermeture même après affichage. L’adresse e-mail est conse
 en mémoire pendant un changement d’onglet, sans stockage local.
 Rendu vérifié à 319/1200 px et minimum=8 observé dans le DOM. Tests de limite et
 connexion à huit caractères dans `backend/tests/test_auth.py`.
+
+## Réglages vocaux et transcription
+
+Bouton **Réglages vocaux ⚙** près du micro : langues séparées (ou langue du profil), voix disponibles, vitesse/volume/tonalité, pause de fin, envoi automatique ou relecture, exemple avec arrêt et diagnostic de niveau. Valeurs par défaut : français, voix recommandée, 0,95×, pause 1,6 s. Préférences seules dans `zephyr.voicePreferences`.
+
+`voice-tools.js` normalise les réglages/résultats ; `voice-engine.js` gère capture, finalisation et synthèse ; `voice-settings.js` fournit le dialogue. Mots provisoires distincts, brouillon préservé et erreur jamais envoyée automatiquement. CI : syntaxe et 23 tests Node. Trois tests Python interface réussis, baseline Python complète précédente 274. Exemple natif et persistance contrôlés ; parole réelle/permissions et boucle complète encore à valider. [Guide et limites](../docs/VOICE.md).
