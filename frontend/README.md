@@ -7,8 +7,9 @@ Depuis `backend/` avec le venv activé :
 python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
 ```
 
-Ouvrir http://127.0.0.1:8001/ui/. L’identifiant apprenant est conservé dans localStorage
-et les échanges sont restaurés depuis SQLite via l’API. Aucun secret dans le frontend.
+Ouvrir http://127.0.0.1:8001/ui/. Le profil principal est fourni par la session du compte ; les échanges sont
+restaurés depuis SQLite via l’API. Le jeton de session reste dans un cookie HttpOnly,
+sans mot de passe ni jeton d’authentification dans localStorage.
 
 ## Interaction vocale
 
@@ -148,3 +149,25 @@ chat, ainsi que le mobile 319 px. Aucune réponse de test n’a été inscrite d
 l’évaluation de l’utilisateur pendant la vérification UI.
 
 Reste à intégrer : plan, exercices et corrections dans le parcours visuel.
+
+## Comptes et vocal continu — 0.8.0-alpha.1
+
+`account-ui.js` fournit inscription, connexion et déconnexion. Le bootstrap utilise
+`/api/auth/session` et ignore l’ancien identifiant local en mode authentifié. Les
+requêtes gardent les cookies de même origine et transmettent `X-Zephyr-Request: 1`.
+Une expiration de session suspend le vocal, efface la conversation visible et recharge
+l’écran de connexion. Déconnexion et nouvelle connexion rechargent l’application
+pour ne pas conserver l’état personnel d’un autre compte. Aucun compte personnel
+n’a été créé pendant la validation des formulaires.
+
+`voice-loop.js` est un contrôleur à activation explicite, sans préférence persistée.
+L’écoute reprend après un tour terminé seulement si le compte est connecté, le
+chat libre, le micro arrêté, le document visible et aucune synthèse en attente.
+La lecture, le chargement et les erreurs ne provoquent pas de boucle de capture
+concurrente. Le micro est libéré à chaque fin de capture ; les permissions refusées
+ou erreurs de service désactivent le mode. Une absence de parole permet une nouvelle
+écoute. Profil, compte, déconnexion, arrière-plan et départ arrêtent la boucle.
+
+Tests : 7 Node (dont 3 sur activation/arrêt/blocage de la boucle) et 273 Python.
+La boucle microphone/réponse réelle reste à essayer après inscription et autorisation.
+Voir `docs/ACCOUNTS.md` pour la sécurité et la récupération des anciens profils.

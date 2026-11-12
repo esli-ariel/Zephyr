@@ -1,6 +1,6 @@
 # Points ouverts — Zéphyr
 
-Mise à jour : 12 novembre 2026 — backend V0.7.2 et aperçu interface V0.8.
+Mise à jour : 12 novembre 2026 — backend 0.8.0-alpha.1.
 
 Les points ouverts ci-dessous comprennent des défauts, limites techniques et
 travaux restants. « Résolu » concerne le périmètre indiqué, sans préjuger d’une
@@ -13,7 +13,7 @@ validation en production.
 | B003 | Exercice sans lien explicite vers un mot ou une règle | Résolu en V0.7.2 : lien serveur facultatif et maîtrise actualisée après correction |
 | B004 | Résultats LLM peu strictement validés | Résolu en V0.7.2 : schémas stricts et erreur 502 sans progrès enregistré |
 | B005 | Deux avertissements Starlette/httpx/AnyIO dans les tests | Ouvert : migration des dépendances de test à traiter séparément |
-| B006 | Identifiant de sélection sans authentification | Ouvert : comptes et droits d’accès avant ouverture publique |
+| B006 | Identifiant de sélection sans authentification | Traité : comptes, sessions et propriété des profils en 0.8.0-alpha.1 |
 | B007 | Verrous locaux au processus | Ouvert : coordination nécessaire avant plusieurs workers |
 
 ## Corrigés en V0.6.9
@@ -124,3 +124,12 @@ cette évolution : 3 tests Python interface et 4 tests Node réussis.
 - Le niveau déclaré vide ne supprime pas un niveau existant : limite du contrat API, signalée dans l’interface.
 - Tests locaux : 263 Python et 4 Node réussis. Les deux avertissements de dépendances restent ouverts (B005).
 - Authentification, plusieurs workers, micro réel et analyse PCM restent hors périmètre de cette étape.
+
+## Comptes et vocal continu — 0.8.0-alpha.1
+
+- B006 traité : cookie de compte requis et propriété des profils vérifiée par l’API.
+- B015 ouvert : pas encore de confirmation e-mail, récupération de mot de passe ou MFA. Comptes locaux à l’installation.
+- B016 ouvert : boucle vocale avec une voix réelle à valider ; les tests actuels couvrent le contrôleur et les arrêts.
+- Les anciennes données restent sauvegardées sans rattachement automatique. La procédure locale est dans ACCOUNTS.
+- B007 reste ouvert : apprentissage limité à un processus. Les avertissements B005 et la limitation de dictée française B011 restent ouverts.
+- 273 tests Python et 7 Node réussis ; UI 319/1100 px sans débordement.

@@ -1,4 +1,18 @@
 # 📓 Journal de développement — Zéphyr
+## 12/11/2026 — Comptes locaux et vocal continu
+
+- Demandes : création de compte, bouton vocal continu et push.
+- Inscription/connexion/déconnexion, cookie HttpOnly SameSite Strict, sessions révocables de 7 jours, hachage scrypt et limites de tentatives persistantes.
+- Authentification activée par défaut ; propriété vérifiée sur chaque profil. Inscription et profil initial atomiques. Le mode production exige les cookies HTTPS sécurisés.
+- En-tête de mutation et contrôle d’origine, validation sans réécriture de mot de passe dans les erreurs, documentation OpenAPI adaptée.
+- Profils anonymes conservés ; sauvegarde locale pré-authentification et commande locale de rattachement, aucun endpoint public de réclamation par UUID.
+- Interface de compte ajoutée. Aucun compte personnel créé par l’agent ; l’utilisateur choisit ses identifiants.
+- Vocal continu : activation explicite, écoute → réponse → reprise, sans capture pendant la réflexion/synthèse. Arrêt volontaire, erreur, profil/compte, arrière-plan ou déconnexion ; pas de reprise au rechargement.
+- Validation : 273 tests Python et 7 Node réussis, 2 avertissements connus. Tests de comptes isolés, révocation/rotation/expiration, redémarrage, rattachement, erreurs de création et limitation. Contrôleur vocal testé avec ordonnanceur simulé.
+- UI : formulaires connexion/inscription, largeur 319/1100 px, aucun démarrage vocal automatique. Pas de validation de boucle avec une voix réelle.
+- Version backend 0.8.0-alpha.1 ; guide ACCOUNTS et suivi complétés. Livraison Git demandée, résultat du push communiqué dans le chat.
+
+
 ## 12/11/2026 — Prochain jalon : profil et évaluation, préparation du push
 
 - Demande : reporter les prochains ajustements visuels, poursuivre les fonctionnalités et pousser le travail sur GitHub.

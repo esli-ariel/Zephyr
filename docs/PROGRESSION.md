@@ -1,6 +1,6 @@
 # État actuel — 12 novembre 2026
 
-**Backend 0.7.2 ; première interface conversationnelle, aperçu V0.8.**
+**Backend 0.8.0-alpha.1 ; comptes locaux, parcours pédagogique et vocal continu.**
 
 | Domaine | État |
 |---|---|
@@ -12,14 +12,16 @@
 | Microphone | Analyse du volume par Web Audio ; validation avec une voix réelle restante |
 | Dictée | Web Speech `fr-FR` si disponible ; validation réelle restante |
 | Lecture vocale | Synthèse du navigateur ; activation observée dans l’interface |
-| Tests actuels | 263 Python et 4 Node réussis ; 2 avertissements Python ; appels IA simulés dans pytest |
+| Tests actuels | 273 Python et 7 Node réussis ; 2 avertissements Python ; appels IA simulés dans pytest |
 | Validation manuelle | Chat OpenRouter réel, lecture vocale déclenchée, reprise des messages et responsive |
-| Authentification, multiworkers | À réaliser |
+| Comptes et droits | Inscription/connexion/déconnexion, cookies, sessions révocables et propriété des profils |
+| Vocal continu | Contrôleur et bouton ajoutés ; boucle réelle à essayer après inscription |
+| Multiworkers | À réaliser ; un processus API reste requis |
 | Profil et évaluation dans l’interface | Réalisés : profil, reprise, questions, correction, bilan ; banque anglaise uniquement |
 | Plan → exercice → correction dans l’interface | À réaliser |
 | Caméra, avatar, voix temps réel | À réaliser |
 
-Le backend conserve sa version 0.7.2 ; l’aperçu de l’interface ne termine pas le jalon V0.8.
+Le backend passe en 0.8.0-alpha.1. Plan/exercices et autres langues d’évaluation restent à intégrer au jalon V0.8.
 L’interface est servie par FastAPI, sans Next.js ni processus frontend distinct.
 L’amplitude de la sphère suit le micro à l’écoute. Pendant la synthèse vocale, elle
 utilise une animation liée à la lecture ; aucun accès PCM au son synthétisé.
@@ -81,6 +83,19 @@ Validation : 263 tests Python et 4 tests Node, 2 avertissements existants. Écra
 profil/première question vérifiés en navigateur à 319/1100 px. La suite du jalon
 est le plan d’apprentissage puis les exercices/corrections visuels.
 
+
+### Comptes et vocal continu — 12 novembre 2026
+
+Comptes locaux activés par défaut : mots de passe hachés, cookie de session,
+déconnexion révocante, propriété des profils et limitation des tentatives. Les
+anciens profils sont conservés et récupérables par commande locale, sans attribution
+automatique. Le bouton vocal continu alterne écoute/réponse et reste désactivable ;
+il s’arrête sur erreur, dialogue personnel, déconnexion ou arrière-plan.
+
+Validation : 273 tests Python, 7 Node ; formulaires connexion/inscription sur
+mobile/ordinateur. Aucune inscription personnelle réalisée par l’agent. La boucle
+avec une voix réelle et les fonctions de récupération e-mail restent ouvertes.
+
 ## Prochaines étapes proposées
 
 1. Valider le micro, la dictée et les autorisations sur le navigateur de l’utilisateur.
@@ -88,7 +103,7 @@ est le plan d’apprentissage puis les exercices/corrections visuels.
 3. Mode immersif : sphère centrale et transcription compacte.
 4. Intégrer le plan d’apprentissage puis les exercices/corrections ; profil et évaluation sont disponibles.
 5. Étudier la conversation vocale continue, les interruptions et un moteur vocal plus naturel.
-6. Authentification avant ouverture publique ; coordination avant plusieurs workers.
+6. Récupération de compte et vérification e-mail ; coordination avant plusieurs workers.
 
 ## Validation antérieure
 

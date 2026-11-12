@@ -1,6 +1,6 @@
 # 🌪️ Zéphyr
 
-Assistant d’apprentissage des langues. La version **0.7.2** fournit un
+Assistant d’apprentissage des langues. La version **0.8.0-alpha.1** fournit un
 prototype backend Python/FastAPI : conversation avec OpenRouter, profil apprenant,
 évaluation adaptative CECRL, leçons, exercices, correction, vocabulaire,
 grammaire, recommandations et plans personnalisés.
@@ -37,37 +37,31 @@ python -m pytest -q
 Les tests isolent la configuration et bloquent les appels réels à OpenRouter.
 Une configuration GitHub Actions exécute la même suite sous Python 3.12.
 
-## Sélection de l’apprenant
+## Comptes et sélection de l’apprenant
 
-Créer un apprenant avec `POST /api/learners` (sans en-tête) :
+Les comptes sont activés par défaut. Ouvrir `/ui/`, cliquer **Créer un compte**,
+puis renseigner prénom, e-mail et phrase secrète de 15 à 128 caractères. La session
+est conservée dans un cookie HttpOnly ; **Mon compte** permet de se déconnecter.
+Le serveur rattache chaque profil à son compte et refuse l’accès aux autres profils.
 
-```bash
-curl -X POST http://127.0.0.1:8000/api/learners
-```
+Pour un client API, commencer par `/api/auth/register` ou `/api/auth/login`, conserver
+les cookies du client et reprendre le `learner_id` renvoyé. Les opérations pédagogiques
+exigent `X-Learner-ID` ; les mutations exigent aussi `X-Zephyr-Request: 1`. `/docs`
+propose ces champs. `/`, `/health`, `/ui/`, `/docs` et `/openapi.json` restent publics.
 
-L’API renvoie `201` et `{"learner_id": "<UUID>"}`. Conserver cet identifiant
-côté client et transmettre `X-Learner-ID: <UUID>` à chaque requête `/api/*`
-suivante. La documentation `/docs` propose ce champ sur chaque opération.
-Les routes `/`, `/health`, `/docs` et `/openapi.json` restent accessibles sans identifiant.
+`POST /api/learners` crée un profil supplémentaire uniquement pour le compte connecté.
+Un UUID absent/mal formé donne `400`, un profil inconnu ou appartenant à un autre
+compte `404`, et une session absente/expirée `401`. Les états restent séparés et
+les opérations sont sérialisées par apprenant, dans un seul processus API.
 
-```bash
-curl http://127.0.0.1:8000/api/learner/profile \
-  -H 'X-Learner-ID: <UUID>'
-```
-
-Un identifiant absent, mal formé ou fourni plusieurs fois renvoie `400` ;
-un identifiant inconnu renvoie `404` sans créer de profil. Chaque apprenant a
-son propre agent, mémoire, évaluation, contenus, vocabulaire, grammaire et plan.
-Les opérations d’un même apprenant sont sérialisées ; les appels IA des autres
-apprenants peuvent avancer en parallèle.
-
-L’identifiant sélectionne les données ; il ne constitue pas une authentification.
-Une personne connaissant cet identifiant peut utiliser le profil correspondant.
-L’authentification et les droits d’accès restent à ajouter avant une ouverture publique.
+Les anciens profils locaux sont conservés sans attribution automatique. Une commande
+locale permet de les rattacher après inscription. Les comptes sont propres à cette
+installation ; confirmation et réinitialisation par e-mail ne sont pas encore proposées.
+Voir [comptes, API et récupération des anciens profils](docs/ACCOUNTS.md).
 
 ## Parcours pédagogique
 
-Avec `X-Learner-ID` dans chaque requête :
+Avec une session connectée, `X-Learner-ID` et le marqueur de mutation requis :
 
 1. Définir langue et niveau avec `PUT /api/learner/profile`, ou effectuer
    l’évaluation via `/api/assessment/*`.
@@ -160,8 +154,8 @@ les autres apprenants.
 
 Par défaut : `backend/data/zephyr.sqlite3`, indépendant du répertoire de lancement.
 `DATABASE_PATH` permet de choisir un autre emplacement (préférer un chemin absolu).
-`PERSISTENCE_ENABLED=false` désactive la sauvegarde : la séparation reste active,
-mais profils et identifiants sont perdus au redémarrage.
+`PERSISTENCE_ENABLED=false` est réservé au mode local sans comptes (`AUTH_ENABLED=false`) ;
+avec les comptes activés, la persistance est obligatoire.
 Ces données sont locales et ignorées par Git ; le push GitHub ne les sauvegarde pas.
 
 Pour créer une copie cohérente de **tous les apprenants**, même lorsque l’API fonctionne, depuis `backend/`
@@ -185,7 +179,8 @@ Son profil unique est conservé sous l’identifiant :
 00000000-0000-0000-0000-000000000001
 ```
 
-Utiliser cet identifiant dans `X-Learner-ID` pour retrouver les anciennes données.
+Après rattachement local de ce profil à votre compte, cet identifiant dans
+`X-Learner-ID` permet de retrouver les anciennes données (voir `docs/ACCOUNTS.md`).
 Il n’existe que si l’ancienne base contenait un état sauvegardé. Les nouveaux
 apprenants sont créés vides et ne récupèrent aucune copie de cet état.
 Un état ancien invalide annule la migration et empêche le démarrage sans modifier
@@ -197,7 +192,7 @@ nécessite la V0.7.1 ou une version ultérieure.
 Le prototype gère plusieurs apprenants dans **un seul processus API**
 (`--workers 1`, valeur par défaut). Ses sessions et verrous restent en mémoire :
 plusieurs processus pourraient écraser leurs sauvegardes respectives pour un même
-apprenant. Il ne dispose pas encore d’authentification. Une première interface de conversation est disponible sur `/ui/`.
+apprenant. Il dispose maintenant de comptes locaux et de contrôles de propriété des profils. Une première interface de conversation est disponible sur `/ui/`.
 Les corrections enrichissent les difficultés du profil et la maîtrise des notions
 explicitement liées. La qualité pédagogique du contenu généré n’a pas été validée
 par des appels réels pendant les tests de cette version.
@@ -279,3 +274,16 @@ Validation locale : **263 tests Python et 4 tests Node réussis**, deux avertiss
 Python existants. CI enrichie avec la syntaxe et les tests frontend. Les écrans
 profil/évaluation ont été vérifiés à 319 et 1100 px. Les écrans de plan d’apprentissage,
 d’exercices et de correction constituent la suite du jalon V0.8.
+
+## Vocal continu et validation actuelle
+
+Après connexion, le bouton **∞ Vocal continu** enchaîne écoute, réponse puis reprise
+de l’écoute. Le micro est suspendu pendant la réflexion et la synthèse. Un second
+clic, une erreur, l’ouverture du profil/compte ou le passage en arrière-plan arrête
+le mode ; il ne reprend pas automatiquement au rechargement. La dictée dépend du
+navigateur. La boucle avec une voix réelle reste à essayer avec l’utilisateur.
+
+Validation de cette version : **273 tests Python et 7 tests Node réussis**, deux
+avertissements Python connus. L’authentification, l’isolement des comptes et le
+contrôleur de boucle vocale sont testés. Aucun compte personnel n’est créé par l’agent.
+La récupération par e-mail et les écrans plan/exercices restent à réaliser.

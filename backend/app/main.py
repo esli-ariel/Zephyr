@@ -1,20 +1,25 @@
 import logging
+import asyncio
 from pathlib import Path
 from contextlib import asynccontextmanager
 from typing import Annotated, Literal
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import httpx
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from starlette.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
+from fastapi.exception_handlers import request_validation_exception_handler
 
 from app.config import settings
 from app.agent.zephyr import ZephyrAgent
 from app.learning.adaptive_assessment import AdaptiveAssessment
 from app.persistence import StateStore, capture_state, restore_state
-from app.sessions import LearnerSessions
+from app.sessions import LearnerSessions, LearnerSession
+from app.auth import AuthStore, COOKIE_NAME
+from app.auth_routes import router as auth_router
 from app.learning.llm_schemas import Level, Skill
 
 logger = logging.getLogger(__name__)
@@ -22,9 +27,15 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if settings.auth_enabled and not settings.persistence_enabled:
+        raise RuntimeError('Les comptes nécessitent PERSISTENCE_ENABLED=true.')
+    if settings.app_env == 'production' and (not settings.auth_enabled or not settings.auth_cookie_secure):
+        raise RuntimeError('La production nécessite authentification et cookies HTTPS sécurisés.')
     store = StateStore(settings.database_path) if settings.persistence_enabled else None
     app.state.store = store
     app.state.learners = LearnerSessions(store)
+    app.state.auth = AuthStore(settings.database_path) if settings.auth_enabled else None
+    app.state.password_workers = asyncio.Semaphore(2)
     try:
         yield
     finally:
@@ -32,20 +43,59 @@ async def lifespan(app: FastAPI):
         app.state.store = None
 
 
+async def documented_request_marker(
+    x_zephyr_request: Annotated[str | None, Header(alias='X-Zephyr-Request', description='Valeur 1 requise pour les mutations lorsque les comptes sont activés.')] = '1',
+):
+    return None
+
+
 app = FastAPI(
     title=settings.app_name,
     description="API de l'assistant intelligent Zéphyr",
-    version="0.7.2",
+    version="0.8.0-alpha.1",
     lifespan=lifespan,
+    dependencies=[Depends(documented_request_marker)],
 )
+
+
+app.include_router(auth_router)
+
+
+@app.exception_handler(RequestValidationError)
+async def safe_validation_error(request: Request, exc: RequestValidationError):
+    if request.url.path.startswith('/api/auth/'):
+        return JSONResponse(status_code=422, content={'detail': 'Vérifiez votre adresse e-mail, votre prénom et votre mot de passe (15 à 128 caractères à l’inscription).'})
+    return await request_validation_exception_handler(request, exc)
 
 
 @app.middleware("http")
 async def persist_learning_state(request: Request, call_next):
-    if not request.url.path.startswith("/api/") or (
-        request.url.path == "/api/learners" and request.method == "POST"
-    ):
+    if not request.url.path.startswith('/api/'):
         return await call_next(request)
+    if settings.auth_enabled:
+        if request.method not in {'GET', 'HEAD', 'OPTIONS'}:
+            origin = request.headers.get('origin')
+            expected = f'{request.url.scheme}://{request.url.netloc}'
+            if request.headers.get('X-Zephyr-Request') != '1' or (origin and origin != expected):
+                return JSONResponse(status_code=403, content={'detail': 'Requête non autorisée.'})
+        if request.url.path in {'/api/auth/register', '/api/auth/login', '/api/auth/session', '/api/auth/logout'}:
+            response = await call_next(request)
+            response.headers['Cache-Control'] = 'no-store'
+            return response
+        try:
+            account = request.app.state.auth.authenticate(request.cookies.get(COOKIE_NAME))
+        except Exception:
+            logger.exception('Compte indisponible')
+            return JSONResponse(status_code=503, content={'detail': 'Compte indisponible.'})
+        if account is None:
+            return JSONResponse(status_code=401, content={'detail': 'Connectez-vous pour accéder à vos données.'}, headers={'Cache-Control': 'no-store'})
+        request.state.account = account
+    elif request.url.path.startswith('/api/auth/'):
+        return await call_next(request)
+    if request.url.path == '/api/learners' and request.method == 'POST':
+        response = await call_next(request)
+        response.headers['Cache-Control'] = 'no-store'
+        return response
     values = request.headers.getlist("X-Learner-ID")
     try:
         if len(values) != 1:
@@ -55,6 +105,8 @@ async def persist_learning_state(request: Request, call_next):
         return JSONResponse(status_code=400, content={
             "detail": "L'en-tête X-Learner-ID doit contenir un identifiant UUID unique.",
         })
+    if settings.auth_enabled and not request.app.state.auth.owns(request.state.account['user_id'], learner_id):
+        return JSONResponse(status_code=404, content={'detail': 'Apprenant introuvable.'})
     registry = request.app.state.learners
     try:
         session = registry.get(learner_id)
@@ -82,6 +134,7 @@ async def persist_learning_state(request: Request, call_next):
                     return JSONResponse(status_code=503, content={
                         "detail": "Sauvegarde indisponible. Veuillez réessayer.",
                     })
+            response.headers["Cache-Control"] = "no-store"
             response.headers["X-Learner-ID"] = learner_id
             return response
         except BaseException:
@@ -114,7 +167,13 @@ class LearnerCreated(BaseModel):
 @app.post("/api/learners", status_code=201, response_model=LearnerCreated)
 async def create_learner(request: Request, response: Response):
     try:
-        session = request.app.state.learners.create()
+        if settings.auth_enabled:
+            session = LearnerSession(learner_id=str(uuid4()))
+            request.app.state.auth.create_learner(request.state.account['user_id'], session.learner_id,
+                                                capture_state(session.agent, session.assessment))
+            request.app.state.learners.sessions[session.learner_id] = session
+        else:
+            session = request.app.state.learners.create()
     except Exception:
         logger.exception("Échec de création de l'apprenant")
         raise HTTPException(status_code=503, detail="Création de l'apprenant indisponible.")

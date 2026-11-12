@@ -287,3 +287,36 @@ de l’identifiant d’évaluation. Les objectifs sont ajoutés sans réécrire 
 **Validation :** tests d’intégration en profils isolés, suite Python complète,
 syntaxe/tests Node et contrôle UI mobile/ordinateur. Les cas nécessitant l’IA
 sont simulés par la suite de tests ; aucune fausse note enregistrée pour l’utilisateur.
+
+## ADR-015 — Comptes locaux et propriété des profils
+
+**Date :** 12/11/2026 — 0.8.0-alpha.1.
+
+Activer les comptes par défaut, avec tables SQLite partagées avec les états des
+apprenants. Stocker les mots de passe avec scrypt N=131072/r=8/p=1 et sel aléatoire.
+Utiliser des sessions opaques de 256 bits, empreintes SHA-256 en base et cookie
+HttpOnly/SameSite Strict ; Secure requis en production. Vérifier la propriété de
+chaque UUID sélectionné. Inscription et état initial sont écrits dans une transaction.
+Le cookie présenté est renouvelé à la connexion et révoqué à la déconnexion.
+
+Les mutations requièrent un en-tête dédié et une origine cohérente, sans CORS
+permissif. Les tentatives sont limitées par IP et e-mail, avec au plus deux calculs
+de hachage simultanés. Les mots de passe ne sont pas recopiés dans les erreurs de
+validation. La documentation API expose le marqueur de mutation.
+
+Préserver les profils anciens sans les attribuer au premier inscrit. Une commande
+locale, API arrêtée, peut rattacher un profil non possédé à un compte existant et
+révoque ses sessions. La sauvegarde SQLite inclut aussi comptes et sessions.
+Le mode sans comptes reste uniquement pour les anciens tests/outils locaux et
+est refusé en production. Confirmation e-mail, récupération de mot de passe et
+MFA ne sont pas encore implémentés.
+
+## ADR-016 — Vocal continu à tours alternés
+
+Le mode est explicite et non mémorisé. Reprendre le micro après une réponse,
+seulement si le compte est connecté, le document visible et aucune capture,
+requête ou synthèse en attente. Libérer les pistes audio entre les tours pour
+prévenir l’auto-transcription de la voix de Zéphyr. Arrêter la boucle au clic,
+sur erreur, à l’ouverture d’un dialogue personnel, à la déconnexion ou en
+arrière-plan. Le contrôleur isolé est testé sans appareil audio. Cette décision
+remplace la limitation antérieure « pas d’écoute continue » de l’ADR-013.

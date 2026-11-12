@@ -8,7 +8,7 @@ def test_public_interface_and_assets():
         page = client.get('/ui/')
         assert page.status_code == 200
         assert '<html lang="fr">' in page.text
-        for asset, media in [('app.js', 'javascript'), ('visual-vocabulary.js', 'javascript'), ('style.css', 'text/css'), ('learning-ui.js', 'javascript'), ('learning-ui.css', 'text/css')]:
+        for asset, media in [('app.js', 'javascript'), ('visual-vocabulary.js', 'javascript'), ('style.css', 'text/css'), ('learning-ui.js', 'javascript'), ('learning-ui.css', 'text/css'), ('account-ui.js', 'javascript'), ('voice-loop.js', 'javascript'), ('account-ui.css', 'text/css')]:
             response = client.get('/ui/' + asset)
             assert response.status_code == 200
             assert media in response.headers['content-type']
@@ -16,7 +16,7 @@ def test_public_interface_and_assets():
 
 def test_interface_preserves_api_and_requires_learner():
     with TestClient(app) as client:
-        assert client.get('/').json()['version'] == '0.7.2'
+        assert client.get('/').json()['version'] == app.version
         assert client.get('/health').json()['status'] == 'healthy'
         assert client.get('/api/chat/memory').status_code == 400
         learner = client.post('/api/learners').json()['learner_id']

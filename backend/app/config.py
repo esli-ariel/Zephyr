@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     app_name: str = "Zéphyr"
     app_env: str = "development"
     debug: bool = True
+    auth_enabled: bool = True
+    auth_cookie_secure: bool = False
     persistence_enabled: bool = True
     database_path: str = str(
         Path(__file__).resolve().parents[1] / "data" / "zephyr.sqlite3"

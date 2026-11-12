@@ -7,6 +7,7 @@
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let learnerId = null, ready = false, busy = false, listening = false, starting = false,learningLocked=false;
   let stream, audioContext, analyser, audioData, recognition, utterance;
+  let voiceLoop=null,accountUI=null,speechPending=false;
   let micToken = 0, voiceToken = 0, finalTranscript = '', interim = '', voiceOn = true;
   let mode = 'idle', volume = 0, boundaryAt = 0, speechStart = 0;
   let conversationStarted = false;
@@ -26,7 +27,7 @@
   languageSelect.value=objectLanguage;
   languageStatus.textContent='Traductions hors ligne · sélectionnez la langue étudiée.';
   function applyProfile(profile){
-    if(!profile.target_language){languageStatus.textContent=vocabulary.languages[objectLanguage].name+' · aperçu. Choisissez une langue pour l’enregistrer dans le profil.';return;}
+    if(!profile.target_language){languageStatus.textContent=vocabulary.languages[objectLanguage||'en'].name+' · aperçu. Choisissez une langue pour l’enregistrer dans le profil.';return;}
     const code=vocabulary.resolveLanguage(profile.target_language);
     if(code){objectLanguage=code;unknownLanguage='';languageSelect.value=code;save('zephyr.objectLanguage',code);languageStatus.textContent='Langue du profil : '+vocabulary.languages[code].name+'.';}
     else{
@@ -73,12 +74,12 @@
   $('theme-toggle').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='day'?'night':'day',true));
   systemTheme.addEventListener('change',event=>{if(!stored('zephyr.theme'))setTheme(event.matches?'day':'night');});
   function notice(text,error=false){ui.notice.textContent=text;ui.notice.classList.toggle('error',error);}
-  function state(next){if(mode!=='idle'&&next==='idle')idleTime=0;mode=next;document.body.dataset.voiceState=next;ui.status.textContent={idle:'Prêt à vous écouter',listening:'Je vous écoute…',thinking:'Zéphyr prépare sa réponse…',speaking:'Zéphyr vous répond…'}[next];$('activity').textContent={idle:'EN VEILLE',listening:'ÉCOUTE ACTIVE',thinking:'RÉFLEXION',speaking:'TRANSMISSION'}[next];controls();}
-  function controls(){$('open-learning').disabled=!ready||busy||starting||languageSaving;ui.send.disabled=!ready||busy||listening||starting||learningLocked;ui.mic.disabled=busy||starting||learningLocked;ui.demo.disabled=busy||starting||learningLocked;languageSelect.disabled=busy||listening||starting||languageSaving||learningLocked;$('next-object').disabled=mode!=='idle'||busy||listening||starting;$('read-object').disabled=!objectLanguage||mode!=='idle'||busy||listening||starting;}
+  function state(next){if(mode!=='idle'&&next==='idle')idleTime=0;mode=next;document.body.dataset.voiceState=next;ui.status.textContent={idle:'Prêt à vous écouter',listening:'Je vous écoute…',thinking:'Zéphyr prépare sa réponse…',speaking:'Zéphyr vous répond…'}[next];$('activity').textContent={idle:'EN VEILLE',listening:'ÉCOUTE ACTIVE',thinking:'RÉFLEXION',speaking:'TRANSMISSION'}[next];controls();if(next==='idle')voiceLoop?.schedule();}
+  function controls(){$('continuous-voice').disabled=!ready&&!voiceLoop?.enabled;$('open-learning').disabled=!ready||busy||starting||languageSaving;ui.send.disabled=!ready||busy||listening||starting||learningLocked;ui.mic.disabled=busy||starting||learningLocked;ui.demo.disabled=busy||starting||learningLocked;languageSelect.disabled=busy||listening||starting||languageSaving||learningLocked;$('next-object').disabled=mode!=='idle'||busy||listening||starting;$('read-object').disabled=!objectLanguage||mode!=='idle'||busy||listening||starting;}
   async function request(path,options={},identify=true){
-    const response=await fetch(path,{...options,headers:{...(options.body?{'Content-Type':'application/json'}:{}),...(identify?{'X-Learner-ID':learnerId}:{}),...options.headers},signal:AbortSignal.timeout(135000)});
+    const response=await fetch(path,{...options,credentials:'same-origin',headers:{'X-Zephyr-Request':'1',...(options.body?{'Content-Type':'application/json'}:{}),...(identify?{'X-Learner-ID':learnerId}:{}),...options.headers},signal:AbortSignal.timeout(135000)});
     const data=await response.json();
-    if(!response.ok){const error=new Error(typeof data.detail==='string'?data.detail:'La requête a échoué. Veuillez réessayer.');error.status=response.status;throw error;}
+    if(!response.ok){const error=new Error(typeof data.detail==='string'?data.detail:'La requête a échoué. Veuillez réessayer.');error.status=response.status;if(response.status===401&&identify){suspendVoice();ready=false;ui.messages.replaceChildren();ui.input.value='';location.reload();}throw error;}
     return data;
   }
   function append(role,text){
@@ -88,16 +89,16 @@
     const time=document.createElement('span');time.textContent=new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});label.append(time);
     const p=document.createElement('p');p.textContent=text;article.append(label,p);ui.messages.append(article);ui.messages.scrollTop=ui.messages.scrollHeight;
   }
-  function silence(){voiceToken++;if(synth)synth.cancel();utterance=null;ui.stop.hidden=true;if(mode==='speaking')state('idle');}
+  function silence(){speechPending=false;voiceToken++;if(synth)synth.cancel();utterance=null;ui.stop.hidden=true;if(mode==='speaking')state('idle');}
   function speak(text,language='fr-FR'){
     silence();if(!voiceOn)return;
     if(!synth){notice('La lecture vocale n’est pas disponible dans ce navigateur. Le texte reste accessible.');return;}
-    const token=voiceToken;utterance=new SpeechSynthesisUtterance(text.replace(/[*#`]/g,''));utterance.lang=language;utterance.rate=.97;
+    speechPending=true;const token=voiceToken;utterance=new SpeechSynthesisUtterance(text.replace(/[*#`]/g,''));utterance.lang=language;utterance.rate=.97;
     const voices=synth.getVoices();const voice=voices.find(v=>v.lang===language)||voices.find(v=>v.lang.startsWith(language.split('-')[0]));if(voice)utterance.voice=voice;
     utterance.onstart=()=>{if(token!==voiceToken)return;beginConversation();speechStart=performance.now();state('speaking');ui.stop.hidden=false;};
     utterance.onboundary=()=>{boundaryAt=performance.now();};
-    utterance.onend=()=>{if(token!==voiceToken)return;state('idle');ui.stop.hidden=true;utterance=null;};
-    utterance.onerror=e=>{if(token!==voiceToken)return;state('idle');ui.stop.hidden=true;if(e.error!=='interrupted'&&e.error!=='canceled')notice('La lecture vocale n’a pas pu démarrer. Vous pouvez lire la réponse dans la conversation.',true);};
+    utterance.onend=()=>{if(token!==voiceToken)return;speechPending=false;state('idle');ui.stop.hidden=true;utterance=null;};
+    utterance.onerror=e=>{if(token!==voiceToken)return;speechPending=false;voiceLoop?.disable();state('idle');ui.stop.hidden=true;if(e.error!=='interrupted'&&e.error!=='canceled')notice('La lecture vocale n’a pas pu démarrer. Vous pouvez lire la réponse dans la conversation.',true);};
     synth.speak(utterance);
   }
   async function send(text){
@@ -107,7 +108,7 @@
     notice('Zéphyr réfléchit à votre message.');
     try{const data=await request('/api/chat',{method:'POST',body:JSON.stringify({message:text})});append('assistant',data.response);state('idle');notice('À vous. Continuez par écrit ou activez le microphone.');speak(data.response);refreshProfile();}
     catch(error){state('idle');ui.input.value=text;notice(error.name==='TimeoutError'?'La réponse a pris trop de temps. Réessayez dans quelques instants.':error.message,true);}
-    finally{busy=false;controls();}
+    finally{busy=false;controls();voiceLoop?.schedule();}
   }
   function releaseMic(){
     listening=false;starting=false;stream?.getTracks().forEach(track=>track.stop());stream=null;
@@ -139,9 +140,9 @@
       recognition=new recognitionType();recognition.lang='fr-FR';recognition.continuous=false;recognition.interimResults=true;
       recognition.onresult=event=>{if(token!==micToken)return;interim='';for(let i=event.resultIndex;i<event.results.length;i++){const result=event.results[i];if(result.isFinal)finalTranscript+=result[0].transcript+' ';else interim+=result[0].transcript;}ui.draft.textContent=(finalTranscript+' '+interim).trim();};
       recognition.onend=()=>{if(token!==micToken)return;const text=(finalTranscript+' '+interim).trim();recognition=null;releaseMic();ui.draft.textContent='';if(text){if(ready)send(text);else ui.input.value=text;}else notice('Aucune phrase détectée. Réessayez ou écrivez votre message.');};
-      recognition.onerror=event=>{if(token!==micToken)return;const reason=event.error;stopMic(false);notice(reason==='not-allowed'?'La dictée a été refusée. Autorisez le microphone dans les réglages du navigateur.':reason==='no-speech'?'Aucune parole détectée. Réessayez ou écrivez votre message.':'La dictée est indisponible ('+reason+'). Vous pouvez continuer par écrit.',true);};
+      recognition.onerror=event=>{if(token!==micToken)return;const reason=event.error;if(reason!=='no-speech')voiceLoop?.disable();stopMic(false);notice(reason==='not-allowed'?'La dictée a été refusée. Autorisez le microphone dans les réglages du navigateur.':reason==='no-speech'?'Aucune parole détectée. Réessayez ou écrivez votre message.':'La dictée est indisponible ('+reason+'). Vous pouvez continuer par écrit.',true);};
       recognition.start();
-    }catch(error){if(token!==micToken)return;stopMic(false);notice(error.name==='NotAllowedError'?'Accès au microphone refusé. Vous pouvez l’autoriser dans le navigateur ou écrire à Zéphyr.':error.name==='NotFoundError'?'Aucun microphone détecté. Branchez-en un ou écrivez votre message.':'Impossible d’activer le micro : '+error.message,true);}
+    }catch(error){if(token!==micToken)return;voiceLoop?.disable();stopMic(false);notice(error.name==='NotAllowedError'?'Accès au microphone refusé. Vous pouvez l’autoriser dans le navigateur ou écrire à Zéphyr.':error.name==='NotFoundError'?'Aucun microphone détecté. Branchez-en un ou écrivez votre message.':'Impossible d’activer le micro : '+error.message,true);}
   }
   ui.mic.addEventListener('click',startMic);
   $('composer').addEventListener('submit',event=>{event.preventDefault();send(ui.input.value);});
@@ -151,21 +152,43 @@
   ui.sound.addEventListener('click',()=>{voiceOn=!voiceOn;ui.sound.setAttribute('aria-pressed',String(voiceOn));ui.sound.textContent=voiceOn?'Voix activée ◖))':'Voix coupée';if(!voiceOn)silence();});
   ui.stop.addEventListener('click',silence);
   ui.demo.addEventListener('click',()=>{if(listening)stopMic(false);if(!voiceOn)ui.sound.click();speak('Bonjour, je suis Zéphyr, votre compagnon d’apprentissage. Ensemble, donnons un nouveau souffle à votre pratique des langues.');});
-  window.addEventListener('pagehide',()=>{micToken++;stopMic(false);silence();});
+  function suspendVoice(){voiceLoop?.disable();micToken++;stopMic(false);silence();}
+  voiceLoop=window.ZephyrVoiceLoop({
+    canListen:()=>ready&&!busy&&!starting&&!listening&&!learningLocked&&!speechPending&&mode==='idle'&&!document.hidden,
+    listen:startMic,
+    onChange:enabled=>{$('continuous-voice').setAttribute('aria-pressed',String(enabled));$('continuous-voice').setAttribute('aria-label',enabled?'Arrêter le mode vocal continu':'Activer le mode vocal continu');$('continuous-label').textContent=enabled?'Vocal continu actif':'Vocal continu';controls();},
+  });
+  $('continuous-voice').addEventListener('click',()=>{
+    if(voiceLoop.enabled){voiceLoop.disable();micToken++;stopMic(false);notice('Mode vocal continu arrêté.');return;}
+    if(!ready)return;
+    if(!recognitionType||!navigator.mediaDevices?.getUserMedia){notice('Le mode continu nécessite la dictée et un microphone compatibles. Vous pouvez continuer par écrit.',true);return;}
+    voiceLoop.enable();notice('Vocal continu activé. L’écoute reprend après chaque réponse. La dictée peut utiliser le service du navigateur.');
+  });
+  window.addEventListener('pagehide',suspendVoice);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)suspendVoice();});
+  $('account-button').addEventListener('click',suspendVoice);
+  accountUI=window.ZephyrAccountUI({request,onSignedIn:()=>location.reload(),onSignedOut:()=>{suspendVoice();try{localStorage.removeItem('zephyr.learnerId');}catch{}location.reload();}});
   window.ZephyrLearningUI({request,onProfile:applyProfile,resolveLanguage:vocabulary.resolveLanguage,
     isReady:()=>ready&&!busy&&!starting&&!languageSaving,
-    suspend:()=>{silence();if(listening)stopMic(false);},
+    suspend:suspendVoice,
     onLock:value=>{learningLocked=value;controls();},
   });
   controls();
   async function initialize(){
     try{
-      await request('/health',{},false);learnerId=stored('zephyr.learnerId');
-      if(learnerId){try{applyProfile(await request('/api/learner/profile'));}catch(error){if(error.status===404||error.status===400)learnerId=null;else throw error;}}
-      if(!learnerId){const data=await request('/api/learners',{method:'POST'},false);learnerId=data.learner_id;save('zephyr.learnerId',learnerId);applyProfile(await request('/api/learner/profile'));}
+      await request('/health',{},false);
+      const session=await request('/api/auth/session',{},false);
+      if(session.authentication_required){
+        accountUI.setSession(session);learnerId=session.learner_id;
+        applyProfile(await request('/api/learner/profile'));
+      }else{
+        accountUI.setLegacy();learnerId=stored('zephyr.learnerId');
+        if(learnerId){try{applyProfile(await request('/api/learner/profile'));}catch(error){if(error.status===404||error.status===400)learnerId=null;else throw error;}}
+        if(!learnerId){const data=await request('/api/learners',{method:'POST'},false);learnerId=data.learner_id;save('zephyr.learnerId',learnerId);applyProfile(await request('/api/learner/profile'));}
+      }
       const memory=await request('/api/chat/memory');if(memory.messages?.length){ui.messages.replaceChildren();memory.messages.forEach(m=>append(m.role,m.content));}
       ready=true;$('connection').textContent='Zéphyr connecté';controls();
-    }catch(error){$('connection').textContent='API indisponible';$('connection-dot').classList.add('off');notice('Connexion impossible : '+error.message+' Rechargez la page pour réessayer. Vous pouvez essayer la voix et le micro.',true);}
+    }catch(error){if(error.status===401){$('connection').textContent='Connexion requise';notice('Connectez-vous ou créez un compte pour retrouver votre apprentissage.');accountUI.show('login');return;}$('connection').textContent='API indisponible';$('connection-dot').classList.add('off');notice('Connexion impossible : '+error.message+' Rechargez la page pour réessayer. Vous pouvez essayer la voix et le micro.',true);}
   }
   initialize();
   // The microphone drives the field with RMS amplitude. Browser speech synthesis

@@ -22,5 +22,7 @@ jobs:
           node-version: '22'
       - run: node --check frontend/app.js
       - run: node --check frontend/learning-ui.js
+      - run: node --check frontend/account-ui.js
+      - run: node --check frontend/voice-loop.js
       - run: node --check frontend/visual-vocabulary.js
       - run: node --test frontend/tests/*.test.cjs

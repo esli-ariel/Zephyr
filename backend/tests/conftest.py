@@ -3,6 +3,7 @@ import os
 
 import pytest
 
+os.environ["AUTH_ENABLED"] = "false"
 os.environ["DEBUG"] = "false"
 os.environ["OPENROUTER_API_KEY"] = ""
 os.environ["OPENROUTER_MODEL"] = ""

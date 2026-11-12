@@ -296,7 +296,7 @@ def test_openapi_exposes_learner_selection_for_existing_routes():
     with TestClient(main.app) as client:
         schema = client.get("/openapi.json").json()
         for path, operations in schema["paths"].items():
-            if not path.startswith("/api/") or path == "/api/learners":
+            if not path.startswith("/api/") or path == "/api/learners" or path.startswith("/api/auth/"):
                 continue
             for operation in operations.values():
                 headers = [param for param in operation.get("parameters", []) if param["in"] == "header"]

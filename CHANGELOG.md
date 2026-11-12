@@ -12,6 +12,15 @@ Toutes les modifications importantes du projet sont enregistrées ici.
 - Mouvement réduit respecté ; contrôle mobile à 319 px et ordinateur à 1440 px, sans débordement.
 - JavaScript et diff vérifiés ; trois tests d’intégration interface réussis, deux avertissements existants.
 
+## [0.8.0-alpha.1] — 12/11/2026 — comptes et vocal continu
+
+- Inscription, connexion et déconnexion avec mots de passe scrypt, sessions opaques et cookies HttpOnly.
+- Contrôle de propriété des profils, transaction d’inscription, limitation des tentatives et garde de mutation/origine.
+- Écran de compte ; anciens profils conservés, rattachement réservé à une commande locale.
+- Bouton vocal continu : écoute/réponse/reprise avec arrêts explicites et aucun redémarrage automatique au chargement.
+- 273 tests Python et 7 Node réussis ; formulaires contrôlés sur mobile et ordinateur.
+- Confirmation/récupération e-mail et validation du micro réel restent à réaliser.
+
 ## [Non publié] — 12/11/2026 — aperçu interface V0.8
 
 ### Profil et évaluation accessibles dans l’interface
