@@ -889,3 +889,7 @@ Page complète de profil et formulaire intégré, navigation latérale et compte
 ### Interface épurée — 13 novembre 2026
 
 Textes décoratifs et répétitifs allégés, commandes d’objets supprimées. Rotation, objets 3D et traductions automatiques selon le profil conservés. Aides et états accessibles utiles maintenus. 34 Node et 3 Python interface réussis ; contrôle 319/1280 px et accès aux réglages vocaux. Aucun changement backend ; baseline complète précédente 293 Python.
+
+### Précision sur les phrases — 13 novembre 2026
+
+Les phrases d’accueil et d’accompagnement sont conservées, conformément à la précision utilisateur. Les commandes des objets restent supprimées. L’affichage immersif continue à masquer l’introduction une fois la conversation commencée.

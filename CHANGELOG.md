@@ -1,5 +1,10 @@
 # 📋 Changelog — Zéphyr
 
+## Phrases d’accueil conservées — 13/11/2026
+
+- Rétablissement des phrases d’accueil et d’accompagnement à la demande de l’utilisateur.
+- Commandes des objets toujours retirées ; animations et traductions automatiques conservées.
+
 ## Allègement de l’interface — 13/11/2026
 
 - Textes décoratifs et répétitifs retirés ou raccourcis ; aides et états utiles conservés.

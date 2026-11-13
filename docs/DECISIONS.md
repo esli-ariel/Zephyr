@@ -363,3 +363,5 @@ Ajouter une vue complète dans le document existant, adressable par fragment `/u
 ### Complément de direction visuelle — interface épurée
 
 À la demande de l’utilisateur, garder les informations utiles et retirer slogans/labels décoratifs. Retirer les commandes de changement et de prononciation des objets ainsi que leur sélecteur ; leur cycle reste automatique, leur langue est celle du profil. Conserver noms/traductions, erreurs, aide nécessaire et annonces accessibles. L’animation et le vocal ne dépendent plus de contrôles DOM retirés.
+
+Complément utilisateur : conserver les phrases d’accueil et d’accompagnement. L’allègement des commandes d’objets reste appliqué ; les slogans ne sont plus à retirer par défaut.

@@ -1,5 +1,12 @@
 # 📓 Journal de développement — Zéphyr
 
+## 13/11/2026 — Phrases d’accueil conservées
+
+- Précision utilisateur : conserver les phrases. Rétablissement de l’accueil, des slogans et textes d’accompagnement, y compris ceux du profil.
+- Les boutons Autre objet/Écouter et le sélecteur des objets restent retirés. Cycle, noms et traductions suivent toujours le profil.
+- Étiquettes techniques de version/installation non réintroduites ; comportement conversationnel épuré conservé après le début d’un échange.
+- Vérification syntaxique des scripts ; suivi rectifié dans la continuité de la demande.
+
 ## 13/11/2026 — Interface épurée et commandes d’objets retirées
 
 - Demande : retirer les textes inutiles et les boutons des objets.

@@ -46,7 +46,7 @@
   $('theme-toggle').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='day'?'night':'day',true));
   systemTheme.addEventListener('change',event=>{if(!stored('zephyr.theme'))setTheme(event.matches?'day':'night');});
   function notice(text,error=false){ui.notice.textContent=text;ui.notice.classList.toggle('error',error);}
-  function state(next){if(mode!=='idle'&&next==='idle')idleTime=0;mode=next;document.body.dataset.voiceState=next;companion?.updateState(next);ui.status.textContent={idle:'Prêt à vous écouter',listening:'Je vous écoute…',thinking:'Zéphyr prépare sa réponse…',speaking:'Zéphyr vous répond…'}[next];controls();if(next==='idle')voiceLoop?.schedule();}
+  function state(next){if(mode!=='idle'&&next==='idle')idleTime=0;mode=next;document.body.dataset.voiceState=next;companion?.updateState(next);ui.status.textContent={idle:'Prêt à vous écouter',listening:'Je vous écoute…',thinking:'Zéphyr prépare sa réponse…',speaking:'Zéphyr vous répond…'}[next];$('activity').textContent={idle:'EN VEILLE',listening:'ÉCOUTE ACTIVE',thinking:'RÉFLEXION',speaking:'TRANSMISSION'}[next];controls();if(next==='idle')voiceLoop?.schedule();}
   function controls(){
     $('continuous-voice').disabled=(!ready||!recognitionType||voiceSettingsOpen)&&!voiceLoop?.enabled;
     $('open-learning').disabled=!ready||busy||starting;
@@ -238,6 +238,7 @@
     $('object-french').textContent=item.fr;
     $('object-word').textContent=objectLanguage?item.words[objectLanguage]:'—';
     $('object-word').lang=objectLanguage||'fr';
+    $('object-language').textContent=objectLanguage?vocabulary.languages[objectLanguage].name:'Traduction indisponible : '+unknownLanguage;
     canvas.setAttribute('aria-label',show?item.fr+(objectLanguage?' : '+item.words[objectLanguage]:'. Traduction indisponible : '+unknownLanguage)+'. Nuage interactif, cliquez pour une pulsation.':'Nuage de points interactif : déplacement au pointeur, pulsation au clic ou avec Entrée.');
   }
   function resize(){
