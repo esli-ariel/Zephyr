@@ -1,5 +1,15 @@
 # 📓 Journal de développement — Zéphyr
 
+## 13/11/2026 — Présence au choix et objets texturés
+
+- Points / Avatar humanoïde avec préférence locale ; buste 3D stylisé animé par la voix, repli SVG et caméra locale séparée.
+- Catalogue porté de 6 à 36 objets, mélange sans répétition immédiate ; géométries Three.js, textures procédurales et éclairage. Dépendance officielle MIT vendue localement, sans CDN ni compilation.
+- À la demande de l’utilisateur, suppression des interactions souris/toucher/clic/clavier sur les points. Phrases d’accueil, noms/traductions, vocal, thèmes et mouvement réduit conservés.
+- Cache géométrique borné, libération des ressources et repli Canvas si WebGL 2 indisponible. URL des scripts modifiés versionnées pour éviter un ancien catalogue conservé en cache.
+- 39 Node et 3 Python interface réussis (2 avertissements existants), syntaxe/diff vérifiés. QA : WebGL actif, lampe texturée et avatar, choix persistant, thèmes jour/nuit, synthèse native et 319 px sans débordement, caméra inactive. Repli sans GPU, voix et caméra réelles restent à valider.
+- Guide PRESENCE ajouté ; livraison Git et serveur local conservés dans la continuité du projet.
+
+
 ## 13/11/2026 — Phrases d’accueil conservées
 
 - Précision utilisateur : conserver les phrases. Rétablissement de l’accueil, des slogans et textes d’accompagnement, y compris ceux du profil.

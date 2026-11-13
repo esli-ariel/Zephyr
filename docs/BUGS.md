@@ -1,6 +1,6 @@
 # Points ouverts — Zéphyr
 
-Mise à jour : 12 novembre 2026 — backend 0.8.0-alpha.1.
+Mise à jour : 13 novembre 2026 — backend 0.8.0-alpha.1.
 
 Les points ouverts ci-dessous comprennent des défauts, limites techniques et
 travaux restants. « Résolu » concerne le périmètre indiqué, sans préjuger d’une
@@ -103,7 +103,7 @@ sans mesure PCM, reconnaissance et lecture toujours en français.
 
 | ID | Point | État |
 |---|---|---|
-| B012 | Couverture des traductions d’objets | Six objets et six langues hors ligne ; langues inconnues signalées. Élargissement restant. |
+| B012 | Couverture des traductions d’objets | 36 objets texturés et six langues hors ligne ; langues inconnues signalées. Autres langues restantes. |
 | B013 | Objets plats et points ternes dans l’ébauche | Corrigé : surfaces en volume, rotation Y/X, lumière/opacité et accents renforcés. |
 
 Le sélecteur « Mots en images » sauvegarde la langue cible du profil. Un échec
@@ -167,3 +167,9 @@ Profil désormais visualisable dans une page complète, avec formulaire intégr�
 ## Nettoyage des textes et commandes d’objets — 13 novembre 2026
 
 Les anciennes mentions des boutons Autre objet/Écouter et du sélecteur décrivent les versions précédentes. Ces contrôles sont retirés, avec leurs gestionnaires DOM ; cycle et traduction suivent automatiquement le profil. Syntaxe, 34 Node et 3 Python interface réussis ; affichage 319/1280 px et réglages vocaux contrôlés. Les limites matérielles vocales et les autres travaux ouverts restent inchangés.
+
+## Présence 3D — limites actuelles
+
+- WebGL 2 nécessaire aux matières ; repli points Canvas / avatar SVG sans textures, perte/restauration du contexte à valider sur matériel concerné.
+- Objets procéduraux texturés et humanoïde stylisé ; modèles photoréalistes et synchronisation phonétique non réalisés.
+- Tests des 36 géométries et tirages réussis ; rendu WebGL observé dans le navigateur, caméra inactive. Interaction des points retirée volontairement.

@@ -6,7 +6,7 @@
   const synth = window.speechSynthesis;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let learnerId = null, ready = false, busy = false, listening = false, starting = false,learningLocked=false;
-  let profilePage=null,profileVisible=false,currentAccount=null,oralAnswer=null,learningUI=null,companion=null,voiceLoop=null,accountUI=null,voiceEngine=null,voiceSettings=null,voiceSettingsOpen=false,dictationPending=false,captureLanguage='fr-FR',voiceOn=true;
+  let presence=null,profilePage=null,profileVisible=false,currentAccount=null,oralAnswer=null,learningUI=null,companion=null,voiceLoop=null,accountUI=null,voiceEngine=null,voiceSettings=null,voiceSettingsOpen=false,dictationPending=false,captureLanguage='fr-FR',voiceOn=true;
   let mode = 'idle', volume = 0, boundaryAt = 0, speechStart = 0;
   let conversationStarted = false;
   function beginConversation(){
@@ -17,8 +17,9 @@
   const stored = key => { try { return localStorage.getItem(key); } catch { return null; } };
   const save = (key, value) => { try { localStorage.setItem(key,value); } catch {} };
   const vocabulary=window.ZephyrVocabulary;
-  let objectIndex=0,objectLanguage=vocabulary.resolveLanguage(stored('zephyr.objectLanguage'))||'en';
-  let unknownLanguage='',profileEpoch=0,idleTime=0,currentShapeIndex=0;
+  const objectDeck=vocabulary.createShuffleBag(vocabulary.objects.map((_,index)=>index));
+  let objectLanguage=vocabulary.resolveLanguage(stored('zephyr.objectLanguage'))||'en';
+  let unknownLanguage='',profileEpoch=0,idleTime=0,currentShapeIndex=objectDeck.next(),lastObjectCycle=0;
   let captionKey='',shapeSettledTime=0,lastGeometryShape=-1;
   function applyProfile(profile){
     profileEpoch++;profilePage?.updateSidebar(profile);
@@ -224,39 +225,29 @@
   // exposes word boundaries, not PCM audio: its envelope is an animation, not a waveform.
   const canvas=$('orb'),ctx=canvas.getContext('2d');
   let width=0,height=0,lastFrame=0,rotation=0,motionTime=0,engagement=0,themeBlend=document.documentElement.dataset.theme==='day'?1:0;
-  const pointer={x:0,y:0,active:false,strength:0};
   const feeling={listening:0,thinking:0,speaking:0};
-  let pulseAt=-10000;
   const points=Array.from({length:2100},(_,i)=>{
     const y=1-2*(i+.5)/2100,r=Math.sqrt(1-y*y),angle=i*2.399963229728653;
     return{x:r*Math.cos(angle),y,z:r*Math.sin(angle),freeX:Math.sin(i*71.17)*1.3,freeY:Math.cos(i*17.91)*.95,freeZ:Math.sin(i*31.7)*.55,position:null,size:.65+((i*.754877666)%1)*.65,spark:i%43===0,phase:i*.73,drifter:i%6===0,driftOffset:(i*.61803398875)%1};
   });
-  const shapes=vocabulary.objects.map(item=>vocabulary.buildGeometry(item.id,points.length));
+  const shapeCache=new Map();
+  function fallbackShape(index){if(!shapeCache.has(index)){shapeCache.set(index,vocabulary.buildGeometry(vocabulary.objects[index].id,points.length));if(shapeCache.size>4)shapeCache.delete(shapeCache.keys().next().value);}return shapeCache.get(index);}
+  presence=window.ZephyrPresenceUI({stage:canvas.parentElement,vocabulary,onChange:()=>{idleTime=0;lastObjectCycle=0;captionKey='';$('object-caption').hidden=true;}});
   function caption(show,index){
+    if(presence?.mode==='humanoid'){if(captionKey!=='humanoid'){$('object-caption').hidden=true;canvas.setAttribute('aria-label','Avatar humanoïde de Zéphyr');captionKey='humanoid';}return;}
     const item=vocabulary.objects[index],key=[show,index,objectLanguage,unknownLanguage].join('|');if(key===captionKey)return;captionKey=key;
     $('object-caption').hidden=!show;
     $('object-french').textContent=item.fr;
     $('object-word').textContent=objectLanguage?item.words[objectLanguage]:'—';
     $('object-word').lang=objectLanguage||'fr';
     $('object-language').textContent=objectLanguage?vocabulary.languages[objectLanguage].name:'Traduction indisponible : '+unknownLanguage;
-    canvas.setAttribute('aria-label',show?item.fr+(objectLanguage?' : '+item.words[objectLanguage]:'. Traduction indisponible : '+unknownLanguage)+'. Nuage interactif, cliquez pour une pulsation.':'Nuage de points interactif : déplacement au pointeur, pulsation au clic ou avec Entrée.');
+    canvas.setAttribute('aria-label',show?item.fr+(objectLanguage?' : '+item.words[objectLanguage]:'. Traduction indisponible : '+unknownLanguage)+'. Objet en trois dimensions.':'Nuage de points de Zéphyr.');
   }
   function resize(){
     const rect=canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);
     width=rect.width;height=rect.height;canvas.width=width*dpr;canvas.height=height*dpr;
     ctx.setTransform(dpr,0,0,dpr,0,0);
   }
-  function pointAt(event){
-    const rect=canvas.getBoundingClientRect();pointer.x=event.clientX-rect.left;pointer.y=event.clientY-rect.top;pointer.active=true;
-  }
-  canvas.addEventListener('pointermove',pointAt);
-  canvas.addEventListener('pointerleave',()=>{pointer.active=false;});
-  canvas.addEventListener('pointercancel',()=>{pointer.active=false;});
-  canvas.addEventListener('pointerup',event=>{if(event.pointerType!=='mouse')pointer.active=false;});
-  canvas.addEventListener('pointerdown',event=>{pointAt(event);pulseAt=performance.now();});
-  canvas.addEventListener('keydown',event=>{
-    if(event.key==='Enter'||event.key===' '){event.preventDefault();pulseAt=performance.now();}
-  });
   new ResizeObserver(resize).observe(canvas);resize();
   function draw(now){
     requestAnimationFrame(draw);
@@ -272,13 +263,12 @@
     // Blend state changes so shape, glow and colour settle together.
     for(const name of Object.keys(feeling))feeling[name]+=((mode===name?1:0)-feeling[name])*.08;
     engagement+=((conversationStarted?1:0)-engagement)*.06;
-    pointer.strength+=((pointer.active?1:0)-pointer.strength)*.12;
     const quiet=reducedMotion.matches;
     themeBlend+=((document.documentElement.dataset.theme==='day'?1:0)-themeBlend)*(quiet?1:.045);
     if(!quiet){rotation+=delta*(.10+engagement*.10+feeling.thinking*.55+feeling.speaking*.14+volume*.18);motionTime+=delta;}
-    if(mode==='idle')idleTime=quiet?9:idleTime+delta;else idleTime=0;
+    if(mode==='idle'){if(presence.mode==='points')idleTime=quiet?9:idleTime+delta;}else{idleTime=0;lastObjectCycle=0;}
+    const cycle=Math.floor(idleTime/20);if(!quiet&&cycle>lastObjectCycle){currentShapeIndex=objectDeck.next();lastObjectCycle=cycle;}
     const phase=idleTime%20;
-    currentShapeIndex=(objectIndex+Math.floor(idleTime/20))%shapes.length;
     const form=quiet?1:phase<5?0:phase<8?(phase-5)/3:phase<16?1:1-(phase-16)/4;
     const smoothForm=form*form*(3-2*form);
     const activeWeight=Math.min(1,feeling.speaking+feeling.thinking+feeling.listening);
@@ -288,9 +278,10 @@
     const objectClarity=smoothForm*(1-activeWeight);
     const showCaption=mode==='idle'&&smoothForm>.98&&activeWeight<.03&&(quiet||shapeSettledTime>.7);
     caption(showCaption,currentShapeIndex);
-    document.body.dataset.pointScene=mode==='idle'?(showCaption?'object':'wandering'):mode;
-    const pulseAge=(now-pulseAt)/1000;
-    const pulse=!quiet&&pulseAge<1.4?Math.sin(Math.min(pulseAge/.22,1)*Math.PI/2)*Math.exp(-pulseAge*2.8):0;
+    document.body.dataset.pointScene=presence.mode==='humanoid'?'humanoid':mode==='idle'?(showCaption?'object':'wandering'):mode;
+    const pulse=0,pulseAge=10;
+    if(presence.render({width,height,delta,time:motionTime,theme:themeBlend,quiet,state:mode,volume,form:smoothForm,objectId:vocabulary.objects[currentShapeIndex].id,pulse:0,pointer:{x:0,y:0,strength:0}}))return;
+    const model=fallbackShape(currentShapeIndex);
     const base=Math.min(width*(.32+engagement*.035),height*.34,154+engagement*65)*(.84+.16*engagement);
     const amp=quiet?volume*.018:.018+engagement*.025+feeling.listening*.07+feeling.speaking*.10+volume*.23;
     const breath=quiet?1:1+.025*Math.sin(motionTime*1.5)+feeling.speaking*(.035+volume*.10);
@@ -326,7 +317,7 @@
       const cy=Math.cos(swirl),sy=Math.sin(swirl);
       const x=(p.x*cy+p.z*sy)*wobble+tangent*p.z,y=p.y*wobble+tangent*p.x,z=(p.z*cy-p.x*sy)*wobble;
       const free={x:p.freeX+(!quiet?.10*Math.sin(motionTime*.7+p.phase):0),y:p.freeY+(!quiet?.09*Math.cos(motionTime*.5+p.phase):0),z:p.freeZ};
-      const modelPoint=shapes[currentShapeIndex][index];
+      const modelPoint=model[index];
       const objectYaw=quiet?.45:motionTime*.32+.45;
       const objectPitch=quiet?-.16:-.16+Math.sin(motionTime*.25)*.10;
       const ox=modelPoint.x*Math.cos(objectYaw)+modelPoint.z*Math.sin(objectYaw);
@@ -348,13 +339,7 @@
       const yy=p.position.y*Math.cos(tilt*tiltWeight)-p.position.z*Math.sin(tilt*tiltWeight),zz=p.position.y*Math.sin(tilt*tiltWeight)+p.position.z*Math.cos(tilt*tiltWeight);
       const perspective=2.8/(2.8-zz*.3);
       let px=width/2+p.position.x*base*perspective,py=height/2-12+yy*base*perspective;
-      const dx=px-pointer.x,dy=py-pointer.y,distance=Math.hypot(dx,dy);
-      const influence=Math.exp(-(distance*distance)/(2*85*85))*pointer.strength;
-      if(!quiet&&distance>0){
-        const force=influence*(28+volume*35)*(.55+(zz+1)*.3);
-        px+=dx/distance*force;py+=dy/distance*force;
-      }
-      return{x:px,y:py,z:zz,influence,flight,tint:p.driftOffset,size:p.size,spark:p.spark,perspective};
+      return{x:px,y:py,z:zz,influence:0,flight,tint:p.driftOffset,size:p.size,spark:p.spark,perspective};
     }).sort((a,b)=>a.z-b.z);
     ctx.globalCompositeOperation=themeBlend<.2?'lighter':'source-over';
     for(const p of projected){

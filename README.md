@@ -221,8 +221,7 @@ chat réel OpenRouter depuis l’interface, état de lecture vocale observé, re
 et affichage mobile/ordinateur contrôlés. Microphone réel et dictée à valider avec l’utilisateur.
 
 Pendant une conversation, les textes près de la sphère disparaissent et les points
-bougent davantage. Ils réagissent au pointeur et pulsent au clic/toucher ou avec
-Entrée/Espace sur la sphère. Les messages utiles restent dans le panneau de discussion.
+bougent davantage. Ils ne réagissent plus au pointeur, au clic ou au toucher. Les messages utiles restent dans le panneau de discussion.
 Le mode épuré s’applique aussi à la reprise d’un historique.
 
 Les points peuvent désormais se détacher de la surface puis la rejoindre. Leurs
@@ -237,9 +236,8 @@ au repos, ondulations à l’écoute, torsion en spirale en réflexion, expansio
 ## Nuage libre et objets 3D — 12 novembre 2026
 
 Les points se promènent librement, se rassemblent pendant la synthèse vocale
-et alternent au repos avec six objets en volume tournant lentement : maison, arbre,
-tasse, livre, poisson et cœur. Le nom français et la traduction restent fixes sous
-l’objet ; les points conservent leur éclat, leur halo et leur interaction au pointeur.
+et alternent au repos avec 36 objets aléatoires en volume, éclairés et texturés. Le nom français et la traduction restent fixes sous
+l’objet ; les points conservent leur éclat et leur halo, sans interaction au pointeur.
 
 La langue des traductions suit la langue étudiée dans **Mon profil**, restaurée ou
 actualisée après un chat. Traductions hors ligne en anglais, espagnol, allemand,
@@ -304,7 +302,7 @@ Validation de ce changement : **23 tests Node et 3 Python interface réussis**, 
 
 **Mon parcours → Mon plan** prépare et enchaîne les leçons/exercices après validation ; les corrections et l’activité en cours sont sauvegardées. **Révisions** permet d’ajouter des mots/règles et de les retrouver selon les échéances calculées (1/3/7/14/30/60 jours, oubli : 10 minutes).
 
-**Caméra et avatar** ouvre un avatar animé par les états de parole et un aperçu caméra local sur activation volontaire. Aucune image enregistrée ou envoyée. Guides : [séances et révisions](docs/JOURNEY.md), [caméra et avatar](docs/COMPANION.md).
+**Points / Avatar humanoïde** choisit la présence centrale et mémorise ce choix. **Caméra** ouvre un aperçu local sur activation volontaire. Les 36 objets aléatoires ont des matières procédurales avec Three.js local ; voir [PRESENCE](docs/PRESENCE.md). Aucune image enregistrée ou envoyée. Guides : [séances et révisions](docs/JOURNEY.md), [caméra et avatar](docs/COMPANION.md).
 
 Validation actuelle : **287 Python et 27 Node réussis**, deux avertissements connus. Parcours navigateur complet avec contenus simulés ; aucune nouvelle validation pédagogique IA réelle, ni boucle parlée ou image caméra réelle. Serveur local relancé sur 8001 ; comptes conservés.
 

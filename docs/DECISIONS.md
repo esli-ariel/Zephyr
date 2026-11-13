@@ -365,3 +365,7 @@ Ajouter une vue complète dans le document existant, adressable par fragment `/u
 À la demande de l’utilisateur, garder les informations utiles et retirer slogans/labels décoratifs. Retirer les commandes de changement et de prononciation des objets ainsi que leur sélecteur ; leur cycle reste automatique, leur langue est celle du profil. Conserver noms/traductions, erreurs, aide nécessaire et annonces accessibles. L’animation et le vocal ne dépendent plus de contrôles DOM retirés.
 
 Complément utilisateur : conserver les phrases d’accueil et d’accompagnement. L’allègement des commandes d’objets reste appliqué ; les slogans ne sont plus à retirer par défaut.
+
+## ADR-023 — Présence au choix, matières locales et points non interactifs
+
+Conserver le pilotage vocal existant et ajouter un sélecteur Points / Avatar humanoïde mémorisé localement. Utiliser Three.js officiel MIT en fichiers locaux et échantillonner les mêmes volumes pour les points et les surfaces texturées, sans CDN ni modèle distant. Générer les matières par Canvas, borner le cache géométrique à quatre objets et garder les replis Canvas/SVG sans WebGL 2. Mélanger les 36 objets par sac complet sans répétition en frontière. Supprimer le pilotage des points au pointeur/clic/toucher/clavier à la demande explicite de l’utilisateur. Aucun accès caméra implicite ; avatar stylisé sans prétention de synchronisation phonétique. Voir PRESENCE.md pour les limites et validations.

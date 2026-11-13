@@ -1,0 +1,7 @@
+{
+  "name": "zephyr-three-local",
+  "version": "0.187.0",
+  "type": "module",
+  "private": true,
+  "license": "MIT"
+}

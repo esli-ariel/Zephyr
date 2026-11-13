@@ -1,5 +1,10 @@
 # Interface locale Zéphyr
 
+## Présence actuelle — 13 novembre 2026
+
+Choix mémorisé **Points / Avatar humanoïde**, 36 objets aléatoires, éclairage et textures procédurales via Three.js local (MIT), sans CDN ni build. Points sans interaction souris/toucher/clavier. WebGL 2 ou repli Canvas/SVG ; guide [PRESENCE](../docs/PRESENCE.md). 39 Node et 3 Python interface réussis ; moteur WebGL et responsive 319/1280 px vérifiés. Les validations datées ci-dessous décrivent aussi les étapes précédentes.
+
+
 HTML, CSS et JavaScript natifs, servis par FastAPI sur `/ui/`. Aucun build ni npm install.
 Depuis `backend/` avec le venv activé :
 
@@ -46,9 +51,8 @@ activé à la restauration d’un historique. Le micro reste accessible ; notifi
 et erreurs sont affichées dans le panneau de conversation.
 
 - Mouvement plus ample, sphère agrandie, rotation accélérée et ondulations.
-- Pointeur : les points s’écartent localement.
-- Clic/toucher ou Entrée/Espace lorsque la sphère est focalisée : pulsation.
-- Ces interactions sont purement visuelles, sans activation du micro ni appel IA.
+- Aucune interaction des points au pointeur, clic, toucher ou clavier ; le canvas est une image sans focus.
+- Les animations suivent uniquement les états vocaux et le cycle automatique.
 - Mouvement réduit respecté. Validation visuelle à 319 et 1440 px.
 
 ## Particules libres et thèmes jour/nuit
@@ -95,7 +99,7 @@ objets au repos, nuage en spirale lors de la réflexion et rassemblement pendant
 la lecture vocale. Un cycle de repos dure 20 secondes : promenade, formation, objet
 lisible, dissolution. Les légendes apparaissent une fois la forme stabilisée.
 
-Six modèles en volume sont générés par `ZephyrVocabulary.buildGeometry` :
+Le catalogue comprend désormais 36 modèles, dont :
 maison (corps, toit prismatique, cheminée), arbre (tronc et feuillage), tasse creuse
 avec anse, livre épais, poisson avec nageoires et cœur gonflé. Les points sont
 échantillonnés sur les surfaces, puis tournés autour des axes Y/X avant projection.
@@ -113,9 +117,7 @@ Les boutons Autre objet/Écouter et le sélecteur ont été retirés à la deman
 l’utilisateur. Aucun ajout automatique à la maîtrise du vocabulaire. Le chat et la
 dictée conservent les réglages vocaux indépendants.
 
-Vérifier avec `node --test frontend/tests/visual-vocabulary.test.cjs`. Quatre tests
-passent : langues/accents/locales, langues inconnues, couverture lexicale et géométrie
-3D (bornes, étendue en profondeur et covariance non planaire des six modèles).
+Vérifier avec `node --test frontend/tests/*.test.cjs` : 39 tests passent, dont langues, mélange sans répétition, volumes des 36 objets et échantillonnage de surfaces Three.js.
 Les trois tests Python d’interface passent aussi, y compris le nouveau fichier JS.
 Vérification navigateur : Arbre/Árbol, profil espagnol restauré puis anglais rétabli,
 prononciation/rassemblement, tasse et maison en volume, points lumineux en nuage

@@ -8,11 +8,11 @@
 | Vocabulaire, grammaire, recommandations, plans | Backend implémenté |
 | Persistance et séparation des apprenants | SQLite, un processus API |
 | Interface `/ui/` | Conversation, profil complet, navigation latérale et compte regroupé ; historique et brouillon conservés |
-| Visualisation | Nuage libre de 2 100 points, six objets 3D tournants et rassemblement pendant la parole |
+| Visualisation | Choix Points / Avatar humanoïde ; 36 objets 3D texturés aléatoires, points sans interaction au toucher et rassemblement à la parole |
 | Microphone | Analyse du volume par Web Audio ; validation avec une voix réelle restante |
 | Dictée | Langue configurable, mots provisoires et relecture ; validation avec parole réelle restante |
 | Lecture vocale | Langue, voix, débit, tonalité et volume réglables ; exemple déclenché |
-| Tests actuels | Profil : 34 Node et 3 Python interface réussis ; baseline complète précédente 293 Python ; 2 avertissements |
+| Tests actuels | Présence : 39 Node et 3 Python interface réussis ; baseline complète précédente 293 Python ; 2 avertissements |
 | Validation manuelle | Chat OpenRouter réel, lecture vocale déclenchée, reprise des messages et responsive |
 | Comptes et droits | Inscription/connexion/déconnexion, cookies, sessions révocables et propriété des profils |
 | Vocal continu | Contrôleur et bouton ajoutés ; boucle réelle à essayer après inscription |
@@ -22,7 +22,7 @@
 | Révisions espacées | Réalisées : mots/règles, échéances, révélation et autoévaluation |
 | Séance du jour | Réalisée : accueil compact, priorité des révisions, reprise et compteurs en lecture seule |
 | Exercices à l’oral | Réalisés dans le plan : dictée modifiable, report explicite puis correction ; voix matérielle à valider |
-| Caméra et avatar | Aperçu local opt-in et avatar animé réalisés ; image réelle à valider après autorisation |
+| Caméra et avatar | Aperçu local opt-in séparé ; avatar humanoïde 3D/SVG au choix ; image réelle à valider après autorisation |
 | Voix temps réel externe | À réaliser ; dictée/synthèse natives et réglages disponibles |
 
 Le backend conserve la version 0.8.0-alpha.1. Le parcours plan/exercices/révisions est intégré ; la banque d’évaluation reste limitée à l’anglais.

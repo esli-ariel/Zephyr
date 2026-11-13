@@ -1,5 +1,13 @@
 # 📋 Changelog — Zéphyr
 
+## Présence et objets texturés — 13/11/2026
+
+- Choix mémorisé entre points et avatar humanoïde animé.
+- 36 objets aléatoires en 3D éclairée et texturée, moteur Three.js local ; repli Canvas/SVG.
+- Interaction au pointeur/clic/toucher/clavier sur les points supprimée.
+- Phrases d’accueil conservées ; 39 tests Node et 3 Python interface réussis. Guide PRESENCE.
+
+
 ## Phrases d’accueil conservées — 13/11/2026
 
 - Rétablissement des phrases d’accueil et d’accompagnement à la demande de l’utilisateur.
