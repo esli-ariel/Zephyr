@@ -1,5 +1,11 @@
 # 📋 Changelog — Zéphyr
 
+## Allègement de l’interface — 13/11/2026
+
+- Textes décoratifs et répétitifs retirés ou raccourcis ; aides et états utiles conservés.
+- Commandes Autre objet/Écouter et sélecteur des objets retirés. Objets et traductions restent automatiques selon le profil.
+- Gestionnaires DOM nettoyés ; 34 tests Node et 3 Python interface réussis, contrôle navigateur à 319/1280 px.
+
 ## Profil et navigation latérale — 13/11/2026
 
 - Page Mon profil : vue d’ensemble, objectifs, compétences réelles, bilans et édition intégrée.

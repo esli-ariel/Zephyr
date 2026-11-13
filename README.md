@@ -241,12 +241,12 @@ et alternent au repos avec six objets en volume tournant lentement : maison, arb
 tasse, livre, poisson et cœur. Le nom français et la traduction restent fixes sous
 l’objet ; les points conservent leur éclat, leur halo et leur interaction au pointeur.
 
-Dans « Mots en images », choisir la langue enregistre `target_language` dans le
-profil. La sélection suit également le profil restauré ou actualisé après un chat.
-Traductions hors ligne en anglais, espagnol, allemand, italien, portugais et français.
-Une langue non prise en charge est signalée, sans traduction inventée. « Autre objet »
-force la formation suivante ; « Écouter » prononce le mot dans sa langue. Ces cartes
-ne marquent pas automatiquement le vocabulaire comme appris.
+La langue des traductions suit la langue étudiée dans **Mon profil**, restaurée ou
+actualisée après un chat. Traductions hors ligne en anglais, espagnol, allemand,
+italien, portugais et français ; aucune traduction inventée pour une langue inconnue.
+Les objets se forment automatiquement. Les boutons de changement/prononciation et
+le sélecteur d’objets ont été retirés pour alléger l’interface. Ces cartes ne marquent
+pas automatiquement le vocabulaire comme appris.
 
 Validation ciblée : 4 tests Node et 3 tests d’intégration interface réussis (2 avertissements
 Python existants). Affichage et profil persisté contrôlés en navigateur, modes jour/nuit

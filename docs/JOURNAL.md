@@ -1,5 +1,14 @@
 # 📓 Journal de développement — Zéphyr
 
+## 13/11/2026 — Interface épurée et commandes d’objets retirées
+
+- Demande : retirer les textes inutiles et les boutons des objets.
+- Suppression du panneau Mots en images : boutons Autre objet/Écouter et sélecteur de langue. Objets 3D, rotation, nuage libre, brillance et noms/traductions automatiques conservés ; langue pilotée depuis Mon profil.
+- Slogans, numérotation décorative, labels techniques, pied de page de version et textes redondants retirés. Accueil du chat et textes de profil raccourcis. États vocaux et raccourcis clavier conservés pour les lecteurs d’écran ; erreurs, aide utile et confidentialité maintenues.
+- Suppression des gestionnaires et accès DOM liés aux commandes retirées ; synchronisation profil/vocabulaire conservée, langue inconnue sans traduction inventée.
+- Validation : syntaxe JS, diff, 34 tests Node et 3 Python interface réussis ; deux avertissements existants, baseline complète Python précédente 293. Navigateur : absence des trois commandes confirmée, cycle d’objets observé, réglages vocaux accessibles, 319/1280 px sans débordement.
+- Suivi et instructions de vocabulaire actualisés ; serveur local conservé et livraison Git dans la continuité du projet.
+
 ## 13/11/2026 — Profil complet et compte dans la barre latérale
 
 - Demande : mieux visualiser le profil sur une page et regrouper profil/compte dans la barre latérale.

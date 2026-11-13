@@ -67,3 +67,7 @@ html[data-theme="day"] .orb-stage{background:radial-gradient(ellipse,#9bd4dd29 0
 
 [data-point-scene="object"] .experience .orb-label{display:none}
 [data-point-scene="object"] .experience .status{width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* Keep only functional copy around the conversation. */
+#conversation-view{min-height:calc(100dvh - 100px)}.experience{justify-content:center}.experience .orb-stage{margin-top:0}.conversation .chat-heading h2{margin-top:0}.conversation .composer-foot{min-height:0}.conversation .composer-foot:has(#stop[hidden]){margin-top:0}.profile-page-heading{padding-bottom:18px}
+@media(max-width:760px){#conversation-view,.profile-page{min-height:calc(100dvh - 80px)}}

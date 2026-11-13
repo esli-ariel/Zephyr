@@ -885,3 +885,7 @@ Première priorité réalisée dans la direction immersive : accueil compact dan
 ### Profil et compte latéral — 13 novembre 2026
 
 Page complète de profil et formulaire intégré, navigation latérale et compte en bas, menu mobile au clavier. Retour à la conversation sans perdre le brouillon. 34 Node et 3 Python interface réussis ; QA de démonstration et contrôle hors session sur le serveur principal, 319/1280 px sans débordement. [Guide PROFILE](PROFILE.md).
+
+### Interface épurée — 13 novembre 2026
+
+Textes décoratifs et répétitifs allégés, commandes d’objets supprimées. Rotation, objets 3D et traductions automatiques selon le profil conservés. Aides et états accessibles utiles maintenus. 34 Node et 3 Python interface réussis ; contrôle 319/1280 px et accès aux réglages vocaux. Aucun changement backend ; baseline complète précédente 293 Python.

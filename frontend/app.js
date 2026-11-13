@@ -17,49 +17,21 @@
   const stored = key => { try { return localStorage.getItem(key); } catch { return null; } };
   const save = (key, value) => { try { localStorage.setItem(key,value); } catch {} };
   const vocabulary=window.ZephyrVocabulary;
-  const languageSelect=$('object-language-select');
-  const languageStatus=$('object-language-status');
   let objectIndex=0,objectLanguage=vocabulary.resolveLanguage(stored('zephyr.objectLanguage'))||'en';
-  let unknownLanguage='',languageSaving=false,profileEpoch=0,idleTime=0,currentShapeIndex=0;
+  let unknownLanguage='',profileEpoch=0,idleTime=0,currentShapeIndex=0;
   let captionKey='',shapeSettledTime=0,lastGeometryShape=-1;
-  languageSelect.value=objectLanguage;
-  languageStatus.textContent='Traductions hors ligne · sélectionnez la langue étudiée.';
   function applyProfile(profile){
-    profilePage?.updateSidebar(profile);
-    const voiceCode=vocabulary.resolveLanguage(profile.target_language);voiceSettings?.setProfileLanguage(voiceCode?vocabulary.languages[voiceCode].speech:null);
-    if(!profile.target_language){languageStatus.textContent=vocabulary.languages[objectLanguage||'en'].name+' · aperçu. Choisissez une langue pour l’enregistrer dans le profil.';return;}
+    profileEpoch++;profilePage?.updateSidebar(profile);
     const code=vocabulary.resolveLanguage(profile.target_language);
-    if(code){objectLanguage=code;unknownLanguage='';languageSelect.value=code;save('zephyr.objectLanguage',code);languageStatus.textContent='Langue du profil : '+vocabulary.languages[code].name+'.';}
-    else{
-      unknownLanguage=String(profile.target_language);objectLanguage=null;
-      let option=languageSelect.querySelector('[data-unsupported]');
-      if(!option){option=document.createElement('option');option.value='';option.disabled=true;option.dataset.unsupported='true';languageSelect.prepend(option);}
-      option.textContent=unknownLanguage;languageSelect.value='';
-      languageStatus.textContent='Traductions non disponibles pour « '+unknownLanguage+' ». Choisissez une des six langues proposées.';
-    }
+    voiceSettings?.setProfileLanguage(code?vocabulary.languages[code].speech:null);
+    if(!profile.target_language){objectLanguage=vocabulary.resolveLanguage(stored('zephyr.objectLanguage'))||'en';unknownLanguage='';return;}
+    objectLanguage=code;unknownLanguage=code?'':String(profile.target_language);
+    if(code)save('zephyr.objectLanguage',code);
   }
   async function refreshProfile(){
     const epoch=profileEpoch;
-    try{const profile=await request('/api/learner/profile');if(epoch===profileEpoch&&!languageSaving)applyProfile(profile);}catch{}
+    try{const profile=await request('/api/learner/profile');if(epoch===profileEpoch)applyProfile(profile);}catch{}
   }
-  languageSelect.addEventListener('change',async()=>{
-    const code=languageSelect.value;if(!vocabulary.languages[code])return;
-    profileEpoch++;objectLanguage=code;unknownLanguage='';save('zephyr.objectLanguage',code);
-    if(!ready){languageStatus.textContent='Aperçu en '+vocabulary.languages[code].name+' ; profil non synchronisé.';return;}
-    languageSaving=true;controls();languageStatus.textContent='Enregistrement de la langue…';
-    try{const profile=await request('/api/learner/profile',{method:'PUT',body:JSON.stringify({target_language:vocabulary.languages[code].profile})});applyProfile(profile);}
-    catch{languageStatus.textContent='Aperçu en '+vocabulary.languages[code].name+' ; langue non enregistrée dans le profil. Réessayez.';}
-    finally{languageSaving=false;controls();}
-  });
-  $('next-object').addEventListener('click',()=>{
-    if(mode!=='idle'||busy||listening||starting)return;
-    objectIndex=(currentShapeIndex+1)%vocabulary.objects.length;currentShapeIndex=objectIndex;idleTime=9;
-  });
-  $('read-object').addEventListener('click',()=>{
-    if(!objectLanguage||mode!=='idle'||busy||listening||starting)return;
-    const item=vocabulary.objects[currentShapeIndex];if(!voiceOn)ui.sound.click();
-    speak(item.words[objectLanguage],vocabulary.languages[objectLanguage].speech);
-  });
   const systemTheme=matchMedia('(prefers-color-scheme: light)');
   function setTheme(theme,persist=false){
     document.documentElement.dataset.theme=theme;
@@ -74,18 +46,15 @@
   $('theme-toggle').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='day'?'night':'day',true));
   systemTheme.addEventListener('change',event=>{if(!stored('zephyr.theme'))setTheme(event.matches?'day':'night');});
   function notice(text,error=false){ui.notice.textContent=text;ui.notice.classList.toggle('error',error);}
-  function state(next){if(mode!=='idle'&&next==='idle')idleTime=0;mode=next;document.body.dataset.voiceState=next;companion?.updateState(next);ui.status.textContent={idle:'Prêt à vous écouter',listening:'Je vous écoute…',thinking:'Zéphyr prépare sa réponse…',speaking:'Zéphyr vous répond…'}[next];$('activity').textContent={idle:'EN VEILLE',listening:'ÉCOUTE ACTIVE',thinking:'RÉFLEXION',speaking:'TRANSMISSION'}[next];controls();if(next==='idle')voiceLoop?.schedule();}
+  function state(next){if(mode!=='idle'&&next==='idle')idleTime=0;mode=next;document.body.dataset.voiceState=next;companion?.updateState(next);ui.status.textContent={idle:'Prêt à vous écouter',listening:'Je vous écoute…',thinking:'Zéphyr prépare sa réponse…',speaking:'Zéphyr vous répond…'}[next];controls();if(next==='idle')voiceLoop?.schedule();}
   function controls(){
     $('continuous-voice').disabled=(!ready||!recognitionType||voiceSettingsOpen)&&!voiceLoop?.enabled;
-    $('open-learning').disabled=!ready||busy||starting||languageSaving;
-    $('sidebar-learning').disabled=!ready||busy||starting||languageSaving;
-    $('open-daily-session').disabled=!ready||busy||starting||languageSaving;
+    $('open-learning').disabled=!ready||busy||starting;
+    $('sidebar-learning').disabled=!ready||busy||starting;
+    $('open-daily-session').disabled=!ready||busy||starting;
     ui.send.disabled=!ready||busy||listening||starting||learningLocked||voiceSettingsOpen||profileVisible;
     ui.mic.disabled=!ready||busy||learningLocked||voiceSettingsOpen||profileVisible||!recognitionType;
     ui.demo.disabled=busy||learningLocked||voiceSettingsOpen;
-    languageSelect.disabled=busy||listening||starting||languageSaving||learningLocked||voiceSettingsOpen;
-    $('next-object').disabled=mode!=='idle'||busy||listening||starting;
-    $('read-object').disabled=!objectLanguage||mode!=='idle'||busy||listening||starting;
     $('dictation-send').disabled=!ready||busy||listening||starting||learningLocked||voiceSettingsOpen;
   }
   async function request(path,options={},identify=true){
@@ -217,7 +186,7 @@
   accountUI=window.ZephyrAccountUI({request,onSignedIn:()=>location.reload(),onSignedOut:()=>{suspendVoice();try{localStorage.removeItem('zephyr.learnerId');}catch{}location.reload();}});
   oralAnswer=window.ZephyrOralAnswer({Recognition:recognitionType,createEngine:callbacks=>window.ZephyrVoiceEngine({...callbacks,Recognition:recognitionType,mediaDevices:navigator.mediaDevices,AudioContext:window.AudioContext||window.webkitAudioContext,synth,Utterance:window.SpeechSynthesisUtterance}),settings:()=>voiceSettings.capture,speechOptions:language=>voiceSettings.speechOptions(language),onState:next=>{if(next==='listening'||next==='speaking')beginConversation();if(next==='speaking')speechStart=performance.now();state(next==='starting'?'idle':next);},onBoundary:()=>{boundaryAt=performance.now();}});
   learningUI=window.ZephyrLearningUI({request,onProfile:applyProfile,resolveLanguage:vocabulary.resolveLanguage,oralAnswer,resolveSpeechLanguage:value=>{const code=vocabulary.resolveLanguage(value);return code?vocabulary.languages[code].speech:null;},
-    isReady:()=>ready&&!busy&&!starting&&!languageSaving,
+    isReady:()=>ready&&!busy&&!starting,
     suspend:suspendVoice,
     onLock:value=>{learningLocked=value;controls();if(!value){refreshDaily();profilePage?.refreshIfOpen();}},
   });
@@ -269,8 +238,7 @@
     $('object-french').textContent=item.fr;
     $('object-word').textContent=objectLanguage?item.words[objectLanguage]:'—';
     $('object-word').lang=objectLanguage||'fr';
-    $('object-language').textContent=objectLanguage?vocabulary.languages[objectLanguage].name:'Traduction indisponible : '+unknownLanguage;
-    canvas.setAttribute('aria-label',show?item.fr+(objectLanguage?' : '+item.words[objectLanguage]:'')+'. Nuage interactif, cliquez pour une pulsation.':'Nuage de points interactif : déplacement au pointeur, pulsation au clic ou avec Entrée.');
+    canvas.setAttribute('aria-label',show?item.fr+(objectLanguage?' : '+item.words[objectLanguage]:'. Traduction indisponible : '+unknownLanguage)+'. Nuage interactif, cliquez pour une pulsation.':'Nuage de points interactif : déplacement au pointeur, pulsation au clic ou avec Entrée.');
   }
   function resize(){
     const rect=canvas.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);
@@ -319,7 +287,6 @@
     const objectClarity=smoothForm*(1-activeWeight);
     const showCaption=mode==='idle'&&smoothForm>.98&&activeWeight<.03&&(quiet||shapeSettledTime>.7);
     caption(showCaption,currentShapeIndex);
-    $('read-object').disabled=!showCaption||!objectLanguage||busy||listening||starting;
     document.body.dataset.pointScene=mode==='idle'?(showCaption?'object':'wandering'):mode;
     const pulseAge=(now-pulseAt)/1000;
     const pulse=!quiet&&pulseAge<1.4?Math.sin(Math.min(pulseAge/.22,1)*Math.PI/2)*Math.exp(-pulseAge*2.8):0;

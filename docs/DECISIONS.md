@@ -358,3 +358,8 @@ Réutiliser ZephyrVoiceEngine dans une session orale isolée, avec langue initia
 ## ADR-022 — Profil en page et compte dans la navigation
 
 Ajouter une vue complète dans le document existant, adressable par fragment `/ui/#profil`, pour conserver la conversation et son brouillon sans nouveau routeur ni dépendance. La page lit les API profil/résumé existantes et sauvegarde par le PUT existant ; identité pédagogique et identité du compte restent distinctes. Compétences absentes et progression indisponible restent explicitement non renseignées. Déplacer le même bouton de compte dans la barre latérale afin de conserver ses flux et protections. Sur mobile, panneau latéral avec focus/clavier et fond inerte. Arrêter les médias en quittant la conversation et suspendre son rendu quand il est masqué. Aucune nouvelle persistance de données personnelles côté navigateur.
+
+
+### Complément de direction visuelle — interface épurée
+
+À la demande de l’utilisateur, garder les informations utiles et retirer slogans/labels décoratifs. Retirer les commandes de changement et de prononciation des objets ainsi que leur sélecteur ; leur cycle reste automatique, leur langue est celle du profil. Conserver noms/traductions, erreurs, aide nécessaire et annonces accessibles. L’animation et le vocal ne dépendent plus de contrôles DOM retirés.

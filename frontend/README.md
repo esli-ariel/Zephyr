@@ -107,13 +107,11 @@ une composition additive en mode nuit. Le mode jour garde une palette contrasté
 
 La table hors ligne propose six langues. `resolveLanguage` reconnaît les noms
 usuels, accents et codes régionaux ; une langue inconnue reste explicitement non
-prise en charge. Le sélecteur met à jour `target_language` dans le profil via l’API.
-Sans API ou si l’enregistrement échoue, l’affichage local est indiqué comme aperçu.
-Le profil est relu après le chat sans écraser une sélection en cours.
-
-« Autre objet » forme le modèle suivant. « Écouter » est activé seulement lorsque
-le mot est affiché et lance la synthèse avec la langue cible. Le chat et la dictée
-restent en français. Aucun ajout automatique à la maîtrise du vocabulaire.
+prise en charge. La langue suit désormais Mon profil ; le profil est également
+relu après le chat. Les objets se forment automatiquement et conservent nom/traduction.
+Les boutons Autre objet/Écouter et le sélecteur ont été retirés à la demande de
+l’utilisateur. Aucun ajout automatique à la maîtrise du vocabulaire. Le chat et la
+dictée conservent les réglages vocaux indépendants.
 
 Vérifier avec `node --test frontend/tests/visual-vocabulary.test.cjs`. Quatre tests
 passent : langues/accents/locales, langues inconnues, couverture lexicale et géométrie

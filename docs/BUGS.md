@@ -163,3 +163,7 @@ B011 traité : langues de dictée/lecture configurables et choix de voix. Les me
 ## Profil et compte latéral — 13 novembre 2026
 
 Profil désormais visualisable dans une page complète, avec formulaire intégré et compte accessible dans la navigation. Les compétences sans score restent non évaluées ; les dates absentes des anciens bilans ne sont pas inventées. Navigation mobile, focus, Tab/Échap, liens et brouillon conservé vérifiés. 34 Node et 3 Python interface réussis ; backend fonctionnel inchangé, baseline précédente 293 Python. Aucune inscription ou modification d’un compte personnel pendant la QA. Les limites vocales B008/B016 et celles de récupération de compte B015 restent ouvertes.
+
+## Nettoyage des textes et commandes d’objets — 13 novembre 2026
+
+Les anciennes mentions des boutons Autre objet/Écouter et du sélecteur décrivent les versions précédentes. Ces contrôles sont retirés, avec leurs gestionnaires DOM ; cycle et traduction suivent automatiquement le profil. Syntaxe, 34 Node et 3 Python interface réussis ; affichage 319/1280 px et réglages vocaux contrôlés. Les limites matérielles vocales et les autres travaux ouverts restent inchangés.
