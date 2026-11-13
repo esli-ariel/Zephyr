@@ -1,5 +1,14 @@
 # 📓 Journal de développement — Zéphyr
 
+## 13/11/2026 — Version 0.8.9 : objets et avatar holographiques
+
+- Direction approuvée : abandon des textures au profit de points lumineux avec contours plus lisibles. Sélection de 15 objets pour le cycle automatique ; banque de 36 géométries conservée pour de futurs affinages. 40 % des points échantillonnés sur les lignes, 60 % sur les surfaces ; contours de sphères/tores et cordes/rosace de guitare, cadre de vélo complétés.
+- Rotation limitée et lente pour conserver une silhouette lisible ; cache de quatre modèles, replis Canvas/SVG et absence d’interaction au toucher conservés.
+- Humanoïde reconstruit : tête et mâchoire, épaules et cou continus, traits en lignes, maillage et 2 500 particules. Animation vocale, clignement, mouvement réduit ; aucun accès caméra implicite. SVG de secours assorti. Générateur de textures supprimé.
+- API et OpenAPI : 0.8.9 ; serveur local relancé sur 8001 avec base/comptes existants. Documentation et cache des nouveaux fichiers synchronisés.
+- Vérification : 293 Python et 40 Node réussis, 2 avertissements existants. Test du buste : géométries finies, absence de textures, réponse vocale, repos réduit et libération complète des ressources. Syntaxe et diff contrôlés. Rendu WebGL du livre et du buste observé, synthèse native en état speaking puis retour au repos, choix restauré après rechargement, thèmes jour/nuit et 319/1280 px sans débordement, caméra inactive et aucune erreur console observée ; voix et caméra matérielles restent à valider avec l’utilisateur.
+
+
 ## 13/11/2026 — Présence au choix et objets texturés
 
 - Points / Avatar humanoïde avec préférence locale ; buste 3D stylisé animé par la voix, repli SVG et caméra locale séparée.

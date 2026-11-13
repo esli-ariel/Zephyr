@@ -1,6 +1,6 @@
 # État actuel — 13 novembre 2026
 
-**Backend 0.8.0-alpha.1 ; comptes locaux, parcours pédagogique et vocal continu.**
+**Backend 0.8.9 ; comptes locaux, parcours pédagogique et vocal continu.**
 
 | Domaine | État |
 |---|---|
@@ -8,11 +8,11 @@
 | Vocabulaire, grammaire, recommandations, plans | Backend implémenté |
 | Persistance et séparation des apprenants | SQLite, un processus API |
 | Interface `/ui/` | Conversation, profil complet, navigation latérale et compte regroupé ; historique et brouillon conservés |
-| Visualisation | Choix Points / Avatar humanoïde ; 36 objets 3D texturés aléatoires, points sans interaction au toucher et rassemblement à la parole |
+| Visualisation | Choix Points / Avatar humanoïde ; 15 objets holographiques aléatoires sans textures, points sans interaction au toucher et rassemblement à la parole |
 | Microphone | Analyse du volume par Web Audio ; validation avec une voix réelle restante |
 | Dictée | Langue configurable, mots provisoires et relecture ; validation avec parole réelle restante |
 | Lecture vocale | Langue, voix, débit, tonalité et volume réglables ; exemple déclenché |
-| Tests actuels | Présence : 39 Node et 3 Python interface réussis ; baseline complète précédente 293 Python ; 2 avertissements |
+| Tests actuels | Version 0.8.9 : 40 Node et 293 Python réussis ; 2 avertissements existants |
 | Validation manuelle | Chat OpenRouter réel, lecture vocale déclenchée, reprise des messages et responsive |
 | Comptes et droits | Inscription/connexion/déconnexion, cookies, sessions révocables et propriété des profils |
 | Vocal continu | Contrôleur et bouton ajoutés ; boucle réelle à essayer après inscription |
@@ -22,10 +22,10 @@
 | Révisions espacées | Réalisées : mots/règles, échéances, révélation et autoévaluation |
 | Séance du jour | Réalisée : accueil compact, priorité des révisions, reprise et compteurs en lecture seule |
 | Exercices à l’oral | Réalisés dans le plan : dictée modifiable, report explicite puis correction ; voix matérielle à valider |
-| Caméra et avatar | Aperçu local opt-in séparé ; avatar humanoïde 3D/SVG au choix ; image réelle à valider après autorisation |
+| Caméra et avatar | Aperçu local opt-in séparé ; avatar humanoïde holographique 3D/SVG au choix ; image réelle à valider après autorisation |
 | Voix temps réel externe | À réaliser ; dictée/synthèse natives et réglages disponibles |
 
-Le backend conserve la version 0.8.0-alpha.1. Le parcours plan/exercices/révisions est intégré ; la banque d’évaluation reste limitée à l’anglais.
+Le backend annonce la version 0.8.9. Le parcours plan/exercices/révisions est intégré ; la banque d’évaluation reste limitée à l’anglais.
 L’interface est servie par FastAPI, sans Next.js ni processus frontend distinct.
 L’amplitude de la sphère suit le micro à l’écoute. Pendant la synthèse vocale, elle
 utilise une animation liée à la lecture ; aucun accès PCM au son synthétisé.

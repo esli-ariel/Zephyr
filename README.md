@@ -1,6 +1,11 @@
 # 🌪️ Zéphyr
 
-Assistant d’apprentissage des langues. La version **0.8.0-alpha.1** fournit un
+## Version 0.8.9 — présence holographique
+
+Objets sans textures : 15 silhouettes en points lumineux, contours renforcés et rotation douce. Avatar humanoïde redessiné en buste continu avec visage en lignes, maillage et particules ; bouche animée par la voix. Choix Points / Avatar mémorisé, phrases d’accueil conservées et aucune interaction souris/toucher sur les points. [Guide de présence](docs/PRESENCE.md). Validation : 293 Python et 40 Node réussis (2 avertissements existants). Serveur local : `/ui/`, API et OpenAPI annoncent 0.8.9.
+
+
+Assistant d’apprentissage des langues. La version **0.8.9** fournit un
 prototype backend Python/FastAPI : conversation avec OpenRouter, profil apprenant,
 évaluation adaptative CECRL, leçons, exercices, correction, vocabulaire,
 grammaire, recommandations et plans personnalisés.
@@ -205,7 +210,7 @@ Voir [l’état du projet](docs/PROGRESSION.md) et les [points ouverts](docs/BUG
 
 Ouvrir `/ui/` sur le même port que FastAPI. Lors de la validation locale du 12 novembre,
 le port 8000 était occupé : lancement avec `python -m uvicorn app.main:app --host 127.0.0.1 --port 8001`,
-puis `http://127.0.0.1:8001/ui/`. Le backend garde sa version 0.7.2.
+puis `http://127.0.0.1:8001/ui/`. Le backend annonce désormais la version 0.8.9.
 
 - Création/restauration de l’apprenant et reprise des messages, identifiant conservé dans le navigateur.
 - Sphère de 2 100 points : volume réel du microphone à l’écoute, animation pendant la lecture vocale.
@@ -236,7 +241,7 @@ au repos, ondulations à l’écoute, torsion en spirale en réflexion, expansio
 ## Nuage libre et objets 3D — 12 novembre 2026
 
 Les points se promènent librement, se rassemblent pendant la synthèse vocale
-et alternent au repos avec 36 objets aléatoires en volume, éclairés et texturés. Le nom français et la traduction restent fixes sous
+et alternent au repos avec 15 objets sélectionnés, aléatoires, en points et contours holographiques sans texture. Le nom français et la traduction restent fixes sous
 l’objet ; les points conservent leur éclat et leur halo, sans interaction au pointeur.
 
 La langue des traductions suit la langue étudiée dans **Mon profil**, restaurée ou
@@ -302,7 +307,7 @@ Validation de ce changement : **23 tests Node et 3 Python interface réussis**, 
 
 **Mon parcours → Mon plan** prépare et enchaîne les leçons/exercices après validation ; les corrections et l’activité en cours sont sauvegardées. **Révisions** permet d’ajouter des mots/règles et de les retrouver selon les échéances calculées (1/3/7/14/30/60 jours, oubli : 10 minutes).
 
-**Points / Avatar humanoïde** choisit la présence centrale et mémorise ce choix. **Caméra** ouvre un aperçu local sur activation volontaire. Les 36 objets aléatoires ont des matières procédurales avec Three.js local ; voir [PRESENCE](docs/PRESENCE.md). Aucune image enregistrée ou envoyée. Guides : [séances et révisions](docs/JOURNEY.md), [caméra et avatar](docs/COMPANION.md).
+**Points / Avatar humanoïde** choisit la présence centrale et mémorise ce choix. **Caméra** ouvre un aperçu local sur activation volontaire. Les 15 objets aléatoires et le buste humanoïde ont un rendu holographique sans texture avec Three.js local ; voir [PRESENCE](docs/PRESENCE.md). Aucune image enregistrée ou envoyée. Guides : [séances et révisions](docs/JOURNEY.md), [caméra et avatar](docs/COMPANION.md).
 
 Validation actuelle : **287 Python et 27 Node réussis**, deux avertissements connus. Parcours navigateur complet avec contenus simulés ; aucune nouvelle validation pédagogique IA réelle, ni boucle parlée ou image caméra réelle. Serveur local relancé sur 8001 ; comptes conservés.
 

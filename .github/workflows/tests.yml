@@ -23,7 +23,7 @@ jobs:
       - run: node --check frontend/profile-page.js
       - run: node --check frontend/presence-ui.js
       - run: node --check frontend/presence-3d.mjs
-      - run: node --check frontend/presence-materials.mjs
+      - run: node --check frontend/humanoid.mjs
       - run: node --check frontend/app.js
       - run: node --check frontend/oral-answer.js
       - run: node --check frontend/journey-ui.js

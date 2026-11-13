@@ -54,7 +54,7 @@ async def documented_request_marker(
 app = FastAPI(
     title=settings.app_name,
     description="API de l'assistant intelligent Zéphyr",
-    version="0.8.0-alpha.1",
+    version="0.8.9",
     lifespan=lifespan,
     dependencies=[Depends(documented_request_marker)],
 )

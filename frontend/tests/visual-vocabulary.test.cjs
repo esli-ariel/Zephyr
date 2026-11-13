@@ -14,7 +14,7 @@ test('Unknown or missing profile languages never become an English translation',
   for(const input of [null,undefined,'','bambara','wolof','en-unknown'])assert.equal(resolveLanguage(input),null);
 });
 test('Every object has a unique identity and a word in each advertised language',()=>{
-  assert.ok(objects.length>=36);
+  assert.ok(objects.length===15);
   assert.equal(new Set(objects.map(item=>item.id)).size,objects.length);
   for(const item of objects){
     assert.ok(item.fr.trim());

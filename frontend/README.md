@@ -1,9 +1,8 @@
 # Interface locale Zéphyr
 
-## Présence actuelle — 13 novembre 2026
+## Présence actuelle — version 0.8.9
 
-Choix mémorisé **Points / Avatar humanoïde**, 36 objets aléatoires, éclairage et textures procédurales via Three.js local (MIT), sans CDN ni build. Points sans interaction souris/toucher/clavier. WebGL 2 ou repli Canvas/SVG ; guide [PRESENCE](../docs/PRESENCE.md). 39 Node et 3 Python interface réussis ; moteur WebGL et responsive 319/1280 px vérifiés. Les validations datées ci-dessous décrivent aussi les étapes précédentes.
-
+Choix mémorisé **Points / Avatar humanoïde**. 15 silhouettes aléatoires en points et contours holographiques ; textures retirées. Guitare/vélo détaillés, rotation douce. Avatar redessiné en buste continu avec traits en lignes, maillage et particules. Three.js local (MIT), sans CDN ni build. Points sans interaction souris/toucher/clavier ; repli Canvas/SVG sans WebGL 2. Guide [PRESENCE](../docs/PRESENCE.md). Validation de version : 293 Python et 40 Node réussis. Les étapes datées ci-dessous décrivent aussi l’historique.
 
 HTML, CSS et JavaScript natifs, servis par FastAPI sur `/ui/`. Aucun build ni npm install.
 Depuis `backend/` avec le venv activé :
@@ -99,7 +98,7 @@ objets au repos, nuage en spirale lors de la réflexion et rassemblement pendant
 la lecture vocale. Un cycle de repos dure 20 secondes : promenade, formation, objet
 lisible, dissolution. Les légendes apparaissent une fois la forme stabilisée.
 
-Le catalogue comprend désormais 36 modèles, dont :
+Le cycle utilise désormais 15 modèles sélectionnés (banque géométrique de 36), dont :
 maison (corps, toit prismatique, cheminée), arbre (tronc et feuillage), tasse creuse
 avec anse, livre épais, poisson avec nageoires et cœur gonflé. Les points sont
 échantillonnés sur les surfaces, puis tournés autour des axes Y/X avant projection.
@@ -117,7 +116,7 @@ Les boutons Autre objet/Écouter et le sélecteur ont été retirés à la deman
 l’utilisateur. Aucun ajout automatique à la maîtrise du vocabulaire. Le chat et la
 dictée conservent les réglages vocaux indépendants.
 
-Vérifier avec `node --test frontend/tests/*.test.cjs` : 39 tests passent, dont langues, mélange sans répétition, volumes des 36 objets et échantillonnage de surfaces Three.js.
+Vérifier avec `node --test frontend/tests/*.test.cjs` : 40 tests passent, dont langues, mélange sans répétition, volumes des 15 objets actifs et échantillonnage de surfaces Three.js.
 Les trois tests Python d’interface passent aussi, y compris le nouveau fichier JS.
 Vérification navigateur : Arbre/Árbol, profil espagnol restauré puis anglais rétabli,
 prononciation/rassemblement, tasse et maison en volume, points lumineux en nuage

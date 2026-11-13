@@ -318,7 +318,7 @@
       const x=(p.x*cy+p.z*sy)*wobble+tangent*p.z,y=p.y*wobble+tangent*p.x,z=(p.z*cy-p.x*sy)*wobble;
       const free={x:p.freeX+(!quiet?.10*Math.sin(motionTime*.7+p.phase):0),y:p.freeY+(!quiet?.09*Math.cos(motionTime*.5+p.phase):0),z:p.freeZ};
       const modelPoint=model[index];
-      const objectYaw=quiet?.45:motionTime*.32+.45;
+      const objectYaw=quiet?.45:Math.sin(motionTime*.18)*.65-.20;
       const objectPitch=quiet?-.16:-.16+Math.sin(motionTime*.25)*.10;
       const ox=modelPoint.x*Math.cos(objectYaw)+modelPoint.z*Math.sin(objectYaw);
       const oz=modelPoint.z*Math.cos(objectYaw)-modelPoint.x*Math.sin(objectYaw);

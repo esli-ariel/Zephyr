@@ -1,6 +1,6 @@
 import * as THREE from './vendor/three/three.module.js';
 import {MeshSurfaceSampler} from './vendor/three/MeshSurfaceSampler.js';
-import {createSurfaceMaterials} from './presence-materials.mjs';
+import {createHumanoid} from './humanoid.mjs?v=0.8.9-hologram';
 
 function primitive(part){
   if(part.kind==='sphere')return new THREE.SphereGeometry(1,24,16);
@@ -17,6 +17,21 @@ function primitive(part){
   throw new Error('Unsupported 3D primitive: '+part.kind);
 }
 
+function contourGeometry(part,geometry){
+  const outline=new THREE.EdgesGeometry(geometry,35),values=[...outline.attributes.position.array];outline.dispose();
+  const curve=points=>{for(let i=1;i<points.length;i++)values.push(...points[i-1],...points[i]);};
+  const ring=(fn,arc=Math.PI*2)=>curve(Array.from({length:65},(_,i)=>fn(i/64*arc)));
+  if(part.kind==='sphere'){
+    ring(a=>[Math.cos(a),Math.sin(a),0]);ring(a=>[0,Math.sin(a),Math.cos(a)]);
+    ring(a=>[Math.cos(a),0,Math.sin(a)]);
+  }else if(part.kind==='torus'){
+    for(const v of [0,Math.PI,Math.PI/2])ring(a=>{const radius=1+part.tube*Math.cos(v),x=radius*Math.cos(a),y=radius*Math.sin(a),z=part.tube*Math.sin(v);return part.horizontal?[x,z,y]:[x,y,z];},part.arc||Math.PI*2);
+  }else if(part.kind==='cone'){
+    for(let i=0;i<4;i++){const a=i*Math.PI/2;curve([[0,-1,0],[Math.cos(a),1,Math.sin(a)]]);}
+  }
+  const result=new THREE.BufferGeometry();result.setAttribute('position',new THREE.Float32BufferAttribute(values,3));return result;
+}
+
 export function buildVisualObject(vocabulary,id,count=2100,materials={}){
   const group=new THREE.Group(),geometries=[],samplers=[];
   const owned=!materials.surface&&!materials.createSurface;
@@ -27,10 +42,11 @@ export function buildVisualObject(vocabulary,id,count=2100,materials={}){
   for(const [partIndex,part] of vocabulary.getModelParts(id).entries()){
     const geometry=primitive(part),scale=new THREE.Vector3(...(part.scale||[1,1,1])),center=new THREE.Vector3(...(part.center||[0,0,0]));
     const rotation=new THREE.Quaternion().setFromEuler(new THREE.Euler(...(part.rotate||[0,0,0]),'ZYX'));
-    geometry.applyMatrix4(new THREE.Matrix4().compose(center,rotation,scale));geometry.computeVertexNormals();
-    const mesh=new THREE.Mesh(geometry,materials.createSurface?materials.createSurface(id,part,partIndex):surface),edges=new THREE.EdgesGeometry(geometry,35);
+    const edges=contourGeometry(part,geometry),matrix=new THREE.Matrix4().compose(center,rotation,scale);
+    geometry.applyMatrix4(matrix);edges.applyMatrix4(matrix);geometry.computeVertexNormals();
+    const mesh=new THREE.Mesh(geometry,materials.createSurface?materials.createSurface(id,part,partIndex):surface);
     mesh.userData.surface=true;group.add(mesh,new THREE.LineSegments(edges,edge));geometries.push(geometry,edges);
-    samplers.push({weight:part.weight,sampler:new MeshSurfaceSampler(mesh).setRandomGenerator(random).build()});
+    samplers.push({weight:part.weight,edges:edges.attributes.position.array,sampler:new MeshSurfaceSampler(mesh).setRandomGenerator(random).build()});
   }
   // Catalogue coordinates use downward-positive Y; convert once to Three's world.
   group.scale.y=-1;
@@ -38,45 +54,9 @@ export function buildVisualObject(vocabulary,id,count=2100,materials={}){
   for(let i=0;i<count;i++){
     let pick=random()*total,selected=samplers.at(-1);
     for(const item of samplers){pick-=item.weight;if(pick<0){selected=item;break;}}
-    selected.sampler.sample(point);samples.set([point.x,-point.y,point.z],i*3);
+    if(selected.edges.length&&random()<.40){const e=selected.edges,n=Math.floor(random()*(e.length/6))*6,t=random();point.set(e[n]*(1-t)+e[n+3]*t,e[n+1]*(1-t)+e[n+4]*t,e[n+2]*(1-t)+e[n+5]*t);}else selected.sampler.sample(point);samples.set([point.x,-point.y,point.z],i*3);
   }
   return {group,samples,dispose(){geometries.forEach(item=>item.dispose());if(owned){surface.dispose();edge.dispose();}}};
-}
-
-function humanoid(){
-  const group=new THREE.Group(),head=new THREE.Group(),eyes=[],resources=[];
-  const skin=new THREE.MeshStandardMaterial({color:0xc4a28b,roughness:.68,metalness:.03});
-  const cloth=new THREE.MeshStandardMaterial({color:0x164652,roughness:.55,metalness:.15});
-  const hair=new THREE.MeshStandardMaterial({color:0x17212b,roughness:.8});
-  const white=new THREE.MeshStandardMaterial({color:0xeee8df,roughness:.4});
-  const iris=new THREE.MeshStandardMaterial({color:0x28574e,roughness:.3});
-  const dark=new THREE.MeshStandardMaterial({color:0x111e23,roughness:.5});
-  const lips=new THREE.MeshStandardMaterial({color:0x705047,roughness:.75});
-  const add=(parent,material,scale,position,geometry=new THREE.SphereGeometry(1,32,24))=>{const mesh=new THREE.Mesh(geometry,material);mesh.scale.set(...scale);mesh.position.set(...position);parent.add(mesh);resources.push(geometry);return mesh;};
-  add(group,cloth,[.49,.51,.27],[0,-.73,0]);add(group,cloth,[.73,.26,.30],[0,-.43,0]);
-  for(const sign of [-1,1]){const arm=add(group,cloth,[.16,.43,.18],[sign*.64,-.75,0]);arm.rotation.z=sign*.12;}
-  add(group,skin,[.135,.23,.14],[0,-.17,.015]);group.add(head);
-  add(head,hair,[.435,.55,.33],[0,.43,-.115]);
-  add(head,skin,[.405,.55,.36],[0,.39,0]);add(head,skin,[.29,.24,.26],[0,.01,.04]);
-  const cap=new THREE.SphereGeometry(1,32,20,0,Math.PI*2,0,Math.PI/2);add(head,hair,[.43,.29,.38],[0,.71,-.005],cap);
-  for(const sign of [-1,1]){
-    add(head,skin,[.07,.13,.08],[sign*.405,.34,-.005]);
-    const eye=new THREE.Group();eye.position.set(sign*.155,.46,.31);head.add(eye);
-    add(eye,white,[.105,.055,.055],[0,0,0]);const pupil=add(eye,iris,[.041,.041,.016],[0,0,.051]);add(eye,dark,[.019,.023,.009],[0,0,.064]);add(eye,white,[.009,.010,.005],[-.011,.013,.073]);eyes.push({group:eye,pupil});
-    const brow=add(head,hair,[.115,.020,.023],[sign*.155,.565,.315]);brow.rotation.z=sign*-.10;
-  }
-  add(head,skin,[.061,.12,.085],[0,.315,.365]);add(head,skin,[.075,.047,.075],[0,.235,.405]);
-  const mouth=add(head,lips,[.115,.018,.022],[0,.115,.334]);
-  const rim=new THREE.Mesh(new THREE.TorusGeometry(.68,.009,8,96),new THREE.MeshBasicMaterial({color:0x73e4df,transparent:true,opacity:.18}));rim.rotation.x=Math.PI/2;rim.position.y=-1.24;group.add(rim);resources.push(rim.geometry);
-  return {group,update({time,volume,state,quiet,day}){
-    const talking=state==='speaking';mouth.scale.y=.018+(talking?(quiet?.025:.018+volume*.065):0);
-    const cycle=time%5.4,blink=quiet?0:cycle<.18?Math.sin(cycle/.18*Math.PI):0;
-    for(const eye of eyes){eye.group.scale.y=1-blink*.93;eye.pupil.position.x=0;}
-    head.rotation.y=quiet?0:Math.sin(time*.38)*.045;
-    head.rotation.z=quiet?0:state==='thinking'?-.065+Math.sin(time*.7)*.025:Math.sin(time*.5)*.012;
-    group.position.y=.08+(quiet?0:Math.sin(time*1.5)*.012);
-    cloth.color.set(day?'#237c82':'#164652');skin.color.set(day?'#c5a58c':'#bd9b85');
-  },dispose(){resources.forEach(item=>item.dispose());[skin,cloth,hair,white,iris,dark,lips,rim.material].forEach(item=>item.dispose());}};
 }
 
 export function createPresenceScene({stage,vocabulary,onReady,onUnavailable,count=2100}){
@@ -85,18 +65,17 @@ export function createPresenceScene({stage,vocabulary,onReady,onUnavailable,coun
   const renderer=new THREE.WebGLRenderer({canvas,context,alpha:true,antialias:true,powerPreference:'low-power'});renderer.setClearColor(0,0);renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.6));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;
   stage.prepend(canvas);const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(38,1,.1,40);camera.position.z=4.4;
   scene.add(new THREE.HemisphereLight(0xffffff,0x26333b,2.1));const key=new THREE.DirectionalLight(0xfff0da,3.0);key.position.set(-3,4,5);scene.add(key);const rimLight=new THREE.DirectionalLight(0x77e4e1,2.4);rimLight.position.set(3,1,-3);scene.add(rimLight);
-  const avatar=humanoid();scene.add(avatar.group);
+  const avatar=createHumanoid();scene.add(avatar.group);
   const positions=new Float32Array(count*3),sizes=new Float32Array(count),geometry=new THREE.BufferGeometry();for(let i=0;i<count;i++)sizes[i]=.7+((i*.75487766)%1)*.65;
   geometry.setAttribute('position',new THREE.BufferAttribute(positions,3).setUsage(THREE.DynamicDrawUsage));geometry.setAttribute('aSize',new THREE.BufferAttribute(sizes,1));
-  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{uColor:{value:new THREE.Color('#73e4df')},uRatio:{value:renderer.getPixelRatio()},uOpacity:{value:1}},
-    vertexShader:`attribute float aSize;uniform float uRatio;varying float vDepth;void main(){vec4 mv=modelViewMatrix*vec4(position,1.0);gl_Position=projectionMatrix*mv;gl_PointSize=clamp(aSize*23.0/-mv.z*uRatio,1.0,12.0*uRatio);vDepth=clamp((position.z+1.6)/3.2,.0,1.0);}`,
+  const material=new THREE.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{uColor:{value:new THREE.Color('#73e4df')},uRatio:{value:renderer.getPixelRatio()},uSize:{value:23},uOpacity:{value:1}},
+    vertexShader:`attribute float aSize;uniform float uRatio;uniform float uSize;varying float vDepth;void main(){vec4 mv=modelViewMatrix*vec4(position,1.0);gl_Position=projectionMatrix*mv;gl_PointSize=clamp(aSize*uSize/-mv.z*uRatio,1.0,12.0*uRatio);vDepth=clamp((position.z+1.6)/3.2,.0,1.0);}`,
     fragmentShader:`uniform vec3 uColor;uniform float uOpacity;varying float vDepth;void main(){float r=length(gl_PointCoord-.5)*2.0;if(r>1.0)discard;float halo=pow(1.0-r,2.2);float core=1.0-smoothstep(.0,.32,r);float alpha=(halo*.48+core*.72)*(.48+vDepth*.52)*uOpacity;vec3 tint=pow(uColor,vec3(1.0/2.2));gl_FragColor=vec4(tint+core*.12,alpha);}`});
   const cloud=new THREE.Points(geometry,material);cloud.frustumCulled=false;scene.add(cloud);
   const surface=new THREE.MeshBasicMaterial({color:0x73e4df,transparent:true,opacity:.025,side:THREE.DoubleSide,depthWrite:false});
   const edge=new THREE.LineBasicMaterial({color:0x73e4df,transparent:true,opacity:.11,depthWrite:false});
-  const surfaces=createSurfaceMaterials();
   const cache=new Map();let currentId=null,current=null,width=0,height=0,ready=true,disposed=false,first=true;
-  function object(id){if(cache.has(id))return cache.get(id);const entry=buildVisualObject(vocabulary,id,count,{surface,edge,createSurface:surfaces.surface});cache.set(id,entry);scene.add(entry.group);entry.group.visible=false;if(cache.size>4){const [key,value]=cache.entries().next().value;if(key!==id){scene.remove(value.group);value.dispose();cache.delete(key);}}return entry;}
+  function object(id){if(cache.has(id))return cache.get(id);const entry=buildVisualObject(vocabulary,id,count,{surface,edge});cache.set(id,entry);scene.add(entry.group);entry.group.visible=false;if(cache.size>4){const [key,value]=cache.entries().next().value;if(key!==id){scene.remove(value.group);value.dispose();cache.delete(key);}}return entry;}
   canvas.addEventListener('webglcontextlost',event=>{event.preventDefault();ready=false;onUnavailable();});
   canvas.addEventListener('webglcontextrestored',()=>{if(!disposed){ready=true;first=true;onReady();}});
   onReady();
@@ -106,16 +85,16 @@ export function createPresenceScene({stage,vocabulary,onReady,onUnavailable,coun
     if(width!==frame.width||height!==frame.height){width=frame.width;height=frame.height;renderer.setSize(width,height,false);camera.aspect=width/height;camera.position.z=4.4/Math.min(1,camera.aspect*1.25);camera.updateProjectionMatrix();}
     const human=frame.mode==='humanoid';avatar.group.visible=human;cloud.visible=!human;
     if(current)current.group.visible=false;
-    const day=frame.theme>.5;scene.background=null;
+    const day=frame.theme>.5;scene.background=null;material.uniforms.uSize.value=23;
     if(human){avatar.update({time:frame.time,volume:frame.volume,state:frame.state,quiet:frame.quiet,day});}
     else{
       if(currentId!==frame.objectId){currentId=frame.objectId;current=object(currentId);}
-      current.group.visible=frame.form>.02&&frame.state==='idle';current.group.rotation.set(frame.quiet?-.16:-.16+Math.sin(frame.time*.25)*.10,frame.quiet?.45:frame.time*.32+.45,0);
-      const opacity=THREE.MathUtils.smoothstep(frame.form,.18,.95);current.group.traverse(node=>{if(node.userData.surface){node.material.opacity=opacity;node.material.depthWrite=opacity>.98;}});
-      edge.opacity=0;material.uniforms.uOpacity.value=1-frame.form*.80;
-      surface.opacity=0;surface.color.set(day?'#207b81':'#73e4df');edge.color.copy(surface.color);
+      current.group.visible=frame.form>.02&&frame.state==='idle';current.group.rotation.set(frame.quiet?-.16:-.16+Math.sin(frame.time*.25)*.10,frame.quiet?.28:Math.sin(frame.time*.18)*.65-.20,0);
+      const opacity=THREE.MathUtils.smoothstep(frame.form,.18,.95);
+      edge.opacity=opacity*(day?.28:.23);material.uniforms.uOpacity.value=1;material.uniforms.uSize.value=23-7*frame.form;
+      surface.opacity=opacity*.012;surface.color.set(day?'#207b81':'#73e4df');edge.color.copy(surface.color);
       material.blending=day?THREE.NormalBlending:THREE.AdditiveBlending;material.uniforms.uColor.value.setHSL((187+Math.sin(frame.time*.19)*8+(frame.state==='thinking'?34:0))/360,.60,day?.27:.62);
-      const yaw=frame.quiet?.45:frame.time*.32+.45,pitch=frame.quiet?-.16:-.16+Math.sin(frame.time*.25)*.10,cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
+      const yaw=frame.quiet?.28:Math.sin(frame.time*.18)*.65-.20,pitch=frame.quiet?-.16:-.16+Math.sin(frame.time*.25)*.10,cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);
       for(let i=0;i<count;i++){
         const index=i*3,y=1-2*(i+.5)/count,r=Math.sqrt(1-y*y),angle=i*2.399963229728653,phase=i*.73;
         const freeX=Math.sin(i*71.17)*1.30+(frame.quiet?0:Math.sin(frame.time*.7+phase)*.10),freeY=Math.cos(i*17.91)*.95+(frame.quiet?0:Math.cos(frame.time*.5+phase)*.09),freeZ=Math.sin(i*31.7)*.55;
@@ -132,5 +111,5 @@ export function createPresenceScene({stage,vocabulary,onReady,onUnavailable,coun
       geometry.attributes.position.needsUpdate=true;first=false;
     }
     renderer.render(scene,camera);return true;
-  },dispose(){disposed=true;ready=false;for(const value of cache.values())value.dispose();avatar.dispose();surfaces.dispose();geometry.dispose();material.dispose();surface.dispose();edge.dispose();renderer.dispose();canvas.remove();}};
+  },dispose(){disposed=true;ready=false;for(const value of cache.values())value.dispose();avatar.dispose();geometry.dispose();material.dispose();surface.dispose();edge.dispose();renderer.dispose();canvas.remove();}};
 }

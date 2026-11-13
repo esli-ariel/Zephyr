@@ -1,5 +1,13 @@
 # 📋 Changelog — Zéphyr
 
+## [0.8.9] — 13/11/2026 — présence holographique
+
+- Retrait des textures ; 15 objets en points lumineux et contours, rotation douce et cycle aléatoire sans répétition immédiate. Détails de guitare et cadre de vélo renforcés.
+- Avatar humanoïde redessiné : buste continu, visage en lignes, maillage et particules ; mouvement des yeux et de la bouche lié aux états vocaux. Repli SVG assorti.
+- Choix mémorisé, absence d’interaction tactile, accueil, traduction et thèmes conservés.
+- API et OpenAPI passent en 0.8.9. 293 Python et 40 Node réussis ; 2 avertissements de dépendances existants. Guide et suivi actualisés.
+
+
 ## Présence et objets texturés — 13/11/2026
 
 - Choix mémorisé entre points et avatar humanoïde animé.

@@ -2,7 +2,7 @@
 
 Ouvrir **Caméra**, près du microphone. Le panneau est indépendant de l’authentification : l’exemple vocal fonctionne avant connexion ; la conversation personnelle nécessite votre compte.
 
-Choisir **Avatar humanoïde** ou **Points** sous la scène principale. Le buste 3D stylisé suit les états repos, écoute, réflexion et parole ; la bouche suit une enveloppe de synthèse, sans synchronisation phonétique. Repli SVG sans WebGL 2, thèmes et mouvement réduit conservés. Le choix est mémorisé et n’active pas la caméra. Voir [PRESENCE.md](PRESENCE.md).
+Choisir **Avatar humanoïde** ou **Points** sous la scène principale. Le buste 3D holographique redessiné en version 0.8.9 suit les états repos, écoute, réflexion et parole ; la bouche suit une enveloppe de synthèse, sans synchronisation phonétique. Repli SVG sans WebGL 2, thèmes et mouvement réduit conservés. Le choix est mémorisé et n’active pas la caméra. Voir [PRESENCE.md](PRESENCE.md).
 
 **Activer ma caméra** demande une entrée vidéo seule (`audio: false`), affiche un aperçu local en miroir puis permet l’arrêt. La caméra ne démarre pas à l’ouverture du panneau ou au chargement. L’activation en attente reste annulable. Masquer le panneau, ouvrir un dialogue de compte/parcours/réglages, passer en arrière-plan ou quitter libère les pistes. Une autorisation accordée après annulation libère immédiatement le flux tardif. Déconnexion matérielle et erreurs de permission sont signalées.
 

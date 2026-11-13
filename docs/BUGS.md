@@ -1,6 +1,6 @@
 # Points ouverts — Zéphyr
 
-Mise à jour : 13 novembre 2026 — backend 0.8.0-alpha.1.
+Mise à jour : 13 novembre 2026 — backend 0.8.9.
 
 Les points ouverts ci-dessous comprennent des défauts, limites techniques et
 travaux restants. « Résolu » concerne le périmètre indiqué, sans préjuger d’une
@@ -103,7 +103,7 @@ sans mesure PCM, reconnaissance et lecture toujours en français.
 
 | ID | Point | État |
 |---|---|---|
-| B012 | Couverture des traductions d’objets | 36 objets texturés et six langues hors ligne ; langues inconnues signalées. Autres langues restantes. |
+| B012 | Couverture des traductions d’objets | 15 objets holographiques et six langues hors ligne ; langues inconnues signalées. Autres langues restantes. |
 | B013 | Objets plats et points ternes dans l’ébauche | Corrigé : surfaces en volume, rotation Y/X, lumière/opacité et accents renforcés. |
 
 Le sélecteur « Mots en images » sauvegarde la langue cible du profil. Un échec
@@ -173,3 +173,7 @@ Les anciennes mentions des boutons Autre objet/Écouter et du sélecteur décriv
 - WebGL 2 nécessaire aux matières ; repli points Canvas / avatar SVG sans textures, perte/restauration du contexte à valider sur matériel concerné.
 - Objets procéduraux texturés et humanoïde stylisé ; modèles photoréalistes et synchronisation phonétique non réalisés.
 - Tests des 36 géométries et tirages réussis ; rendu WebGL observé dans le navigateur, caméra inactive. Interaction des points retirée volontairement.
+
+## Ajustement 0.8.9 — direction holographique retenue
+
+Les textures et leur générateur ont été retirés à la demande de l’utilisateur : objets en points/contours, 15 silhouettes actives sur une banque géométrique de 36, guitare et vélo détaillés. Avatar reconstruit en buste continu holographique. Les limites de photoréalisme ne sont plus l’objectif retenu ; WebGL 2 reste requis pour les contours 3D et le nouveau buste, avec replis Canvas/SVG. Bouche par enveloppe vocale, sans synchronisation phonétique ni analyse du visage.
