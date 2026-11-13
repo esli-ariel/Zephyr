@@ -353,3 +353,8 @@ Respecter la ligne immersive : une carte dans le panneau de conversation et un o
 ## ADR-021 — Brouillon oral séparé du chat et correction explicite
 
 Réutiliser ZephyrVoiceEngine dans une session orale isolée, avec langue initiale du profil et choix explicite si inconnue. Aucun autosend du chat, ni déduction d’option QCM. Le texte dicté peut être modifié, puis reporté par clic, avant un second clic de correction. Lecture/relecture lente utilisent les voix et paramètres natifs. Libérer la session à la fermeture/navigation/arrière-plan et ignorer les événements tardifs ; transmettre seulement les états/volume au nuage/avatar. Aucun enregistrement audio ni score de prononciation. Tests et QA simulée distincts de la validation matérielle restante.
+
+
+## ADR-022 — Profil en page et compte dans la navigation
+
+Ajouter une vue complète dans le document existant, adressable par fragment `/ui/#profil`, pour conserver la conversation et son brouillon sans nouveau routeur ni dépendance. La page lit les API profil/résumé existantes et sauvegarde par le PUT existant ; identité pédagogique et identité du compte restent distinctes. Compétences absentes et progression indisponible restent explicitement non renseignées. Déplacer le même bouton de compte dans la barre latérale afin de conserver ses flux et protections. Sur mobile, panneau latéral avec focus/clavier et fond inerte. Arrêter les médias en quittant la conversation et suspendre son rendu quand il est masqué. Aucune nouvelle persistance de données personnelles côté navigateur.

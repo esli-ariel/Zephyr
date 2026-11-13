@@ -126,5 +126,5 @@ window.ZephyrLearningUI = function({request,onProfile,suspend,onLock,isReady,res
   dialog.addEventListener('close',()=>{oralAnswer.unmount();onLock(false);});
   function open(next=section){if(!isReady())return;suspend();dialog.showModal();onLock(true);task(()=>loadSection(next));}
   document.getElementById('open-learning').addEventListener('click',()=>open());
-  return {open};
+  return {open,close:()=>{if(dialog.open)dialog.close();}};
 };

@@ -159,3 +159,7 @@ B011 traité : langues de dictée/lecture configurables et choix de voix. Les me
 - Résumé quotidien isolé en lecture seule, compteurs du plan courant et des notions distinctes ; changement de langue et fuseau local couverts.
 - 293 Python et 34 Node réussis ; dictée/contenus simulés en QA navigateur, 319/1280 px sans débordement. B008/B016 (matériel vocal réel), B009 (PCM synthèse), B005/B007/B014/B015 restent ouverts.
 - Étapes suivantes : mises en situation guidées, ajout d’un mot sélectionné dans le chat, analyse d’image sur action volontaire ; ni vision ni synchronisation phonétique revendiquées dans cette étape.
+
+## Profil et compte latéral — 13 novembre 2026
+
+Profil désormais visualisable dans une page complète, avec formulaire intégré et compte accessible dans la navigation. Les compétences sans score restent non évaluées ; les dates absentes des anciens bilans ne sont pas inventées. Navigation mobile, focus, Tab/Échap, liens et brouillon conservé vérifiés. 34 Node et 3 Python interface réussis ; backend fonctionnel inchangé, baseline précédente 293 Python. Aucune inscription ou modification d’un compte personnel pendant la QA. Les limites vocales B008/B016 et celles de récupération de compte B015 restent ouvertes.

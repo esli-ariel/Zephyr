@@ -128,3 +128,7 @@ Connexion/inscription : panneau Zéphyr sur ordinateur, champs et espacements
 recomposés, navigation par onglets et affichage/masquage des mots de passe. À la
 fermeture du dialogue, ces champs sont vidés même s’ils étaient visibles.
 Le formulaire a été vérifié à 319 et 1200 px, sans débordement horizontal.
+
+## Accès depuis la navigation latérale
+
+Le bouton Compte se trouve désormais en bas de la barre latérale, et dans le menu sur mobile. Les flux de connexion/inscription/déconnexion et protections restent inchangés. La page Mon profil affiche l’identité pédagogique et permet de la modifier séparément de celle du compte. Hors session, elle invite à se connecter sans afficher de données privées. Les installations sans authentification présentent explicitement Profil local. [Guide PROFILE](PROFILE.md).

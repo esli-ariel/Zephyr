@@ -1,5 +1,12 @@
 # 📋 Changelog — Zéphyr
 
+## Profil et navigation latérale — 13/11/2026
+
+- Page Mon profil : vue d’ensemble, objectifs, compétences réelles, bilans et édition intégrée.
+- Barre latérale avec Conversation, Profil, Parcours et Compte ; compte retiré de l’en-tête.
+- Menu mobile avec gestion du focus, clavier et fond inerte ; conversation et brouillon conservés entre vues.
+- 34 tests Node et 3 Python interface réussis ; édition/rechargement et rendu jour/nuit à 319/1280 px contrôlés. Guide PROFILE.
+
 ## Séance du jour et exercices à l’oral — 13/11/2026
 
 - Accueil compact et onglet Aujourd’hui : révisions dues, reprise d’activité et progression réelle, sans mutation ni génération à l’affichage.

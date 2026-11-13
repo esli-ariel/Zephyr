@@ -315,3 +315,9 @@ Validation actuelle : **287 Python et 27 Node réussis**, deux avertissements co
 Dans les exercices du plan, **Répondre à l’oral** produit une dictée modifiable ; **Utiliser cette réponse** reporte le texte, puis **Corriger ma réponse** envoie explicitement. Langue du profil, choix manuel si inconnue, QCM exact, répétition et lecture plus lente. Le vocal du parcours reste séparé de l’envoi automatique du chat ; caméra locale, points et avatar conservent leur direction.
 
 Validation : **293 Python et 34 Node réussis**, deux avertissements existants. Navigateur testé avec voix/contenus simulés, sans microphone ou IA réels ; 319/1280 px sans débordement. Permissions et voix matérielle restent à valider. [Guide et limites](docs/DAILY_SESSION.md).
+
+## Profil et compte dans la navigation
+
+**Mon profil**, dans la barre latérale, ouvre une page complète avec langue, niveau, objectifs, compétences, bilans et progression. **Modifier mon profil** enregistre les changements sans quitter la page. Le compte est accessible en bas de cette navigation ; sur mobile, ouvrir le menu. La conversation et son brouillon sont conservés entre les vues, tandis que les médias s’arrêtent au passage vers le profil.
+
+Lien direct : `/ui/#profil`. Jour/nuit, clavier et menu mobile vérifiés ; 34 Node et 3 Python interface réussis, baseline Python complète précédente 293. [Guide PROFILE](docs/PROFILE.md).

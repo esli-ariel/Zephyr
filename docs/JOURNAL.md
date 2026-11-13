@@ -1,5 +1,15 @@
 # 📓 Journal de développement — Zéphyr
 
+## 13/11/2026 — Profil complet et compte dans la barre latérale
+
+- Demande : mieux visualiser le profil sur une page et regrouper profil/compte dans la barre latérale.
+- Nouvelle vue `/ui/#profil` avec identité, langue, niveau, objectifs, compétences, forces/axes de travail, compteurs du plan/révisions et derniers bilans. Formulaire intégré pour prénom/langue/niveau/nouvel objectif.
+- Navigation Conversation / Mon profil / Mon parcours, compte en bas ; accès retiré de l’en-tête. Connexion/inscription/déconnexion existantes conservées. Mode local explicite quand les comptes sont désactivés.
+- Conversation conservée en mémoire, brouillon intact entre vues ; médias arrêtés et rendu des particules suspendu sur la page de profil. La direction immersive du projet est conservée.
+- Mobile : panneau latéral, arrière-plan inerte, liens explicites, focus après animation, cycle Tab et fermeture Échap ; thèmes jour/nuit.
+- Validation : 34 Node et 3 Python interface réussis ; baseline complète Python précédente 293, non relancée ici. QA avec données de démonstration : édition/enregistrement/rechargement, brouillon conservé, 319/1280 px sans débordement. Compte et profil hors session vérifiés sur le serveur principal, sans saisie d’identifiants.
+- Guide PROFILE, progression, décisions et limites actualisés ; serveur principal conservé, QA distincte arrêtée. Livraison Git dans la continuité du projet.
+
 ## 13/11/2026 — Séance du jour et exercices à l’oral
 
 - Accord utilisateur : réaliser les priorités proposées en suivant la ligne immersive du projet et actualiser le suivi.

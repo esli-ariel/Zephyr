@@ -4,7 +4,7 @@ window.ZephyrAccountUI=function({request,onSignedIn,onSignedOut}){
   dialog.innerHTML=`<div class="auth-layout"><aside class="auth-story" aria-label="Zéphyr, compagnon de langues"><a class="auth-wordmark" href="/ui/">z<span>·</span><b>ZÉPHYR</b></a><div class="auth-constellation" aria-hidden="true"><i></i><i></i><i></i><i></i><span>z</span></div><div class="auth-story-copy"><span class="auth-eyebrow">UN NOUVEAU SOUFFLE</span><h3>Le monde s’ouvre.<br>À vous de parler.</h3><p>Un compagnon pour apprendre,<br>une conversation à la fois.</p></div><div class="auth-story-foot"><span></span> À VOTRE RYTHME, CHAQUE JOUR</div></aside>
   <section class="auth-main"><button type="button" id="account-close" aria-label="Fermer la fenêtre de compte">×</button><div class="auth-mobile-brand">ZÉPHYR<span>VOTRE COMPAGNON DE LANGUES</span></div><header class="auth-heading"><span class="auth-eyebrow">VOTRE ESPACE PERSONNEL</span><h2 id="account-title">Ravi de vous retrouver.</h2><p id="account-subtitle">Reprenez là où votre dernière conversation s’est arrêtée.</p></header><nav id="account-tabs" class="account-tabs" aria-label="Accès au compte"><button id="account-login-tab" type="button" aria-pressed="true">Connexion</button><button id="account-register-tab" type="button" aria-pressed="false">Inscription</button></nav><p id="account-status" class="learning-status" role="status"></p><div id="account-content"></div><div class="auth-bottom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/></svg> Un espace personnel pour votre apprentissage.</div></section></div>`;
   document.body.append(dialog);const $=id=>dialog.querySelector('#'+id),content=$('account-content'),status=$('account-status'),button=document.getElementById('account-button');
-  let user=null,busy=false,draftEmail='';
+  let user=null,busy=false,draftEmail='',authenticationRequired=true;
   const text=(tag,value)=>{const node=document.createElement(tag);node.textContent=value;return node;};
   const eye=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>`;
   function passwordField(id,label,autocomplete,min,help=''){
@@ -14,8 +14,9 @@ window.ZephyrAccountUI=function({request,onSignedIn,onSignedOut}){
   function setBusy(value){busy=value;content.querySelectorAll('button,input').forEach(node=>node.disabled=value);$('account-login-tab').disabled=value;$('account-register-tab').disabled=value;dialog.classList.toggle('auth-busy',value);}
   function show(mode='login'){
     if(busy)return;if($('account-email'))draftEmail=$('account-email').value;message('');content.replaceChildren();
-    $('account-tabs').hidden=!!user;
-    if(user){
+    $('account-tabs').hidden=!!user||!authenticationRequired;
+    if(!authenticationRequired){$('account-title').textContent='Votre profil local.';$('account-subtitle').textContent='Votre parcours est conservé sur cette installation.';content.append(text('p','Cette installation utilise un profil local. La connexion à un compte n’y est pas activée.'));}
+    else if(user){
       $('account-title').textContent='Votre espace vous attend.';$('account-subtitle').textContent='Vous êtes connecté à votre compte Zéphyr.';content.append(text('h3',user.name),text('p',user.email));
       const logout=text('button','Se déconnecter');logout.className='learning-primary auth-submit';logout.type='button';content.append(logout);
       logout.addEventListener('click',async()=>{setBusy(true);message('Déconnexion…');try{await request('/api/auth/logout',{method:'POST'},false);onSignedOut();}catch(error){message(error.message,true);}finally{setBusy(false);}});
@@ -46,11 +47,11 @@ window.ZephyrAccountUI=function({request,onSignedIn,onSignedOut}){
       });
     }
     if(!dialog.open)dialog.showModal();
-    if(!user)$(mode==='register'?'account-name':'account-email').focus();
+    if(!user&&authenticationRequired)$(mode==='register'?'account-name':'account-email').focus();
   }
   $('account-close').addEventListener('click',()=>dialog.close());
   $('account-login-tab').addEventListener('click',()=>show('login'));$('account-register-tab').addEventListener('click',()=>show('register'));
   dialog.addEventListener('close',()=>{dialog.querySelectorAll('#account-password,#account-confirm').forEach(input=>{input.value='';input.type='password';});});
   button.addEventListener('click',()=>show());
-  return {show,setSession(session){user=session?.user||null;button.setAttribute('aria-label',user?'Ouvrir mon compte':'Se connecter ou créer un compte');document.getElementById('account-button-label').textContent=user?'Mon compte':'Se connecter';},setLegacy(){button.hidden=true;}};
+  return {show,setSession(session){authenticationRequired=true;user=session?.user||null;button.setAttribute('aria-label',user?'Ouvrir mon compte':'Se connecter ou créer un compte');document.getElementById('account-button-label').textContent=user?(user.name||'Mon compte'):'Se connecter';},setLegacy(){authenticationRequired=false;button.hidden=false;button.setAttribute('aria-label','Informations du profil local');document.getElementById('account-button-label').textContent='Profil local';}};
 };

@@ -6,7 +6,7 @@
   const synth = window.speechSynthesis;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let learnerId = null, ready = false, busy = false, listening = false, starting = false,learningLocked=false;
-  let oralAnswer=null,learningUI=null,companion=null,voiceLoop=null,accountUI=null,voiceEngine=null,voiceSettings=null,voiceSettingsOpen=false,dictationPending=false,captureLanguage='fr-FR',voiceOn=true;
+  let profilePage=null,profileVisible=false,currentAccount=null,oralAnswer=null,learningUI=null,companion=null,voiceLoop=null,accountUI=null,voiceEngine=null,voiceSettings=null,voiceSettingsOpen=false,dictationPending=false,captureLanguage='fr-FR',voiceOn=true;
   let mode = 'idle', volume = 0, boundaryAt = 0, speechStart = 0;
   let conversationStarted = false;
   function beginConversation(){
@@ -25,6 +25,7 @@
   languageSelect.value=objectLanguage;
   languageStatus.textContent='Traductions hors ligne · sélectionnez la langue étudiée.';
   function applyProfile(profile){
+    profilePage?.updateSidebar(profile);
     const voiceCode=vocabulary.resolveLanguage(profile.target_language);voiceSettings?.setProfileLanguage(voiceCode?vocabulary.languages[voiceCode].speech:null);
     if(!profile.target_language){languageStatus.textContent=vocabulary.languages[objectLanguage||'en'].name+' · aperçu. Choisissez une langue pour l’enregistrer dans le profil.';return;}
     const code=vocabulary.resolveLanguage(profile.target_language);
@@ -77,9 +78,10 @@
   function controls(){
     $('continuous-voice').disabled=(!ready||!recognitionType||voiceSettingsOpen)&&!voiceLoop?.enabled;
     $('open-learning').disabled=!ready||busy||starting||languageSaving;
+    $('sidebar-learning').disabled=!ready||busy||starting||languageSaving;
     $('open-daily-session').disabled=!ready||busy||starting||languageSaving;
-    ui.send.disabled=!ready||busy||listening||starting||learningLocked||voiceSettingsOpen;
-    ui.mic.disabled=!ready||busy||learningLocked||voiceSettingsOpen||!recognitionType;
+    ui.send.disabled=!ready||busy||listening||starting||learningLocked||voiceSettingsOpen||profileVisible;
+    ui.mic.disabled=!ready||busy||learningLocked||voiceSettingsOpen||profileVisible||!recognitionType;
     ui.demo.disabled=busy||learningLocked||voiceSettingsOpen;
     languageSelect.disabled=busy||listening||starting||languageSaving||learningLocked||voiceSettingsOpen;
     $('next-object').disabled=mode!=='idle'||busy||listening||starting;
@@ -117,7 +119,7 @@
   }
   function silence(){voiceEngine?.silence();voiceSettings?.setSpeaking(false);ui.stop.hidden=true;if(mode==='speaking')state('idle');voiceLoop?.schedule();}
   function speak(text,language,preview=false){
-    if((!voiceOn&&!preview)||(voiceSettingsOpen&&!preview))return;
+    if((!voiceOn&&!preview)||((voiceSettingsOpen||profileVisible)&&!preview))return;
     if(listening||starting)stopMic(false);
     voiceEngine.speak(text,voiceSettings.speechOptions(language));voiceSettings.setSpeaking(voiceEngine.speechPending);
   }
@@ -199,7 +201,7 @@
   ui.demo.addEventListener('click',()=>{if(listening||starting)stopMic(false);const options=voiceSettings.speechOptions();speak(window.ZephyrVoiceTools.locales[options.lang].sample,options.lang,true);});
   function suspendVoice(){oralAnswer?.stop();companion?.stop();voiceLoop?.disable();stopMic(false);silence();voiceSettings?.stopTest();}
   voiceLoop=window.ZephyrVoiceLoop({
-    canListen:()=>ready&&!busy&&!starting&&!listening&&!learningLocked&&!voiceSettingsOpen&&!dictationPending&&!ui.input.value.trim()&&!voiceEngine.speechPending&&mode==='idle'&&!document.hidden,
+    canListen:()=>ready&&!profileVisible&&!busy&&!starting&&!listening&&!learningLocked&&!voiceSettingsOpen&&!dictationPending&&!ui.input.value.trim()&&!voiceEngine.speechPending&&mode==='idle'&&!document.hidden,
     listen:startMic,
     onChange:enabled=>{$('continuous-voice').setAttribute('aria-pressed',String(enabled));$('continuous-voice').setAttribute('aria-label',enabled?'Arrêter le mode vocal continu':'Activer le mode vocal continu');$('continuous-label').textContent=enabled?'Vocal continu actif':'Vocal continu';controls();},
   });
@@ -217,7 +219,7 @@
   learningUI=window.ZephyrLearningUI({request,onProfile:applyProfile,resolveLanguage:vocabulary.resolveLanguage,oralAnswer,resolveSpeechLanguage:value=>{const code=vocabulary.resolveLanguage(value);return code?vocabulary.languages[code].speech:null;},
     isReady:()=>ready&&!busy&&!starting&&!languageSaving,
     suspend:suspendVoice,
-    onLock:value=>{learningLocked=value;controls();if(!value)refreshDaily();},
+    onLock:value=>{learningLocked=value;controls();if(!value){refreshDaily();profilePage?.refreshIfOpen();}},
   });
   let dailyEpoch=0;
   async function refreshDaily(){
@@ -230,13 +232,14 @@
   $('open-daily-session').addEventListener('click',()=>learningUI.open('today'));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!learningLocked)refreshDaily();});
   companion=window.ZephyrCompanionUI();
+  profilePage=window.ZephyrProfilePage({request,isReady:()=>ready,getAccount:()=>currentAccount,onProfile:applyProfile,onAccount:()=>{suspendVoice();accountUI.show();},onLearning:section=>learningUI.open(section),onViewChange:visible=>{profileVisible=visible;if(visible){suspendVoice();learningUI.close();}controls();}});
   controls();
   async function initialize(){
     try{
       await request('/health',{},false);
       const session=await request('/api/auth/session',{},false);
       if(session.authentication_required){
-        accountUI.setSession(session);learnerId=session.learner_id;
+        currentAccount=session.user;accountUI.setSession(session);learnerId=session.learner_id;
         applyProfile(await request('/api/learner/profile'));
       }else{
         accountUI.setLegacy();learnerId=stored('zephyr.learnerId');
@@ -244,7 +247,7 @@
         if(!learnerId){const data=await request('/api/learners',{method:'POST'},false);learnerId=data.learner_id;save('zephyr.learnerId',learnerId);applyProfile(await request('/api/learner/profile'));}
       }
       const memory=await request('/api/chat/memory');if(memory.messages?.length){ui.messages.replaceChildren();memory.messages.forEach(m=>append(m.role,m.content));}
-      ready=true;$('connection').textContent='Zéphyr connecté';controls();refreshDaily();
+      ready=true;$('connection').textContent='Zéphyr connecté';controls();refreshDaily();profilePage.refreshIfOpen();
     }catch(error){if(error.status===401){$('connection').textContent='Connexion requise';notice('Connectez-vous ou créez un compte pour retrouver votre apprentissage.');accountUI.show('login');return;}$('connection').textContent='API indisponible';$('connection-dot').classList.add('off');notice('Connexion impossible : '+error.message+' Rechargez la page pour réessayer. Vous pouvez essayer la voix et le micro.',true);}
   }
   initialize();
@@ -288,7 +291,7 @@
   new ResizeObserver(resize).observe(canvas);resize();
   function draw(now){
     requestAnimationFrame(draw);
-    if(document.hidden){lastFrame=now;return;}
+    if(document.hidden||profileVisible){lastFrame=now;return;}
     if(now-lastFrame<(reducedMotion.matches?90:30))return;
     const delta=Math.min((now-lastFrame)/1000,.06);lastFrame=now;
     let input=Math.min(1,Math.max(voiceEngine?.level()||0,oralAnswer?.level||0)*7);

@@ -7,12 +7,12 @@
 | Chat, profils, mémoire, évaluation, leçons, exercices | Backend implémenté |
 | Vocabulaire, grammaire, recommandations, plans | Backend implémenté |
 | Persistance et séparation des apprenants | SQLite, un processus API |
-| Interface `/ui/` | Conversation, historique restauré, suggestions et saisie texte |
+| Interface `/ui/` | Conversation, profil complet, navigation latérale et compte regroupé ; historique et brouillon conservés |
 | Visualisation | Nuage libre de 2 100 points, six objets 3D tournants et rassemblement pendant la parole |
 | Microphone | Analyse du volume par Web Audio ; validation avec une voix réelle restante |
 | Dictée | Langue configurable, mots provisoires et relecture ; validation avec parole réelle restante |
 | Lecture vocale | Langue, voix, débit, tonalité et volume réglables ; exemple déclenché |
-| Tests actuels | Suite complète : 293 Python et 34 Node réussis ; 2 avertissements de dépendances |
+| Tests actuels | Profil : 34 Node et 3 Python interface réussis ; baseline complète précédente 293 Python ; 2 avertissements |
 | Validation manuelle | Chat OpenRouter réel, lecture vocale déclenchée, reprise des messages et responsive |
 | Comptes et droits | Inscription/connexion/déconnexion, cookies, sessions révocables et propriété des profils |
 | Vocal continu | Contrôleur et bouton ajoutés ; boucle réelle à essayer après inscription |
@@ -881,3 +881,7 @@ Dialogue de configuration, exemple natif, diagnostic de niveau, préférences pe
 ### Séance du jour et oral — 13 novembre 2026
 
 Première priorité réalisée dans la direction immersive : accueil compact dans la conversation et onglet Aujourd’hui, révisions/prochaine activité/progression réelle. Exercices du plan avec dictée modifiable et validation explicite avant correction, répétition/lecture lente. 293 Python et 34 Node réussis ; QA navigateur simulée, 319/1280 px sans débordement. Voix réelle restant à valider. [Guide DAILY_SESSION](DAILY_SESSION.md).
+
+### Profil et compte latéral — 13 novembre 2026
+
+Page complète de profil et formulaire intégré, navigation latérale et compte en bas, menu mobile au clavier. Retour à la conversation sans perdre le brouillon. 34 Node et 3 Python interface réussis ; QA de démonstration et contrôle hors session sur le serveur principal, 319/1280 px sans débordement. [Guide PROFILE](PROFILE.md).
