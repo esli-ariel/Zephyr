@@ -5,14 +5,14 @@ const {runInNewContext}=require('node:vm');
 const {join}=require('node:path');
 const window={};for(const name of ['voice-tools.js','voice-engine.js'])runInNewContext(readFileSync(join(__dirname,'../'+name),'utf8'),{window,Uint8Array});
 function fixture(options={}){
-  const states=[],results=[],previews=[],errors=[],recognizers=[],spoken=[],timers=new Map();let timerId=0,stops=0,mediaCalls=0,cancels=0;
+  const states=[],results=[],previews=[],errors=[],activities=[],recognizers=[],spoken=[],timers=new Map();let timerId=0,stops=0,mediaCalls=0,cancels=0;
   class Recognition{constructor(){recognizers.push(this);}start(){this.onstart?.();}stop(){this.stopped=true;}abort(){this.aborted=true;}}
   const stream={getTracks:()=>[{stop:()=>stops++}]};
   const mediaDevices={getUserMedia:()=>{mediaCalls++;return options.media?options.media():Promise.resolve(stream);}};
   const synth={speak:utterance=>spoken.push(utterance),cancel:()=>cancels++};
   class Utterance{constructor(text){this.text=text;}}
-  const engine=window.ZephyrVoiceEngine({Recognition,mediaDevices,AudioContext:options.AudioContext,synth,Utterance,settings:()=>({recognitionLanguage:'en-GB',pauseMs:2100}),onState:value=>states.push(value),onTranscript:value=>previews.push(value),onResult:value=>results.push(value),onError:value=>errors.push(value),schedule:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},cancelTimer:id=>timers.delete(id)});
-  return {engine,states,results,previews,errors,recognizers,spoken,timers,stream,get stops(){return stops;},get mediaCalls(){return mediaCalls;},get cancels(){return cancels;},fire(delay){const found=[...timers.entries()].find(([,timer])=>timer.delay===delay);assert.ok(found);timers.delete(found[0]);found[1].fn();}};
+  const engine=window.ZephyrVoiceEngine({Recognition,mediaDevices,AudioContext:options.AudioContext,synth,Utterance,settings:()=>({recognitionLanguage:options.language||'en-GB',pauseMs:options.pauseMs||2100}),onState:value=>states.push(value),onTranscript:value=>previews.push(value),onResult:value=>results.push(value),onError:value=>errors.push(value),onActivity:value=>activities.push(value),schedule:(fn,delay)=>{timers.set(++timerId,{fn,delay});return timerId;},cancelTimer:id=>timers.delete(id)});
+  return {engine,states,results,previews,errors,activities,recognizers,spoken,timers,stream,get stops(){return stops;},get mediaCalls(){return mediaCalls;},get cancels(){return cancels;},fire(delay){const found=[...timers.entries()].find(([,timer])=>timer.delay===delay);assert.ok(found);timers.delete(found[0]);found[1].fn();}};
 }
 const result=(text,final)=>Object.assign([{transcript:text}],{isFinal:final});
 const emit=(recognizer,...results)=>recognizer.onresult({results});
@@ -52,4 +52,12 @@ test('A stalled speech engine is cancelled instead of blocking the voice loop fo
 test('A suspended optional analyser does not prevent the recognizer from starting',async()=>{
   class AudioContext{resume(){return new Promise(()=>{});}createAnalyser(){return {fftSize:512,getByteTimeDomainData:array=>array.fill(128)};}createMediaStreamSource(){return {connect(){}};}close(){return Promise.resolve();}}
   const f=fixture({AudioContext});await f.engine.start();assert.equal(f.recognizers.length,1);assert.equal(f.states.at(-1),'listening');assert.equal(f.engine.level(),0);f.engine.cancel();assert.equal(f.stops,1);
+});
+
+test('French and English capture wait five seconds and reset the silence timer when speech resumes',async()=>{
+  for(const language of ['fr-FR','en-GB']){const f=fixture({language,pauseMs:5000});await f.engine.start();const rec=f.recognizers[0];assert.equal(rec.lang,language);
+    emit(rec,result(language==='fr-FR'?'Bonjour':'Hello',true));assert.equal([...f.timers.values()][0].delay,5000);assert.equal(f.activities.at(-1),false);
+    rec.onspeechstart();assert.equal(f.timers.size,0);assert.equal(f.activities.at(-1),true);
+    rec.onspeechend();assert.equal([...f.timers.values()][0].delay,5000);f.fire(5000);assert.equal(rec.stopped,true);rec.onend();assert.equal(f.results.length,1);assert.equal(f.stops,1);
+  }
 });

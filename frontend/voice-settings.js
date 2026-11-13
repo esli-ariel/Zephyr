@@ -1,5 +1,5 @@
 'use strict';
-window.ZephyrVoiceSettings=function({synth,mediaDevices,AudioContext,Recognition,onOpen,onClose,onSample,onStopSpeech}){
+window.ZephyrVoiceSettings=function({synth,mediaDevices,AudioContext,Recognition,onOpen,onClose,onSample,onStopSpeech,onChange=()=>{}}){
   const tools=window.ZephyrVoiceTools,key='zephyr.voicePreferences';let settings;
   try{settings=tools.normalize(JSON.parse(localStorage.getItem(key)||'null'));}catch{settings=tools.normalize(null);}
   let profileLanguage=null,meterStream=null,meterContext=null,meterFrame=null,meterTimeout=null,testToken=0;
@@ -7,8 +7,8 @@ window.ZephyrVoiceSettings=function({synth,mediaDevices,AudioContext,Recognition
   dialog.innerHTML=`<header class="learning-header"><div><span class="tag">PARLONS NATURELLEMENT</span><h2 id="voice-settings-title">Voix et transcription</h2></div><button type="button" id="voice-settings-close" class="voice-close" aria-label="Fermer les réglages vocaux">×</button></header>
   <div class="voice-capabilities"><span id="recognition-capability"></span><span id="synthesis-capability"></span></div><p id="voice-settings-status" class="learning-status" role="status"></p>
   <section class="voice-setting-section"><h3>Votre voix → texte</h3><p class="learning-help">Choisissez la langue que vous allez parler. Les mots provisoires restent visibles jusqu’à leur confirmation.</p><label for="recognition-language">Langue de transcription</label><select id="recognition-language"></select>
-  <label for="voice-pause">Pause avant de terminer la dictée <output id="voice-pause-value"></output></label><input id="voice-pause" type="range" min="900" max="3500" step="100">
-  <label class="voice-checkbox"><input id="voice-auto-send" type="checkbox"><span>Envoyer automatiquement la dictée confirmée</span></label><p class="learning-help">Désactivez pour relire et modifier le texte avant l’envoi. Le mode continu attend alors votre validation.</p></section>
+  <label for="voice-pause">Pause avant de terminer la dictée en mode manuel <output id="voice-pause-value"></output></label><input id="voice-pause" type="range" min="900" max="3500" step="100">
+  <label class="voice-checkbox"><input id="voice-auto-send" type="checkbox"><span>Valider et envoyer après 5 secondes de silence</span></label><p class="learning-help">Le compte à rebours repart si vous reprenez la parole. Vous pouvez annuler l’envoi ou modifier le texte. Désactivez pour valider manuellement.</p></section>
   <section class="voice-setting-section"><h3>Les réponses de Zéphyr</h3><label for="speech-language">Langue de lecture</label><select id="speech-language"></select><p class="learning-help">Ce choix règle la prononciation ; il ne traduit pas le message.</p><label for="speech-voice">Voix disponible sur cet appareil</label><select id="speech-voice"></select><p id="voice-availability" class="learning-help"></p>
   <div class="voice-slider-grid"><div><label for="speech-rate">Vitesse <output id="speech-rate-value"></output></label><input id="speech-rate" type="range" min="0.7" max="1.4" step="0.05"></div><div><label for="speech-volume">Volume <output id="speech-volume-value"></output></label><input id="speech-volume" type="range" min="0" max="1" step="0.05"></div></div>
   <label for="speech-pitch">Tonalité <output id="speech-pitch-value"></output></label><input id="speech-pitch" type="range" min="0.8" max="1.2" step="0.05"><div><button type="button" id="voice-sample" class="learning-secondary">Écouter un exemple</button><button type="button" id="voice-sample-stop" class="learning-secondary" disabled>Arrêter la lecture</button></div></section>
@@ -19,7 +19,7 @@ window.ZephyrVoiceSettings=function({synth,mediaDevices,AudioContext,Recognition
   $('recognition-language').append(localeOptions());$('speech-language').append(localeOptions());
   $('recognition-capability').textContent=Recognition?'Dictée disponible':'Dictée indisponible ici';$('synthesis-capability').textContent=synth?'Lecture vocale disponible':'Lecture vocale indisponible';
   function status(value,error=false){$('voice-settings-status').textContent=value;$('voice-settings-status').classList.toggle('error',error);}
-  function persist(){try{localStorage.setItem(key,JSON.stringify(settings));status('Réglages enregistrés.');}catch{status('Réglages actifs pour cette session ; stockage du navigateur indisponible.');}}
+  function persist(){onChange();try{localStorage.setItem(key,JSON.stringify(settings));status('Réglages enregistrés.');}catch{status('Réglages actifs pour cette session ; stockage du navigateur indisponible.');}}
   function resolved(which){return tools.resolve(settings[which],profileLanguage);}
   function availableVoices(){return (synth?.getVoices()||[]).filter(voice=>voice.lang.split('-')[0].toLowerCase()===resolved('speechLanguage').split('-')[0].toLowerCase());}
   function renderVoices(){
@@ -31,6 +31,7 @@ window.ZephyrVoiceSettings=function({synth,mediaDevices,AudioContext,Recognition
     $('voice-availability').textContent=voices.length?voices.length+' voix disponible(s) en '+tools.locales[language].label.toLowerCase()+'.':synth?'Aucune voix spécifique chargée pour cette langue. Le navigateur choisira sa voix par défaut.':'La lecture vocale n’est pas proposée par ce navigateur.';
   }
   function values(){
+    $('voice-pause').disabled=settings.autoSend;
     $('voice-pause-value').textContent=(settings.pauseMs/1000).toFixed(1)+' s';$('speech-rate-value').textContent=settings.rate.toFixed(2)+'×';$('speech-volume-value').textContent=Math.round(settings.volume*100)+' %';$('speech-pitch-value').textContent=settings.pitch.toFixed(2);
   }
   function render(){
@@ -74,7 +75,7 @@ window.ZephyrVoiceSettings=function({synth,mediaDevices,AudioContext,Recognition
   function stopForVisibility(){if(document.hidden){stopTest();if(dialog.open)status('Test suspendu : l’onglet est passé en arrière-plan.');}}
   document.addEventListener('visibilitychange',stopForVisibility);window.addEventListener('pagehide',stopTest);
   render();
-  return {get capture(){return {...settings,recognitionLanguage:resolved('recognitionLanguage')};},get autoSend(){return settings.autoSend;},get open(){return dialog.open;},
+  return {get capture(){return {...settings,recognitionPreference:settings.recognitionLanguage,recognitionLanguage:resolved('recognitionLanguage')};},setRecognitionLanguage(value){settings=tools.normalize({...settings,recognitionLanguage:value});render();persist();},get autoSend(){return settings.autoSend;},get open(){return dialog.open;},
     speechOptions(override){const lang=override||resolved('speechLanguage'),voices=synth?.getVoices()||[],saved=settings.voices[lang];const sameLanguage=voice=>voice.lang.split('-')[0].toLowerCase()===lang.split('-')[0].toLowerCase();const voice=voices.find(v=>v.voiceURI===saved&&sameLanguage(v))||voices.find(v=>v.lang===lang&&v.localService)||voices.find(v=>v.lang===lang)||voices.find(v=>sameLanguage(v)&&v.localService)||voices.find(sameLanguage);return {lang,voice,rate:settings.rate,pitch:settings.pitch,volume:settings.volume};},
     setSpeaking(value){$('voice-sample-stop').disabled=!value;},reportError(value){if(dialog.open)status(value,true);},setProfileLanguage(value){profileLanguage=value;for(const id of ['recognition-language','speech-language'])$(id).options[0].textContent=profileLanguage?'Langue étudiée : '+tools.locales[profileLanguage].label:'Langue étudiée non reconnue — français utilisé';renderVoices();},stopTest};
 };

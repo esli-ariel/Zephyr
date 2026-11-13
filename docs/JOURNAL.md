@@ -1,5 +1,15 @@
 # 📓 Journal de développement — Zéphyr
 
+## 13/11/2026 — Transcription français/anglais avec délai de 5 secondes
+
+- Demande : transcription français/anglais et validation automatique en cinq secondes.
+- Sélecteur de transcription visible dans le panneau de conversation, synchronisé avec les réglages existants et la préférence locale. Français, anglais britannique/américain et langues précédentes conservés ; choix de langue, sans détection bilingue automatique.
+- Contrôleur de validation : compte cinq secondes depuis le dernier résultat/fin de parole, attend la confirmation du navigateur et n’ajoute pas un second délai à la fin normale de capture. Si le navigateur termine tôt, seul le délai restant est attendu. Reprise de parole : compteur annulé puis relancé ; envoi au plus tôt à l’échéance, après confirmation des mots.
+- Compte à rebours visible avec Garder pour relire ; édition, réglages, navigation, arrière-plan et annulation invalident les callbacks en attente. Brouillon conservé, ni erreur ni mots provisoires envoyés automatiquement ; vocal continu attend la validation. Pause du mode manuel conservée et désactivée dans les réglages quand le délai auto fixe est actif. Exercices oraux inchangés : correction explicite.
+- 47 tests Node réussis, dont 6 du contrôleur (arrêt précoce, finalisation tardive, reprise, annulation/callback tardif, contexte bloqué, mots non confirmés) et capture cinq secondes en français/anglais. 3 Python interface réussis, 2 avertissements existants ; baseline complète précédente 293. Reconnaissance réelle à valider avec permission utilisateur.
+- QA séparée : reconnaissance synthétique et base temporaire, aucune permission matérielle ni appel fournisseur. Français automatiquement envoyé une fois ; anglais conservé après annulation. Sélecteur/réglages synchronisés ; 319 px sans débordement. Hauteur du panneau corrigée pour garder notice, langue, dictée et saisie sans chevauchement. Aucun changement backend fonctionnel ; serveur personnel conservé sur 8001 en 0.8.9.
+
+
 ## 13/11/2026 — Version 0.8.9 : objets et avatar holographiques
 
 - Direction approuvée : abandon des textures au profit de points lumineux avec contours plus lisibles. Sélection de 15 objets pour le cycle automatique ; banque de 36 géométries conservée pour de futurs affinages. 40 % des points échantillonnés sur les lignes, 60 % sur les surfaces ; contours de sphères/tores et cordes/rosace de guitare, cadre de vélo complétés.

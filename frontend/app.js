@@ -6,7 +6,7 @@
   const synth = window.speechSynthesis;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let learnerId = null, ready = false, busy = false, listening = false, starting = false,learningLocked=false;
-  let presence=null,profilePage=null,profileVisible=false,currentAccount=null,oralAnswer=null,learningUI=null,companion=null,voiceLoop=null,accountUI=null,voiceEngine=null,voiceSettings=null,voiceSettingsOpen=false,dictationPending=false,captureLanguage='fr-FR',voiceOn=true;
+  let presence=null,profilePage=null,profileVisible=false,currentAccount=null,oralAnswer=null,learningUI=null,companion=null,voiceLoop=null,accountUI=null,voiceEngine=null,voiceSettings=null,voiceSettingsOpen=false,dictationPending=false,approvalBlocked=false,dictationApproval=null,captureLanguage='fr-FR',voiceOn=true;
   let mode = 'idle', volume = 0, boundaryAt = 0, speechStart = 0;
   let conversationStarted = false;
   function beginConversation(){
@@ -56,6 +56,7 @@
     ui.send.disabled=!ready||busy||listening||starting||learningLocked||voiceSettingsOpen||profileVisible;
     ui.mic.disabled=!ready||busy||learningLocked||voiceSettingsOpen||profileVisible||!recognitionType;
     ui.demo.disabled=busy||learningLocked||voiceSettingsOpen;
+    $('chat-recognition-language').disabled=listening||starting||busy||learningLocked||voiceSettingsOpen;
     $('dictation-send').disabled=!ready||busy||listening||starting||learningLocked||voiceSettingsOpen;
   }
   async function request(path,options={},identify=true){
@@ -80,7 +81,7 @@
     $('dictation-language').textContent=window.ZephyrVoiceTools.locales[captureLanguage]?.label||captureLanguage;
     $('dictation-actions').hidden=!dictationPending;if(listening||starting)ui.draft.scrollTop=ui.draft.scrollHeight;
   }
-  function clearTranscript(){dictationPending=false;$('dictation-panel').hidden=true;ui.draft.replaceChildren();$('dictation-actions').hidden=true;}
+  function clearTranscript(){dictationApproval?.cancel();dictationPending=false;$('dictation-panel').hidden=true;ui.draft.replaceChildren();$('dictation-actions').hidden=true;}
   function preserveDictation(snapshot){
     if(!snapshot.text)return;
     const combined=window.ZephyrVoiceTools.combineTranscript(ui.input.value,snapshot);
@@ -89,12 +90,13 @@
   }
   function silence(){voiceEngine?.silence();voiceSettings?.setSpeaking(false);ui.stop.hidden=true;if(mode==='speaking')state('idle');voiceLoop?.schedule();}
   function speak(text,language,preview=false){
+    dictationApproval?.cancel();
     if((!voiceOn&&!preview)||((voiceSettingsOpen||profileVisible)&&!preview))return;
     if(listening||starting)stopMic(false);
     voiceEngine.speak(text,voiceSettings.speechOptions(language));voiceSettings.setSpeaking(voiceEngine.speechPending);
   }
   async function send(text){
-    text=text.trim();if(!text||busy||!ready||listening||starting||learningLocked||voiceSettingsOpen)return;
+    dictationApproval?.cancel();text=text.trim();if(!text||busy||!ready||listening||starting||learningLocked||voiceSettingsOpen)return;
     if(text.length>5000){notice('Le message est limité à 5 000 caractères. Relisez et raccourcissez votre texte.',true);return;}
     silence();busy=true;controls();state('thinking');$('suggestions')?.remove();append('user',text);ui.input.value='';ui.input.style.height='auto';clearTranscript();
     notice('Zéphyr réfléchit à votre message.');
@@ -104,14 +106,14 @@
   }
   function stopMic(submit=true){
     if(submit){notice('Finalisation de la dictée…');voiceEngine?.finish();}
-    else{const snapshot=voiceEngine?.cancel();if(snapshot?.text)preserveDictation(snapshot);else if(!dictationPending)clearTranscript();}
+    else{dictationApproval?.cancel();const snapshot=voiceEngine?.cancel();if(snapshot?.text)preserveDictation(snapshot);else if(!dictationPending)clearTranscript();}
   }
   function startMic(){
     if(learningLocked||voiceSettingsOpen||busy||!ready)return;
     if(starting){stopMic(false);notice('Activation du micro annulée.');return;}
     if(listening){stopMic(true);return;}
     if(dictationPending){notice('Envoyez ou effacez la dictée précédente avant d’en commencer une autre.');return;}
-    captureLanguage=voiceSettings.capture.recognitionLanguage;
+    captureLanguage=voiceSettings.capture.recognitionLanguage;approvalBlocked=false;dictationApproval.cancel();
     voiceEngine.start();
   }
   const voiceErrors={
@@ -130,12 +132,26 @@
     'synthesis-timeout':'La lecture du navigateur s’est interrompue. Réessayez une voix différente ; la réponse reste affichée.',
     'synthesis-error':'La voix sélectionnée n’a pas pu être lue. Essayez une autre voix dans les réglages.',
   };
+  const transcriptionLanguage=$('chat-recognition-language');
+  for(const [value,label] of [['profile','Langue étudiée'],...Object.entries(window.ZephyrVoiceTools.locales).map(([key,item])=>[key,item.label])]){const option=document.createElement('option');option.value=value;option.textContent=label;transcriptionLanguage.append(option);}
+  function syncTranscription(){transcriptionLanguage.value=voiceSettings.capture.recognitionPreference;$('chat-validation-mode').textContent=voiceSettings.autoSend?'Validation auto · 5 s':'Validation manuelle';}
+  function keepForReview(){approvalBlocked=true;dictationApproval.cancel();$('dictation-status').textContent=listening?'Transcription en cours · validation manuelle':'Dictée prête à relire';notice('Envoi automatique annulé. Relisez le texte, puis envoyez-le quand vous êtes prêt.');}
+  dictationApproval=window.ZephyrDictationApproval({
+    onTick:seconds=>{$('dictation-validation').hidden=seconds===null;if(seconds!==null){const label=seconds===0?'Finalisation de la transcription…':'Validation automatique dans '+seconds+' s';if($('dictation-countdown').textContent!==label)$('dictation-countdown').textContent=label;}},
+    canSend:text=>ready&&!busy&&!starting&&!listening&&!learningLocked&&!voiceSettingsOpen&&!profileVisible&&!document.hidden&&!voiceEngine.speechPending&&dictationPending&&ui.input.value===text,
+    onSend:text=>send(text)
+  });
+  $('dictation-keep').addEventListener('click',keepForReview);
+  transcriptionLanguage.addEventListener('change',()=>{if(dictationApproval.pending||dictationPending)keepForReview();voiceSettings.setRecognitionLanguage(transcriptionLanguage.value);notice('Langue de transcription : '+window.ZephyrVoiceTools.locales[voiceSettings.capture.recognitionLanguage].label+'.');});
   voiceSettings=window.ZephyrVoiceSettings({synth,Recognition:recognitionType,mediaDevices:navigator.mediaDevices,AudioContext:window.AudioContext||window.webkitAudioContext,
     onOpen:()=>{suspendVoice();voiceSettingsOpen=true;controls();},
     onClose:()=>{voiceSettingsOpen=false;silence();controls();},
+    onChange:()=>{dictationApproval.cancel();syncTranscription();},
     onSample:(text,language)=>speak(text,language,true),onStopSpeech:silence,
   });
-  voiceEngine=window.ZephyrVoiceEngine({settings:()=>voiceSettings.capture,Recognition:recognitionType,mediaDevices:navigator.mediaDevices,AudioContext:window.AudioContext||window.webkitAudioContext,synth,Utterance:window.SpeechSynthesisUtterance,
+  syncTranscription();
+  voiceEngine=window.ZephyrVoiceEngine({settings:()=>({...voiceSettings.capture,pauseMs:voiceSettings.autoSend&&!approvalBlocked?5000:voiceSettings.capture.pauseMs}),
+    onActivity:talking=>{if(!voiceSettings.autoSend||approvalBlocked)return;if(talking)dictationApproval.wait();else dictationApproval.activity();},Recognition:recognitionType,mediaDevices:navigator.mediaDevices,AudioContext:window.AudioContext||window.webkitAudioContext,synth,Utterance:window.SpeechSynthesisUtterance,
     onState:next=>{
       voiceSettings.setSpeaking(next==='speaking');
       starting=next==='starting';listening=next==='listening';
@@ -151,10 +167,10 @@
     onTranscript:renderTranscript,
     onResult:snapshot=>{
       if(!snapshot.text){if(!dictationPending)clearTranscript();if(!snapshot.error)notice('Aucune phrase détectée. Réessayez ou écrivez votre message.');return;}
-      const auto=window.ZephyrVoiceTools.shouldAutoSend(snapshot,voiceSettings.autoSend);
+      const auto=window.ZephyrVoiceTools.shouldAutoSend(snapshot,voiceSettings.autoSend&&!approvalBlocked);
       const text=window.ZephyrVoiceTools.combineTranscript(ui.input.value,snapshot).text;
-      if(auto&&ready&&text.length<=5000){clearTranscript();send(text);}
-      else{preserveDictation(snapshot);if(!snapshot.error)notice(text.length>5000?'La dictée dépasse 5 000 caractères. Modifiez le texte avant de l’envoyer.':snapshot.interim?'Une partie de la dictée est provisoire. Relisez le texte avant de l’envoyer.':'Relisez votre dictée, puis cliquez sur Envoyer.');}
+      if(auto&&ready&&text.length<=5000){preserveDictation(snapshot);notice('La dictée est prête. Vous pouvez encore la relire.');dictationApproval.arm(ui.input.value);}
+      else{dictationApproval.cancel();preserveDictation(snapshot);if(!snapshot.error)notice(text.length>5000?'La dictée dépasse 5 000 caractères. Modifiez le texte avant de l’envoyer.':snapshot.interim?'Une partie de la dictée est provisoire. Relisez le texte avant de l’envoyer.':'Relisez votre dictée, puis cliquez sur Envoyer.');}
     },
     onError:reason=>{if(reason!=='no-speech')voiceLoop?.disable();if(voiceSettingsOpen)voiceSettings.reportError(voiceErrors[reason]||'Le vocal est indisponible. Vérifiez les réglages.');notice(reason==='no-speech'?(voiceLoop?.enabled?'Aucune parole détectée. L’écoute va reprendre.':'Aucune parole détectée. Réessayez quand vous êtes prêt.'):voiceErrors[reason]||'Le vocal est indisponible. Vérifiez les réglages et continuez par écrit.',reason!=='no-speech');},
     onBoundary:()=>{boundaryAt=performance.now();},
@@ -164,12 +180,12 @@
   $('dictation-send').addEventListener('click',()=>send(ui.input.value));
   $('dictation-cancel').addEventListener('click',()=>{ui.input.value='';clearTranscript();notice('Dictée effacée.');voiceLoop?.schedule();});
   ui.input.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();send(ui.input.value);}});
-  ui.input.addEventListener('input',()=>{ui.input.style.height='auto';ui.input.style.height=Math.min(ui.input.scrollHeight,120)+'px';if(dictationPending){if(ui.input.value.trim())renderTranscript({final:ui.input.value,interim:'',text:ui.input.value});else{clearTranscript();voiceLoop?.schedule();}}else voiceLoop?.schedule();});
+  ui.input.addEventListener('input',()=>{if(dictationApproval.pending||dictationPending||listening||starting){approvalBlocked=true;dictationApproval.cancel();notice('Texte modifié : validation manuelle.');}ui.input.style.height='auto';ui.input.style.height=Math.min(ui.input.scrollHeight,120)+'px';if(dictationPending){if(ui.input.value.trim())renderTranscript({final:ui.input.value,interim:'',text:ui.input.value});else{clearTranscript();voiceLoop?.schedule();}}else voiceLoop?.schedule();});
   document.querySelectorAll('[data-prompt]').forEach(button=>button.addEventListener('click',()=>send(button.dataset.prompt)));
   ui.sound.addEventListener('click',()=>{voiceOn=!voiceOn;ui.sound.setAttribute('aria-pressed',String(voiceOn));ui.sound.textContent=voiceOn?'Voix activée ◖))':'Voix coupée';if(!voiceOn)silence();});
   ui.stop.addEventListener('click',silence);
   ui.demo.addEventListener('click',()=>{if(listening||starting)stopMic(false);const options=voiceSettings.speechOptions();speak(window.ZephyrVoiceTools.locales[options.lang].sample,options.lang,true);});
-  function suspendVoice(){oralAnswer?.stop();companion?.stop();voiceLoop?.disable();stopMic(false);silence();voiceSettings?.stopTest();}
+  function suspendVoice(){dictationApproval?.cancel();oralAnswer?.stop();companion?.stop();voiceLoop?.disable();stopMic(false);silence();voiceSettings?.stopTest();}
   voiceLoop=window.ZephyrVoiceLoop({
     canListen:()=>ready&&!profileVisible&&!busy&&!starting&&!listening&&!learningLocked&&!voiceSettingsOpen&&!dictationPending&&!ui.input.value.trim()&&!voiceEngine.speechPending&&mode==='idle'&&!document.hidden,
     listen:startMic,

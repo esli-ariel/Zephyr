@@ -1,5 +1,5 @@
 'use strict';
-window.ZephyrVoiceEngine=function({settings,Recognition,mediaDevices,AudioContext,synth,Utterance,onState,onTranscript,onResult,onError,onBoundary=()=>{},schedule=setTimeout,cancelTimer=clearTimeout,tools=window.ZephyrVoiceTools}){
+window.ZephyrVoiceEngine=function({settings,Recognition,mediaDevices,AudioContext,synth,Utterance,onState,onTranscript,onResult,onError,onBoundary=()=>{},onActivity=()=>{},schedule=setTimeout,cancelTimer=clearTimeout,tools=window.ZephyrVoiceTools}){
   let capture=null,captureToken=0,speechToken=0,speechPending=false,speechTimer=null,currentUtterance=null;
   const blank=()=>({final:'',interim:'',text:''});
   function clearCaptureTimers(context){for(const key of ['pauseTimer','stopTimer'])if(context[key]!=null){cancelTimer(context[key]);context[key]=null;}}
@@ -31,6 +31,7 @@ window.ZephyrVoiceEngine=function({settings,Recognition,mediaDevices,AudioContex
   function armPause(context){
     if(context.pauseTimer!=null)cancelTimer(context.pauseTimer);
     if(!context.snapshot.text||context.finishing)return;
+    onActivity(false);
     context.pauseTimer=schedule(()=>{
       if(capture!==context)return;
       context.finishing=true;context.stopTimer=schedule(()=>complete(context),1800);
@@ -65,7 +66,7 @@ window.ZephyrVoiceEngine=function({settings,Recognition,mediaDevices,AudioContex
       recognizer.lang=settings().recognitionLanguage;recognizer.continuous=true;recognizer.interimResults=true;recognizer.maxAlternatives=1;
       recognizer.onstart=()=>{if(capture!==context)return;context.active=true;onState('listening');};
       recognizer.onresult=event=>{if(capture!==context)return;context.snapshot=tools.transcript(event.results);onTranscript(context.snapshot);armPause(context);};
-      recognizer.onspeechstart=()=>{if(context.pauseTimer!=null){cancelTimer(context.pauseTimer);context.pauseTimer=null;}};
+      recognizer.onspeechstart=()=>{if(capture!==context||context.finishing)return;onActivity(true);if(context.pauseTimer!=null){cancelTimer(context.pauseTimer);context.pauseTimer=null;}};
       recognizer.onspeechend=()=>{if(capture===context)armPause(context);};
       recognizer.onend=()=>complete(context);
       recognizer.onerror=event=>complete(context,event.error||'recognition-error');

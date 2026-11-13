@@ -1,5 +1,10 @@
 # Interface locale Zéphyr
 
+## Transcription — délai de cinq secondes
+
+Sélecteur de langue dans le chat, français et anglais inclus, synchronisé avec les réglages. Après cinq secondes sans nouvelle parole, la dictée confirmée est envoyée ; compte à rebours et bouton Garder pour relire. Édition, reprise vocale et suspensions gèrent le délai sans envoi tardif ; erreurs et provisoires restent manuels. Exercices oraux toujours validés explicitement. Guide [VOICE](../docs/VOICE.md). 47 Node et 3 Python interface réussis, QA de reconnaissance simulée ; dictée matérielle à valider.
+
+
 ## Présence actuelle — version 0.8.9
 
 Choix mémorisé **Points / Avatar humanoïde**. 15 silhouettes aléatoires en points et contours holographiques ; textures retirées. Guitare/vélo détaillés, rotation douce. Avatar redessiné en buste continu avec traits en lignes, maillage et particules. Three.js local (MIT), sans CDN ni build. Points sans interaction souris/toucher/clavier ; repli Canvas/SVG sans WebGL 2. Guide [PRESENCE](../docs/PRESENCE.md). Validation de version : 293 Python et 40 Node réussis. Les étapes datées ci-dessous décrivent aussi l’historique.

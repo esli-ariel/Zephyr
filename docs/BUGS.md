@@ -177,3 +177,7 @@ Les anciennes mentions des boutons Autre objet/Écouter et du sélecteur décriv
 ## Ajustement 0.8.9 — direction holographique retenue
 
 Les textures et leur générateur ont été retirés à la demande de l’utilisateur : objets en points/contours, 15 silhouettes actives sur une banque géométrique de 36, guitare et vélo détaillés. Avatar reconstruit en buste continu holographique. Les limites de photoréalisme ne sont plus l’objectif retenu ; WebGL 2 reste requis pour les contours 3D et le nouveau buste, avec replis Canvas/SVG. Bouche par enveloppe vocale, sans synchronisation phonétique ni analyse du visage.
+
+## Dictée et délai automatique — complément 13 novembre 2026
+
+Choix français/anglais dans le chat et compte à rebours de 5 s implémentés/testés, y compris arrêt anticipé et finalisation tardive du navigateur. B008/B016 restent ouverts pour la reconnaissance réelle, les permissions et la boucle acoustique complète. La langue reste sélectionnée manuellement ; aucune détection bilingue automatique. Les mots provisoires ou en erreur nécessitent la relecture.

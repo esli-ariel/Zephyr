@@ -10,8 +10,8 @@ Dans `/ui/`, ouvrir **Réglages vocaux ⚙**, près du microphone. La conversati
 | Langue de lecture | Français (`fr-FR`) |
 | Voix | Recommandée du navigateur, priorité à une voix locale de la langue |
 | Vitesse / tonalité / volume | 0,95× / 1 / 100 % |
-| Pause avant finalisation | 1,6 seconde |
-| Envoi automatique | Activé pour une transcription confirmée sans erreur |
+| Pause de finalisation manuelle | 1,6 seconde (réglable si envoi auto désactivé) |
+| Envoi automatique du chat | Après 5 secondes sans nouvelle parole, pour une transcription confirmée sans erreur |
 
 Dictée et lecture se règlent indépendamment : français, anglais britannique ou américain, espagnol, allemand, italien et portugais brésilien. L’option « langue étudiée » suit le profil ; un profil absent/non reconnu indique explicitement le repli français. La langue de lecture change la prononciation, sans traduire le message.
 
@@ -19,11 +19,11 @@ Les voix sont celles réellement proposées par l’appareil et son navigateur ;
 
 ## Transcription et conversation
 
-Cliquer le micro, autoriser son accès dans le navigateur et parler dans la langue choisie. Le panneau distingue les mots confirmés et provisoires ; les résultats révisés remplacent le texte précédent sans le dupliquer. La pause réglable de 0,9 à 3,5 secondes demande une finalisation ; le navigateur peut terminer l’écoute plus tôt.
+Choisir la langue avec **Transcription** dans le panneau de conversation : Français, Anglais britannique ou Anglais américain notamment. Le choix est synchronisé avec les réglages et mémorisé dans ce navigateur. Ce choix ne détecte pas automatiquement la langue et ne traduit pas le texte. Cliquer le micro, autoriser son accès dans le navigateur et parler dans la langue choisie. Le panneau distingue les mots confirmés et provisoires ; les résultats révisés remplacent le texte précédent sans le dupliquer. En mode automatique, un compte à rebours de cinq secondes démarre depuis le dernier résultat ou la fin de parole ; toute reprise le réinitialise. Si le navigateur termine tôt, le délai restant continue. Si la confirmation tarde, l’interface attend les mots finaux après l’échéance. Le bouton **Garder pour relire** annule l’envoi ; modifier le texte ou ouvrir les réglages l’annule aussi. La pause réglable de 0,9 à 3,5 secondes reste réservée au mode manuel et aux exercices oraux.
 
 Un second clic termine l’écoute en attendant les derniers mots confirmés. Le microphone est ensuite libéré. Une annulation ou une erreur conserve le texte reçu pour relecture. Aucun mot provisoire ni résultat en erreur n’est envoyé automatiquement. Le brouillon déjà tapé reste conservé.
 
-Désactiver « Envoyer automatiquement » pour modifier la transcription dans la saisie, puis **Envoyer la dictée** ou **Effacer**. Le vocal continu attend cette validation ; il attend aussi la fin de la lecture avant de réécouter. Il reste volontaire, s’arrête en arrière-plan/sur erreur et ne reprend pas au chargement. Ouvrir les réglages suspend la conversation vocale.
+Désactiver « Valider et envoyer après 5 secondes de silence » pour modifier la transcription dans la saisie, puis **Envoyer la dictée** ou **Effacer**. Le vocal continu attend cette validation ; il attend aussi la fin de la lecture avant de réécouter. Il reste volontaire, s’arrête en arrière-plan/sur erreur et ne reprend pas au chargement. Ouvrir les réglages suspend la conversation vocale.
 
 La lecture des longues réponses est découpée ; un garde-fou arrête une synthèse bloquée. Les événements tardifs après arrêt ne relancent ni dictée ni lecture. La visualisation suit le volume capté ; la voix synthétique utilise toujours une animation, sans analyse PCM.
 
@@ -46,3 +46,7 @@ Références des API : [arrêt avec résultat final](https://developer.mozilla.o
 ## Exercices à l’oral
 
 Les exercices du plan possèdent une session de brouillon distincte de la conversation. L’envoi automatique ne s’y applique pas. La langue suit initialement le profil, puis se choisit dans l’exercice. Répétition et débit réduit accessibles ; fermeture/navigation/arrière-plan arrêtent le vocal. Le texte est relu puis reporté et corrigé par deux clics distincts. Aucun score de prononciation ni audio sauvegardé. Voir [DAILY_SESSION.md](DAILY_SESSION.md).
+
+## Validation du 13 novembre 2026 — délai automatique
+
+47 tests Node et 3 tests Python interface réussis (2 avertissements existants), baseline Python complète précédente 293. Délais et états testés par horloge simulée, français/anglais, arrêt anticipé, reprise, finalisation tardive, annulation et callbacks tardifs. QA navigateur distincte avec reconnaissance simulée et base temporaire : phrase française envoyée une fois après le délai, phrase anglaise conservée après annulation. Aucun audio réel ni appel fournisseur dans cette QA ; un essai de dictée avec le microphone autorisé reste nécessaire. Les exercices gardent la relecture, le report de réponse et la correction explicite.

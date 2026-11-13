@@ -10,9 +10,9 @@
 | Interface `/ui/` | Conversation, profil complet, navigation latérale et compte regroupé ; historique et brouillon conservés |
 | Visualisation | Choix Points / Avatar humanoïde ; 15 objets holographiques aléatoires sans textures, points sans interaction au toucher et rassemblement à la parole |
 | Microphone | Analyse du volume par Web Audio ; validation avec une voix réelle restante |
-| Dictée | Langue configurable, mots provisoires et relecture ; validation avec parole réelle restante |
+| Dictée | Choix français/anglais visible, mots provisoires, validation après 5 s annulable ; parole réelle restante |
 | Lecture vocale | Langue, voix, débit, tonalité et volume réglables ; exemple déclenché |
-| Tests actuels | Version 0.8.9 : 40 Node et 293 Python réussis ; 2 avertissements existants |
+| Tests actuels | Transcription : 47 Node et 3 Python interface réussis ; baseline complète 0.8.9 : 293 Python ; 2 avertissements existants |
 | Validation manuelle | Chat OpenRouter réel, lecture vocale déclenchée, reprise des messages et responsive |
 | Comptes et droits | Inscription/connexion/déconnexion, cookies, sessions révocables et propriété des profils |
 | Vocal continu | Contrôleur et bouton ajoutés ; boucle réelle à essayer après inscription |

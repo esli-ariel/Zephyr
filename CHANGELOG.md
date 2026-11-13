@@ -1,5 +1,13 @@
 # 📋 Changelog — Zéphyr
 
+## Transcription et validation automatique — 13/11/2026
+
+- Choix de langue directement dans le chat : français, anglais britannique/américain et langues existantes, synchronisé avec les réglages et mémorisé.
+- Envoi après 5 secondes sans nouvelle parole, compte à rebours visible et bouton Garder pour relire. Reprise de parole : délai réinitialisé. Résultats provisoires et erreurs conservés pour validation manuelle.
+- Modification du texte, navigation, arrière-plan, changement de réglage et annulation stoppent l’envoi différé. Les exercices oraux gardent leur validation explicite.
+- 47 tests Node et 3 Python interface réussis ; baseline complète précédente 293 Python. Validation UI avec reconnaissance simulée, micro réel à essayer. Version conservée à 0.8.9.
+
+
 ## [0.8.9] — 13/11/2026 — présence holographique
 
 - Retrait des textures ; 15 objets en points lumineux et contours, rotation douce et cycle aléatoire sans répétition immédiate. Détails de guitare et cadre de vélo renforcés.
