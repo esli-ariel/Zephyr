@@ -489,6 +489,8 @@ class LearningEngine:
             available_minutes=available_minutes,
         )
 
+        for item in plan.items:
+            item.metadata["language"] = self.get_learning_context().get("target_language")
         self.current_learning_plan = plan
         return plan.to_dict()
 
@@ -502,6 +504,9 @@ class LearningEngine:
                 "Aucun plan d'apprentissage actif."
             )
 
+        existing = next((i for i in self.current_learning_plan.items if i.id == item_id), None)
+        if existing and existing.metadata.get("execution"):
+            raise ValueError("Cette activité se termine via son parcours, après lecture ou correction.")
         item = self.current_learning_plan.complete_item(
             item_id=item_id,
             score=score,

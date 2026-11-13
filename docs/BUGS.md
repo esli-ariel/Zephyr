@@ -144,3 +144,11 @@ cette évolution : 3 tests Python interface et 4 tests Node réussis.
 ## Réglages vocaux — 12 novembre 2026
 
 B011 traité : langues de dictée/lecture configurables et choix de voix. Les mentions françaises précédentes décrivent les versions antérieures. Arrêt prématuré et duplication des résultats couverts par les nouveaux tests. B008/B016 restent ouverts : autorisation micro et essai parlé réels nécessaires. B009 (absence de PCM synthèse), B005 et B007 inchangés. 23 tests Node et 3 Python interface réussis ; exemple natif/persistance vérifiés.
+
+## Parcours et présence vocale — 13 novembre 2026
+
+- B010 : parcours profil → niveau → plan → exercice → correction désormais intégré, avec révisions espacées. Les listes historiques décrivent les étapes précédentes.
+- Compatibilité des anciennes sauvegardes, reprise et rollback vérifiés ; 287 Python et 27 Node réussis. B005 (deux avertissements) et B007 (un processus) restent ouverts.
+- B008/B016 : parole réelle et boucle micro/réponse à valider après permission. État speaking de l’avatar observé ; garde-fou de synthèse déclenché dans l’environnement de QA, qualité sonore non déclarée validée.
+- Caméra locale implémentée, refus/annulation/libération testés ; aperçu matériel réel restant à autoriser/vérifier. Avatar de présence, sans synchronisation phonétique ni rendu vidéo réaliste.
+- Qualité pédagogique des nouvelles séances vérifiée par contrats/tests simulés ; essai fournisseur réel encore à effectuer. B014/B015 (autres langues d’évaluation et récupération de compte) inchangés.

@@ -21,6 +21,7 @@ from app.sessions import LearnerSessions, LearnerSession
 from app.auth import AuthStore, COOKIE_NAME
 from app.auth_routes import router as auth_router
 from app.learning.llm_schemas import Level, Skill
+from app.learning.plan_execution import ActivityConflict, start_activity, answer_activity, finish_reading, plan_item, public_activity
 
 logger = logging.getLogger(__name__)
 
@@ -696,6 +697,7 @@ async def get_learning_plan(
         )
 
     try:
+        ensure_plan_replaceable(agent.learning_engine)
         plan = (
             agent.learning_engine
             .get_learning_plan(
@@ -843,6 +845,154 @@ async def answer_grammar(agent: Agent, request: GrammarAnswerRequest):
         raise HTTPException(status_code=404, detail="Règle introuvable.")
     agent.learning_engine.register_grammar_answer(request.rule, request.correct)
     return item.to_dict()
+
+
+class PlanGenerateRequest(BaseModel):
+    limit: int = Field(default=5, ge=1, le=20)
+    available_minutes: int = Field(default=30, ge=5, le=180)
+
+
+def ensure_plan_replaceable(engine):
+    plan = engine.current_learning_plan
+    language = engine.get_learning_context().get('target_language')
+    if plan and any(i.metadata.get('execution') and not i.completed and i.metadata.get('language') == language for i in plan.items):
+        raise HTTPException(status_code=409, detail='Terminez l’activité en cours avant de remplacer le plan.')
+
+
+@app.post('/api/learning/plan/generate')
+async def generate_session_plan(agent: Agent, request: PlanGenerateRequest):
+    engine = agent.learning_engine
+    context = engine.get_learning_context()
+    if not context.get('target_language') or not context.get('level'):
+        raise HTTPException(status_code=400, detail='Renseignez votre langue et votre niveau dans Mon profil.')
+    ensure_plan_replaceable(engine)
+    engine.get_learning_plan(**request.model_dump())
+    plan = engine.current_learning_plan
+    if not plan.items:
+        topic = (context.get('goals') or ['Se présenter et faire connaissance'])[0]
+        budget = request.available_minutes
+        for kind, minutes in [('lesson', 10), ('exercise', 15)]:
+            if budget >= minutes:
+                plan.add_item(category='competency', target=topic, activity_type=kind, priority=50,
+                              estimated_minutes=minutes, reason='Première séance adaptée à votre profil.',
+                              metadata={'language': context['target_language']})
+                budget -= minutes
+        if not plan.items:
+            plan.add_item(category='competency', target=topic, activity_type='review', priority=50,
+                          estimated_minutes=5, metadata={'language': context['target_language']})
+    return plan.to_dict()
+
+
+def activity_error(exc):
+    code = 409 if isinstance(exc, ActivityConflict) else 404 if isinstance(exc, LookupError) else 400 if isinstance(exc, ValueError) else 502
+    return HTTPException(status_code=code, detail=str(exc) if code != 502 else 'Le service pédagogique est indisponible. Votre progression est conservée.')
+
+
+@app.post('/api/learning/plan/next')
+async def next_plan_activity(agent: Agent):
+    plan = agent.learning_engine.current_learning_plan
+    if plan is None:
+        raise HTTPException(status_code=404, detail='Générez d’abord votre plan.')
+    pending = next((i for i in plan.items if not i.completed), None)
+    if pending is None:
+        return {'status': 'finished', 'completed': len(plan.items)}
+    try:
+        return await start_activity(agent.learning_engine, pending.id)
+    except (ValueError, LookupError, RuntimeError, httpx.HTTPError) as exc:
+        raise activity_error(exc) from exc
+
+
+@app.get('/api/learning/plan/items/{item_id}/activity')
+async def read_plan_activity(agent: Agent, item_id: str):
+    try:
+        return public_activity(agent.learning_engine, plan_item(agent.learning_engine, item_id))
+    except (ValueError, LookupError) as exc:
+        raise activity_error(exc) from exc
+
+
+class ActivityAnswerRequest(BaseModel):
+    exercise_id: str = Field(min_length=1, max_length=100)
+    answer: str = Field(min_length=1, max_length=5000, pattern=r'\S')
+
+
+@app.post('/api/learning/plan/items/{item_id}/answer')
+async def answer_plan_activity(agent: Agent, item_id: str, request: ActivityAnswerRequest):
+    try:
+        return await answer_activity(agent, item_id, request.exercise_id, request.answer)
+    except (ValueError, LookupError, RuntimeError, httpx.HTTPError) as exc:
+        raise activity_error(exc) from exc
+
+
+class ReadingCompleteRequest(BaseModel):
+    correct: bool | None = Field(default=None, strict=True)
+
+
+@app.post('/api/learning/plan/items/{item_id}/read')
+async def complete_plan_reading(agent: Agent, item_id: str, request: ReadingCompleteRequest):
+    try:
+        return finish_reading(agent.learning_engine, item_id, request.correct)
+    except (ValueError, LookupError) as exc:
+        raise activity_error(exc) from exc
+
+
+def scheduled_items(engine):
+    language = engine.get_learning_context().get('target_language')
+    for category, items in [('vocabulary', engine.vocabulary.get_all_words()), ('grammar', engine.grammar.get_all_rules())]:
+        for item in items:
+            if item.language.strip().casefold() == (language or '').strip().casefold():
+                yield category, item
+
+
+@app.get('/api/learning/reviews/due')
+async def due_reviews(agent: Agent):
+    cards = []
+    upcoming = []
+    for category, item in scheduled_items(agent.learning_engine):
+        target = item.word if category == 'vocabulary' else item.rule
+        card = {'category': category, 'target': target, 'review_count': item.review_count,
+                'next_review_at': item.schedule.next_review_at, 'interval_days': item.schedule.interval_days}
+        (cards if item.schedule.due() else upcoming).append(card)
+    key = lambda i: i['next_review_at'] or ''
+    cards.sort(key=key);upcoming.sort(key=key)
+    return {'count': len(cards), 'cards': cards[:50], 'upcoming_count': len(upcoming), 'next_review_at': upcoming[0]['next_review_at'] if upcoming else None}
+
+
+class ReviewCardRequest(BaseModel):
+    category: Literal['vocabulary', 'grammar']
+    target: str = Field(min_length=1, max_length=200)
+    review_count: int = Field(ge=0)
+
+
+def get_due_card(engine, request):
+    item = engine._get_exercise_target(request.category, request.target, engine.get_learning_context().get('target_language'))
+    if item.review_count != request.review_count or not item.schedule.due():
+        raise ActivityConflict('Cette carte a déjà été révisée. Rechargez les échéances.')
+    return item
+
+
+@app.post('/api/learning/reviews/reveal')
+async def reveal_review(agent: Agent, request: ReviewCardRequest):
+    try:
+        item = get_due_card(agent.learning_engine, request)
+        return {'content': item.translation if request.category == 'vocabulary' else item.explanation, 'examples': item.examples}
+    except (ValueError, LookupError) as exc:
+        raise activity_error(exc) from exc
+
+
+class ReviewGradeRequest(ReviewCardRequest):
+    correct: bool = Field(strict=True)
+
+
+@app.post('/api/learning/reviews/grade')
+async def grade_review(agent: Agent, request: ReviewGradeRequest):
+    try:
+        item = get_due_card(agent.learning_engine, request)
+        register = agent.learning_engine.register_vocabulary_answer if request.category == 'vocabulary' else agent.learning_engine.register_grammar_answer
+        register(request.target, request.correct)
+        return {'next_review_at': item.schedule.next_review_at, 'interval_days': item.schedule.interval_days,
+                'review_count': item.review_count, 'mastery': item.mastery}
+    except (ValueError, LookupError) as exc:
+        raise activity_error(exc) from exc
 
 
 # Same-origin local interface; / and the existing API contract remain available.

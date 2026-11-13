@@ -82,7 +82,7 @@ Leurs routes `POST .../answer` enregistrent une **autoévaluation** :
 `{"rule": "Present Simple", "correct": false}`.
 Elles mettent à jour la maîtrise ; les réponses grammaticales actualisent aussi
 l’historique du profil. Les recommandations et plans sont recalculés à la lecture.
-Le plan décrit des activités ; il ne les exécute pas automatiquement.
+Le plan peut être exécuté depuis **Mon parcours → Mon plan** : préparation des activités, correction, enchaînement après validation et reprise persistante. Voir [JOURNEY.md](docs/JOURNEY.md).
 `GET /api/learning/plan/current` permet de retrouver le plan actif, y compris après
 un redémarrage. `POST /api/learning/plan/items/{item_id}/complete` enregistre
 son avancement avec `{"score": 80}`. Un nouvel appel à `/api/learning/plan`
@@ -197,7 +197,7 @@ Les corrections enrichissent les difficultés du profil et la maîtrise des noti
 explicitement liées. La qualité pédagogique du contenu généré n’a pas été validée
 par des appels réels pendant les tests de cette version.
 
-La première interface est en HTML/CSS/JavaScript, sans dépendance de compilation. Elle propose une sphère de points, le chat, la dictée lorsque le navigateur la prend en charge et la synthèse vocale. Next.js, caméra et avatar ne sont pas implémentés. Voir `frontend/README.md` pour les détails et limites.
+La première interface est en HTML/CSS/JavaScript, sans dépendance de compilation. Elle propose une sphère de points, le chat, la dictée lorsque le navigateur la prend en charge et la synthèse vocale. La caméra locale et l’avatar animé sont disponibles ; Next.js et un moteur vocal temps réel externe restent à réaliser. Voir `frontend/README.md` pour les détails et limites.
 
 Voir [l’état du projet](docs/PROGRESSION.md) et les [points ouverts](docs/BUGS.md).
 
@@ -286,7 +286,7 @@ navigateur. La boucle avec une voix réelle reste à essayer avec l’utilisateu
 Validation de cette version : **274 tests Python et 7 tests Node réussis**, deux
 avertissements Python connus. L’authentification, l’isolement des comptes et le
 contrôleur de boucle vocale sont testés. Aucun compte personnel n’est créé par l’agent.
-La récupération par e-mail et les écrans plan/exercices restent à réaliser.
+La récupération par e-mail reste à réaliser. Les écrans plan/exercices et les révisions sont désormais disponibles (voir la mise à jour ci-dessous).
 
 L’écran de compte propose maintenant une présentation en deux panneaux sur
 ordinateur, un formulaire compact sur mobile et des onglets Connexion/Inscription.
@@ -299,3 +299,11 @@ Ouvrir **Réglages vocaux ⚙** près du micro pour choisir séparément langues
 Les mots provisoires restent distincts ; arrêt manuel attend la finalisation. Désactiver l’envoi automatique pour relire et modifier avant l’envoi. Le vocal continu attend cette validation. Les préférences sont mémorisées localement ; aucun microphone ne démarre au chargement. Le changement de langue de lecture ne traduit pas le texte.
 
 Validation de ce changement : **23 tests Node et 3 Python interface réussis**, deux avertissements connus ; baseline complète précédente 274 Python. Exemple natif et persistance vérifiés, dictée parlée et boucle réelle encore à essayer après autorisation du micro. [Configuration et limites](docs/VOICE.md).
+
+### Parcours et présence vocale — 13 novembre 2026
+
+**Mon parcours → Mon plan** prépare et enchaîne les leçons/exercices après validation ; les corrections et l’activité en cours sont sauvegardées. **Révisions** permet d’ajouter des mots/règles et de les retrouver selon les échéances calculées (1/3/7/14/30/60 jours, oubli : 10 minutes).
+
+**Caméra et avatar** ouvre un avatar animé par les états de parole et un aperçu caméra local sur activation volontaire. Aucune image enregistrée ou envoyée. Guides : [séances et révisions](docs/JOURNEY.md), [caméra et avatar](docs/COMPANION.md).
+
+Validation actuelle : **287 Python et 27 Node réussis**, deux avertissements connus. Parcours navigateur complet avec contenus simulés ; aucune nouvelle validation pédagogique IA réelle, ni boucle parlée ou image caméra réelle. Serveur local relancé sur 8001 ; comptes conservés.

@@ -1,4 +1,4 @@
-# État actuel — 12 novembre 2026
+# État actuel — 13 novembre 2026
 
 **Backend 0.8.0-alpha.1 ; comptes locaux, parcours pédagogique et vocal continu.**
 
@@ -12,16 +12,18 @@
 | Microphone | Analyse du volume par Web Audio ; validation avec une voix réelle restante |
 | Dictée | Langue configurable, mots provisoires et relecture ; validation avec parole réelle restante |
 | Lecture vocale | Langue, voix, débit, tonalité et volume réglables ; exemple déclenché |
-| Tests actuels | 23 Node et 3 Python interface réussis pour le vocal ; baseline complète précédente : 274 Python ; 2 avertissements |
+| Tests actuels | Suite complète : 287 Python et 27 Node réussis ; 2 avertissements de dépendances |
 | Validation manuelle | Chat OpenRouter réel, lecture vocale déclenchée, reprise des messages et responsive |
 | Comptes et droits | Inscription/connexion/déconnexion, cookies, sessions révocables et propriété des profils |
 | Vocal continu | Contrôleur et bouton ajoutés ; boucle réelle à essayer après inscription |
 | Multiworkers | À réaliser ; un processus API reste requis |
 | Profil et évaluation dans l’interface | Réalisés : profil, reprise, questions, correction, bilan ; banque anglaise uniquement |
-| Plan → exercice → correction dans l’interface | À réaliser |
-| Caméra, avatar, voix temps réel | À réaliser |
+| Plan → exercice → correction dans l’interface | Réalisé : préparation, enchaînement après validation, correction et reprise persistante |
+| Révisions espacées | Réalisées : mots/règles, échéances, révélation et autoévaluation |
+| Caméra et avatar | Aperçu local opt-in et avatar animé réalisés ; image réelle à valider après autorisation |
+| Voix temps réel externe | À réaliser ; dictée/synthèse natives et réglages disponibles |
 
-Le backend passe en 0.8.0-alpha.1. Plan/exercices et autres langues d’évaluation restent à intégrer au jalon V0.8.
+Le backend conserve la version 0.8.0-alpha.1. Le parcours plan/exercices/révisions est intégré ; la banque d’évaluation reste limitée à l’anglais.
 L’interface est servie par FastAPI, sans Next.js ni processus frontend distinct.
 L’amplitude de la sphère suit le micro à l’écoute. Pendant la synthèse vocale, elle
 utilise une animation liée à la lecture ; aucun accès PCM au son synthétisé.
@@ -107,12 +109,13 @@ et bascule de visibilité vérifiés. Référence actuelle : 274 Python et 7 Nod
 
 ## Prochaines étapes proposées
 
-1. Valider le micro, la dictée et les autorisations sur le navigateur de l’utilisateur.
-2. Ajouter le choix de langue, de voix et de vitesse de lecture, avec prononciation adaptée.
-3. Mode immersif : sphère centrale et transcription compacte.
-4. Intégrer le plan d’apprentissage puis les exercices/corrections ; profil et évaluation sont disponibles.
-5. Étudier la conversation vocale continue, les interruptions et un moteur vocal plus naturel.
-6. Récupération de compte et vérification e-mail ; coordination avant plusieurs workers.
+1. Valider avec l’utilisateur le micro, la dictée, la boucle parlée et l’image caméra après autorisation.
+2. Évaluer la qualité pédagogique des nouvelles séances avec le fournisseur réel.
+3. Étendre la banque d’évaluation au-delà de l’anglais.
+4. Voix temps réel externe et synchronisation phonétique de l’avatar, si souhaitées.
+5. Récupération de compte et vérification e-mail ; coordination avant plusieurs workers.
+
+Les réglages vocaux, l’enchaînement des activités, les révisions espacées, la caméra locale et l’avatar de présence sont disponibles. Guides : [JOURNEY.md](JOURNEY.md), [COMPANION.md](COMPANION.md).
 
 ## Validation antérieure
 

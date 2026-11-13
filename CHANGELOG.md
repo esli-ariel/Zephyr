@@ -1,5 +1,12 @@
 # 📋 Changelog — Zéphyr
 
+## Parcours, révisions et présence vocale — 13/11/2026
+
+- Exécution des activités du plan dans Mon parcours : préparation, lecture, trois exercices, correction et enchaînement après validation ; reprise persistante sans double crédit.
+- Révisions espacées des mots/règles, bibliothèque et échéances ; calendrier compatible avec les anciennes sauvegardes.
+- Caméra locale activée volontairement et avatar animé par les états vocaux, sans transmission d’images.
+- 287 tests Python et 27 Node réussis ; séance complète testée avec contenus simulés, micro/caméra réels restant à valider. Guides JOURNEY et COMPANION.
+
 ## Réglages vocaux et transcription — 12/11/2026
 
 - Langues de dictée/lecture indépendantes, voix disponibles, débit, tonalité, volume et pause configurables ; préférences locales.

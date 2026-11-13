@@ -21,6 +21,9 @@ jobs:
         with:
           node-version: '22'
       - run: node --check frontend/app.js
+      - run: node --check frontend/journey-ui.js
+      - run: node --check frontend/camera-controller.js
+      - run: node --check frontend/companion-ui.js
       - run: node --check frontend/learning-ui.js
       - run: node --check frontend/account-ui.js
       - run: node --check frontend/voice-loop.js

@@ -335,3 +335,12 @@ soit leur type courant ; aucun mot de passe ni jeton n’est enregistré dans lo
 ## ADR-017 — Configuration vocale et finalisation de la transcription
 
 Conserver les API natives dans un moteur injecté et testable. Séparer langue de dictée et langue de lecture ; ne pas présenter le changement de voix comme une traduction. Filtrer les voix réellement installées et mémoriser uniquement les préférences. Remplacer l’agrégation de fragments par un instantané final/provisoire des résultats. À l’arrêt, demander la finalisation avant de libérer ; en cas d’erreur ou de mots incertains, conserver un brouillon à valider. Le vocal continu attend la fin de la synthèse et la validation éventuelle. Annulations, permissions tardives et lecture bloquée ont des gardes explicites. Diagnostic de volume uniquement, aucun sélecteur d’entrée prétendant piloter SpeechRecognition. Limites et vérifications réelles documentées dans VOICE.md.
+
+
+## ADR-018 — Activités persistantes et calendrier de révision
+
+Le parcours orchestre les générateurs/correcteurs existants et conserve identifiants de contenu/résultats dans les métadonnées du plan. La première activité inachevée est reprise sans régénération ; l’apprenant reste auteur des réponses. Les notes proviennent du serveur, la lecture et l’autoévaluation restent sans score artificiel. Une même réponse est idempotente, une correction différente après validation est refusée. La sauvegarde atomique et le verrou par apprenant encadrent toutes les routes. `ReviewSchedule`, avec valeurs par défaut pour les anciens objets, ajoute les échéances sans changer le calcul de maîtrise. Réussites : 1/3/7/14/30/60 jours ; oubli : 10 minutes. Pas de tâche système ni rappel externe. Un seul processus API reste requis.
+
+## ADR-019 — Caméra locale et avatar de présence
+
+Choix explicite de l’utilisateur : caméra locale et avatar animé par la voix. Utiliser une vidéo seule, activée par clic, sans capture ni transmission. Annuler les permissions tardives et libérer les pistes à l’arrêt, en arrière-plan ou lors d’un dialogue personnel. L’avatar vectoriel est piloté par les événements vocaux ; aucune dépendance vidéo externe, analyse de visage ou synchronisation phonétique revendiquée. Thèmes et mouvement réduit conservés. Les permissions et le matériel réels restent à vérifier par l’utilisateur.

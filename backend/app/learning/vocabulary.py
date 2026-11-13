@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
+from app.learning.spaced_review import ReviewSchedule
 
 
 @dataclass
@@ -27,6 +28,7 @@ class VocabularyItem:
     incorrect_count: int = 0
 
     mastery: float = 0.0
+    schedule: ReviewSchedule = field(default_factory=ReviewSchedule)
 
     def register_correct_answer(self) -> None:
         """
@@ -35,6 +37,7 @@ class VocabularyItem:
 
         self.review_count += 1
         self.correct_count += 1
+        self.schedule.record(True)
 
         self._update_mastery()
 
@@ -45,6 +48,7 @@ class VocabularyItem:
 
         self.review_count += 1
         self.incorrect_count += 1
+        self.schedule.record(False)
 
         self._update_mastery()
 
@@ -79,6 +83,7 @@ class VocabularyItem:
             "correct_count": self.correct_count,
             "incorrect_count": self.incorrect_count,
             "mastery": self.mastery,
+            "schedule": asdict(self.schedule),
         }
 
 class VocabularyManager:

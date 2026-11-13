@@ -187,3 +187,9 @@ connexion à huit caractères dans `backend/tests/test_auth.py`.
 Bouton **Réglages vocaux ⚙** près du micro : langues séparées (ou langue du profil), voix disponibles, vitesse/volume/tonalité, pause de fin, envoi automatique ou relecture, exemple avec arrêt et diagnostic de niveau. Valeurs par défaut : français, voix recommandée, 0,95×, pause 1,6 s. Préférences seules dans `zephyr.voicePreferences`.
 
 `voice-tools.js` normalise les réglages/résultats ; `voice-engine.js` gère capture, finalisation et synthèse ; `voice-settings.js` fournit le dialogue. Mots provisoires distincts, brouillon préservé et erreur jamais envoyée automatiquement. CI : syntaxe et 23 tests Node. Trois tests Python interface réussis, baseline Python complète précédente 274. Exemple natif et persistance contrôlés ; parole réelle/permissions et boucle complète encore à valider. [Guide et limites](../docs/VOICE.md).
+
+## Plan, révisions, caméra et avatar — 13 novembre 2026
+
+Le bouton **Mon parcours** ouvre profil, niveau, plan et révisions. `journey-ui.js` prépare une séance, présente le contenu et les corrections, reprend l’activité, permet d’ajouter des notions et d’autoévaluer les cartes dues. `companion-ui.js` affiche la présence vocale ; `camera-controller.js` isole les permissions/pistes vidéo. Les styles utilisent les thèmes existants, sans bibliothèque supplémentaire.
+
+Caméra volontaire et locale, arrêt en arrière-plan/dialogue/fermeture ; aucun envoi d’images. Avatar SVG réactif aux états du moteur natif, sans synchronisation phonétique. Nouveaux modules contrôlés dans la CI. Validation : 287 Python et 27 Node ; QA simulée complète et responsive 319/1280 px, permissions réelles restantes. [JOURNEY](../docs/JOURNEY.md) · [COMPANION](../docs/COMPANION.md).

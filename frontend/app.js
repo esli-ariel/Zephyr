@@ -6,7 +6,7 @@
   const synth = window.speechSynthesis;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let learnerId = null, ready = false, busy = false, listening = false, starting = false,learningLocked=false;
-  let voiceLoop=null,accountUI=null,voiceEngine=null,voiceSettings=null,voiceSettingsOpen=false,dictationPending=false,captureLanguage='fr-FR',voiceOn=true;
+  let companion=null,voiceLoop=null,accountUI=null,voiceEngine=null,voiceSettings=null,voiceSettingsOpen=false,dictationPending=false,captureLanguage='fr-FR',voiceOn=true;
   let mode = 'idle', volume = 0, boundaryAt = 0, speechStart = 0;
   let conversationStarted = false;
   function beginConversation(){
@@ -73,7 +73,7 @@
   $('theme-toggle').addEventListener('click',()=>setTheme(document.documentElement.dataset.theme==='day'?'night':'day',true));
   systemTheme.addEventListener('change',event=>{if(!stored('zephyr.theme'))setTheme(event.matches?'day':'night');});
   function notice(text,error=false){ui.notice.textContent=text;ui.notice.classList.toggle('error',error);}
-  function state(next){if(mode!=='idle'&&next==='idle')idleTime=0;mode=next;document.body.dataset.voiceState=next;ui.status.textContent={idle:'Prêt à vous écouter',listening:'Je vous écoute…',thinking:'Zéphyr prépare sa réponse…',speaking:'Zéphyr vous répond…'}[next];$('activity').textContent={idle:'EN VEILLE',listening:'ÉCOUTE ACTIVE',thinking:'RÉFLEXION',speaking:'TRANSMISSION'}[next];controls();if(next==='idle')voiceLoop?.schedule();}
+  function state(next){if(mode!=='idle'&&next==='idle')idleTime=0;mode=next;document.body.dataset.voiceState=next;companion?.updateState(next);ui.status.textContent={idle:'Prêt à vous écouter',listening:'Je vous écoute…',thinking:'Zéphyr prépare sa réponse…',speaking:'Zéphyr vous répond…'}[next];$('activity').textContent={idle:'EN VEILLE',listening:'ÉCOUTE ACTIVE',thinking:'RÉFLEXION',speaking:'TRANSMISSION'}[next];controls();if(next==='idle')voiceLoop?.schedule();}
   function controls(){
     $('continuous-voice').disabled=(!ready||!recognitionType||voiceSettingsOpen)&&!voiceLoop?.enabled;
     $('open-learning').disabled=!ready||busy||starting||languageSaving;
@@ -196,7 +196,7 @@
   ui.sound.addEventListener('click',()=>{voiceOn=!voiceOn;ui.sound.setAttribute('aria-pressed',String(voiceOn));ui.sound.textContent=voiceOn?'Voix activée ◖))':'Voix coupée';if(!voiceOn)silence();});
   ui.stop.addEventListener('click',silence);
   ui.demo.addEventListener('click',()=>{if(listening||starting)stopMic(false);const options=voiceSettings.speechOptions();speak(window.ZephyrVoiceTools.locales[options.lang].sample,options.lang,true);});
-  function suspendVoice(){voiceLoop?.disable();stopMic(false);silence();voiceSettings?.stopTest();}
+  function suspendVoice(){companion?.stop();voiceLoop?.disable();stopMic(false);silence();voiceSettings?.stopTest();}
   voiceLoop=window.ZephyrVoiceLoop({
     canListen:()=>ready&&!busy&&!starting&&!listening&&!learningLocked&&!voiceSettingsOpen&&!dictationPending&&!ui.input.value.trim()&&!voiceEngine.speechPending&&mode==='idle'&&!document.hidden,
     listen:startMic,
@@ -217,6 +217,7 @@
     suspend:suspendVoice,
     onLock:value=>{learningLocked=value;controls();},
   });
+  companion=window.ZephyrCompanionUI();
   controls();
   async function initialize(){
     try{

@@ -1,5 +1,16 @@
 # 📓 Journal de développement — Zéphyr
 
+## 13/11/2026 — Activités exécutables, révisions espacées et présence vocale
+
+- Demande : terminer l’exécution des activités et les révisions ; choix confirmé de caméra locale et avatar animé par la voix.
+- Mon parcours enrichi avec Mon plan et Révisions. Séance personnalisée, première séance sans recommandations, leçon/exercices/correction et enchaînement après validation, reprise au premier élément inachevé.
+- Résultats persistés, corrections idempotentes, score moyen calculé côté serveur ; lecture et autoévaluation sans faux score. Erreur fournisseur/disque et autre langue n’entraînent aucun progrès partiel.
+- Calendrier de notions : 1/3/7/14/30/60 jours en réussite, 10 minutes après oubli. Anciennes notions dues immédiatement ; filtrage par langue et compatibilité des snapshots. Bibliothèque de mots/règles dans l’interface.
+- Caméra vidéo seule sur activation explicite, aperçu local en miroir, arrêt et annulation de permission tardive ; aucune transmission ou capture. Avatar SVG suit repos/écoute/réflexion/parole, thèmes et mouvement réduit.
+- Validation complète : 287 Python et 27 Node réussis, deux avertissements connus ; CI et syntaxe vérifiées. 13 nouveaux tests pédagogiques et quatre tests caméra.
+- Navigateur : parcours QA simulé complet, reprise après rechargement, 66,67/100 sur trois exercices, carte repoussée au lendemain, avatar speaking et annulation caméra sans flux ; 319/1280 px sans débordement. Aucun compte personnel ou appel fournisseur réel dans la QA.
+- Caméra réelle et boucle acoustique toujours à valider après autorisation ; garde-fou de synthèse observé en QA. Serveur local 8001 relancé, serveur QA distinct arrêté. Guides JOURNEY/COMPANION, progression, décisions et limites mis à jour ; push autorisé dans la continuité du projet.
+
 ## 12/11/2026 — Réglages vocaux et transcription
 
 - Langues indépendantes, voix réellement disponibles, vitesse/volume/tonalité, pause et validation manuelle optionnelle ; réglages conservés localement.
