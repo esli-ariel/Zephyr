@@ -1,12 +1,13 @@
 'use strict';
-window.ZephyrJourneyUI=function({request,content,text,action,task,message,getProfile,isOpen}){
+window.ZephyrJourneyUI=function({request,content,text,action,task,message,getProfile,isOpen,oralAnswer,resolveSpeechLanguage,onOralBusy,openProfile,selectSection}){
   let activity=null,autoAdvance=true;
   const post=(url,data={})=>request(url,{method:'POST',body:JSON.stringify(data)});
   const date=value=>value?new Date(value).toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short'}):'Maintenant';
   const types={lesson:'Leçon',exercise:'Exercices',review:'Révision',practice:'Pratique',correction:'Correction'};
-  function panel(title,help){content.replaceChildren(text('h3',title),text('p',help,'learning-help'));}
+  function panel(title,help){oralAnswer.unmount();content.replaceChildren(text('h3',title),text('p',help,'learning-help'));}
   function back(){content.append(action('Revenir au plan',planHome,true));}
   async function planHome(){
+    selectSection('plan');
     let plan=null;try{plan=await request('/api/learning/plan/current');}catch(error){if(error.status!==404)throw error;}
     panel('Votre prochaine séance','Les activités se préparent selon votre langue et votre niveau. Vous répondez aux exercices ; Zéphyr enregistre les corrections et propose la suite.');
     if(plan?.items.length){
@@ -25,6 +26,7 @@ window.ZephyrJourneyUI=function({request,content,text,action,task,message,getPro
   async function next(){message('Préparation de l’activité…');activity=await post('/api/learning/plan/next');if(isOpen()){activityView(activity);message('');}}
   async function afterRead(correct){activity=await post('/api/learning/plan/items/'+activity.item.id+'/read',correct==null?{}:{correct});if(!isOpen())return;if(autoAdvance)await next();else{activityView(activity);message('Activité enregistrée.');}}
   function activityView(data){
+    selectSection('plan');
     activity=data;
     if(data.status==='finished'){panel('Séance terminée','Toutes les activités du plan sont enregistrées. Retrouvez les prochaines échéances dans Révisions.');back();return;}
     if(data.status==='completed'){panel('Activité terminée',data.item.score==null?'Lecture ou autoévaluation enregistrée.':'Score des exercices : '+data.item.score+'/100');content.append(action('Activité suivante',next));back();return;}
@@ -40,8 +42,9 @@ window.ZephyrJourneyUI=function({request,content,text,action,task,message,getPro
       const form=document.createElement('form');form.className='assessment-form';const input=document.createElement(exercise.options?.length?'select':'textarea');input.id='journey-answer';input.name='answer';input.required=true;
       if(exercise.options?.length){const empty=text('option','Choisir une réponse');empty.value='';input.append(empty);for(const option of exercise.options){const node=text('option',option);node.value=option;input.append(node);}}else input.maxLength=5000;
       const label=text('label','Votre réponse');label.htmlFor=input.id;form.append(label,input);const button=text('button','Corriger ma réponse','learning-primary');button.type='submit';form.append(button);content.append(form);
+      oralAnswer.mount({container:form,input,language:resolveSpeechLanguage(getProfile()?.target_language),question:exercise.question,onBusy:onOralBusy});form.append(button);
       form.addEventListener('submit',event=>{event.preventDefault();if(!form.reportValidity()||!input.value.trim())return;task(async()=>{
-        message('Correction en cours…');const result=await post('/api/learning/plan/items/'+data.item.id+'/answer',{exercise_id:exercise.id,answer:input.value.trim()});
+        oralAnswer.unmount();message('Correction en cours…');const result=await post('/api/learning/plan/items/'+data.item.id+'/answer',{exercise_id:exercise.id,answer:input.value.trim()});
         if(!isOpen())return;panel(result.evaluation.correct?'Bonne réponse':'À consolider',result.evaluation.feedback);content.append(text('p',result.evaluation.score+'/100','assessment-score'));
         content.append(action(result.activity.status==='completed'?'Continuer le parcours':'Exercice suivant',async()=>{if(result.activity.status==='completed'&&autoAdvance)await next();else activityView(result.activity);}));back();message('Correction enregistrée.');
       });});
@@ -49,6 +52,7 @@ window.ZephyrJourneyUI=function({request,content,text,action,task,message,getPro
     back();
   }
   async function reviewsHome(){
+    selectSection('reviews');
     const data=await request('/api/learning/reviews/due');
     panel('Révisions espacées','Essayez de retrouver la réponse, révélez-la puis indiquez honnêtement si vous l’aviez retrouvée. Les échéances se calculent sur votre compte.');
     content.append(text('p',data.count+' carte(s) à revoir maintenant','assessment-progress'));
@@ -59,6 +63,7 @@ window.ZephyrJourneyUI=function({request,content,text,action,task,message,getPro
     if(data.upcoming_count)content.append(text('p',data.upcoming_count+' carte(s) programmée(s) pour plus tard.','learning-help'));
   }
   function reviewCard(card){
+    selectSection('reviews');
     panel(card.category==='vocabulary'?'Retrouvez la traduction':'Expliquez cette règle','Prenez quelques secondes avant de révéler la réponse.');content.append(text('h3',card.target,'review-target'));
     content.append(action('Afficher la réponse',async()=>{const data=await post('/api/learning/reviews/reveal',card);content.replaceChildren(text('h3',card.target),text('p',data.content,'journey-prose'));for(const example of data.examples)content.append(text('p',example,'learning-help'));
       const grade=async correct=>{const result=await post('/api/learning/reviews/grade',{...card,correct});await reviewsHome();message('Révision enregistrée. Prochaine échéance : '+date(result.next_review_at)+'.');};
@@ -79,5 +84,26 @@ window.ZephyrJourneyUI=function({request,content,text,action,task,message,getPro
       await post('/api/learning/'+kind.value,data);await reviewsHome();message('Notion ajoutée.');
     });});
   }
-  return {planHome,reviewsHome};
+  async function todayHome(){
+    selectSection('today');
+    const data=await request('/api/learning/today?utc_offset_minutes='+(-new Date().getTimezoneOffset()));
+    panel('Ma séance du jour','Un pas à la fois. Retrouvez ce qui vous attend, puis reprenez la conversation.');
+    const card=document.createElement('section');card.className='today-focus';
+    card.append(text('span',data.target_language||'Votre langue à choisir','tag'),text('h3',data.reviews.due?(data.reviews.due===1?'Une révision vous attend':data.reviews.due+' révisions vous attendent'):data.plan.next?data.plan.next.target:data.profile_ready?'Une nouvelle séance vous attend':'Commençons par votre profil'));
+    if(data.level)card.append(text('p','Niveau '+data.level,'learning-help'));
+    if(!data.profile_ready)card.append(action('Choisir ma langue et mon niveau',openProfile));
+    else if(data.reviews.due)card.append(action('Commencer mes révisions',async()=>{const reviews=await request('/api/learning/reviews/due');if(reviews.cards.length)reviewCard(reviews.cards[0]);else await reviewsHome();}));
+    else if(data.plan.next)card.append(action(data.plan.next.started?'Reprendre mon activité':'Commencer ma séance',next));
+    else card.append(action(data.plan.stale?'Préparer un plan dans ma langue':'Préparer ma séance',planHome));
+    content.append(card);
+    const grid=document.createElement('dl');grid.className='today-progress';
+    for(const [label,value] of [['Activités du plan aujourd’hui',data.plan.completed_today],['Notions révisées aujourd’hui',data.reviews.reviewed_today],['Progression du plan',data.plan.completed+' / '+data.plan.total]])grid.append(text('dt',label),text('dd',String(value)));
+    content.append(grid);
+    if(data.plan.next){content.append(text('p','À suivre : '+types[data.plan.next.activity_type]+' · '+data.plan.next.estimated_minutes+' min. Environ '+data.plan.remaining_minutes+' min restantes dans le plan.','learning-help'));}
+    else if(data.plan.stale)content.append(text('p','Votre langue a changé. Préparez un nouveau plan pour poursuivre.','learning-help'));
+    if(data.reviews.next_review_at)content.append(text('p','Prochaine révision programmée : '+date(data.reviews.next_review_at),'learning-help'));
+    content.append(action('Voir mon plan',planHome,true),action('Voir mes révisions',reviewsHome,true));
+  }
+
+  return {planHome,reviewsHome,todayHome};
 };

@@ -42,3 +42,7 @@ Seules les préférences vocales sont mémorisées dans `localStorage` (`zephyr.
 Dans le navigateur : lecture d’exemple déclenchée, sauvegarde après rechargement vérifiée, valeurs par défaut rétablies, absence de débordement à 319 px. Le diagnostic réel attend l’autorisation micro ; aucune phrase parlée ni boucle acoustique complète n’a été validée. B008/B016 restent ouverts.
 
 Références des API : [arrêt avec résultat final](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition/stop), [résultats provisoires](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition/interimResults), [résultat confirmé](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognitionResult/isFinal), [synthèse native](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
+
+## Exercices à l’oral
+
+Les exercices du plan possèdent une session de brouillon distincte de la conversation. L’envoi automatique ne s’y applique pas. La langue suit initialement le profil, puis se choisit dans l’exercice. Répétition et débit réduit accessibles ; fermeture/navigation/arrière-plan arrêtent le vocal. Le texte est relu puis reporté et corrigé par deux clics distincts. Aucun score de prononciation ni audio sauvegardé. Voir [DAILY_SESSION.md](DAILY_SESSION.md).

@@ -152,3 +152,10 @@ B011 traité : langues de dictée/lecture configurables et choix de voix. Les me
 - B008/B016 : parole réelle et boucle micro/réponse à valider après permission. État speaking de l’avatar observé ; garde-fou de synthèse déclenché dans l’environnement de QA, qualité sonore non déclarée validée.
 - Caméra locale implémentée, refus/annulation/libération testés ; aperçu matériel réel restant à autoriser/vérifier. Avatar de présence, sans synchronisation phonétique ni rendu vidéo réaliste.
 - Qualité pédagogique des nouvelles séances vérifiée par contrats/tests simulés ; essai fournisseur réel encore à effectuer. B014/B015 (autres langues d’évaluation et récupération de compte) inchangés.
+
+## Séance du jour et réponses orales — 13 novembre 2026
+
+- Exercices du plan accessibles par dictée modifiable ; report et correction explicitement séparés, mots incertains jamais envoyés automatiquement. Langue inconnue sans repli implicite ; QCM sans réponse inférée.
+- Résumé quotidien isolé en lecture seule, compteurs du plan courant et des notions distinctes ; changement de langue et fuseau local couverts.
+- 293 Python et 34 Node réussis ; dictée/contenus simulés en QA navigateur, 319/1280 px sans débordement. B008/B016 (matériel vocal réel), B009 (PCM synthèse), B005/B007/B014/B015 restent ouverts.
+- Étapes suivantes : mises en situation guidées, ajout d’un mot sélectionné dans le chat, analyse d’image sur action volontaire ; ni vision ni synchronisation phonétique revendiquées dans cette étape.

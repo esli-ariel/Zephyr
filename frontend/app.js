@@ -6,7 +6,7 @@
   const synth = window.speechSynthesis;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let learnerId = null, ready = false, busy = false, listening = false, starting = false,learningLocked=false;
-  let companion=null,voiceLoop=null,accountUI=null,voiceEngine=null,voiceSettings=null,voiceSettingsOpen=false,dictationPending=false,captureLanguage='fr-FR',voiceOn=true;
+  let oralAnswer=null,learningUI=null,companion=null,voiceLoop=null,accountUI=null,voiceEngine=null,voiceSettings=null,voiceSettingsOpen=false,dictationPending=false,captureLanguage='fr-FR',voiceOn=true;
   let mode = 'idle', volume = 0, boundaryAt = 0, speechStart = 0;
   let conversationStarted = false;
   function beginConversation(){
@@ -77,6 +77,7 @@
   function controls(){
     $('continuous-voice').disabled=(!ready||!recognitionType||voiceSettingsOpen)&&!voiceLoop?.enabled;
     $('open-learning').disabled=!ready||busy||starting||languageSaving;
+    $('open-daily-session').disabled=!ready||busy||starting||languageSaving;
     ui.send.disabled=!ready||busy||listening||starting||learningLocked||voiceSettingsOpen;
     ui.mic.disabled=!ready||busy||learningLocked||voiceSettingsOpen||!recognitionType;
     ui.demo.disabled=busy||learningLocked||voiceSettingsOpen;
@@ -196,7 +197,7 @@
   ui.sound.addEventListener('click',()=>{voiceOn=!voiceOn;ui.sound.setAttribute('aria-pressed',String(voiceOn));ui.sound.textContent=voiceOn?'Voix activée ◖))':'Voix coupée';if(!voiceOn)silence();});
   ui.stop.addEventListener('click',silence);
   ui.demo.addEventListener('click',()=>{if(listening||starting)stopMic(false);const options=voiceSettings.speechOptions();speak(window.ZephyrVoiceTools.locales[options.lang].sample,options.lang,true);});
-  function suspendVoice(){companion?.stop();voiceLoop?.disable();stopMic(false);silence();voiceSettings?.stopTest();}
+  function suspendVoice(){oralAnswer?.stop();companion?.stop();voiceLoop?.disable();stopMic(false);silence();voiceSettings?.stopTest();}
   voiceLoop=window.ZephyrVoiceLoop({
     canListen:()=>ready&&!busy&&!starting&&!listening&&!learningLocked&&!voiceSettingsOpen&&!dictationPending&&!ui.input.value.trim()&&!voiceEngine.speechPending&&mode==='idle'&&!document.hidden,
     listen:startMic,
@@ -212,11 +213,22 @@
   document.addEventListener('visibilitychange',()=>{if(document.hidden)suspendVoice();});
   $('account-button').addEventListener('click',suspendVoice);
   accountUI=window.ZephyrAccountUI({request,onSignedIn:()=>location.reload(),onSignedOut:()=>{suspendVoice();try{localStorage.removeItem('zephyr.learnerId');}catch{}location.reload();}});
-  window.ZephyrLearningUI({request,onProfile:applyProfile,resolveLanguage:vocabulary.resolveLanguage,
+  oralAnswer=window.ZephyrOralAnswer({Recognition:recognitionType,createEngine:callbacks=>window.ZephyrVoiceEngine({...callbacks,Recognition:recognitionType,mediaDevices:navigator.mediaDevices,AudioContext:window.AudioContext||window.webkitAudioContext,synth,Utterance:window.SpeechSynthesisUtterance}),settings:()=>voiceSettings.capture,speechOptions:language=>voiceSettings.speechOptions(language),onState:next=>{if(next==='listening'||next==='speaking')beginConversation();if(next==='speaking')speechStart=performance.now();state(next==='starting'?'idle':next);},onBoundary:()=>{boundaryAt=performance.now();}});
+  learningUI=window.ZephyrLearningUI({request,onProfile:applyProfile,resolveLanguage:vocabulary.resolveLanguage,oralAnswer,resolveSpeechLanguage:value=>{const code=vocabulary.resolveLanguage(value);return code?vocabulary.languages[code].speech:null;},
     isReady:()=>ready&&!busy&&!starting&&!languageSaving,
     suspend:suspendVoice,
-    onLock:value=>{learningLocked=value;controls();},
+    onLock:value=>{learningLocked=value;controls();if(!value)refreshDaily();},
   });
+  let dailyEpoch=0;
+  async function refreshDaily(){
+    if(!ready)return;const epoch=++dailyEpoch;
+    try{const data=await request('/api/learning/today?utc_offset_minutes='+(-new Date().getTimezoneOffset()));if(epoch!==dailyEpoch||!ready)return;
+      $('daily-session-summary').textContent=data.reviews.due?data.reviews.due+(data.reviews.due===1?' révision à retrouver':' révisions à retrouver'):data.plan.next?'À suivre : '+data.plan.next.target:data.profile_ready?'Préparez votre prochaine séance.':'Choisissez votre langue et votre niveau.';
+      $('daily-session').hidden=false;
+    }catch{if(ready){$('daily-session-summary').textContent='Ouvrez votre séance pour actualiser la progression.';$('daily-session').hidden=false;}}
+  }
+  $('open-daily-session').addEventListener('click',()=>learningUI.open('today'));
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&!learningLocked)refreshDaily();});
   companion=window.ZephyrCompanionUI();
   controls();
   async function initialize(){
@@ -232,7 +244,7 @@
         if(!learnerId){const data=await request('/api/learners',{method:'POST'},false);learnerId=data.learner_id;save('zephyr.learnerId',learnerId);applyProfile(await request('/api/learner/profile'));}
       }
       const memory=await request('/api/chat/memory');if(memory.messages?.length){ui.messages.replaceChildren();memory.messages.forEach(m=>append(m.role,m.content));}
-      ready=true;$('connection').textContent='Zéphyr connecté';controls();
+      ready=true;$('connection').textContent='Zéphyr connecté';controls();refreshDaily();
     }catch(error){if(error.status===401){$('connection').textContent='Connexion requise';notice('Connectez-vous ou créez un compte pour retrouver votre apprentissage.');accountUI.show('login');return;}$('connection').textContent='API indisponible';$('connection-dot').classList.add('off');notice('Connexion impossible : '+error.message+' Rechargez la page pour réessayer. Vous pouvez essayer la voix et le micro.',true);}
   }
   initialize();
@@ -279,7 +291,7 @@
     if(document.hidden){lastFrame=now;return;}
     if(now-lastFrame<(reducedMotion.matches?90:30))return;
     const delta=Math.min((now-lastFrame)/1000,.06);lastFrame=now;
-    let input=Math.min(1,(voiceEngine?.level()||0)*7);
+    let input=Math.min(1,Math.max(voiceEngine?.level()||0,oralAnswer?.level||0)*7);
     if(mode==='speaking'){
       const elapsed=(now-speechStart)/1000;
       input=.32+.48*Math.abs(Math.sin(elapsed*8.7)*Math.cos(elapsed*3.1))+.2*Math.exp(-(now-boundaryAt)/120);

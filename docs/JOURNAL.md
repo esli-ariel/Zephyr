@@ -1,5 +1,15 @@
 # 📓 Journal de développement — Zéphyr
 
+## 13/11/2026 — Séance du jour et exercices à l’oral
+
+- Accord utilisateur : réaliser les priorités proposées en suivant la ligne immersive du projet et actualiser le suivi.
+- Accueil compact dans le panneau de conversation et onglet Aujourd’hui : révisions dues, prochaine activité, reprise, compteurs réels du plan et notions révisées ; détails masqués en conversation.
+- Résumé GET en lecture seule, décalage local validé, aucune génération ni attribution de progrès à l’affichage. Langue périmée/profil incomplet et absence de plan gérés.
+- Exercices du plan : langue parlée du profil, dictée modifiable, report explicite puis correction séparée. QCM uniquement sur correspondance d’une option. Aucun envoi automatique hérité du chat.
+- Répétition et lecture plus lente de la question ; arrêt, fermeture, arrière-plan et changements d’écran libèrent le vocal. Nuage/avatar suivent les états et le volume, thèmes/mouvement réduit conservés.
+- Validation complète : 293 Python et 34 Node réussis, deux avertissements existants. Navigateur QA avec dictée et contenus simulés, report/correction distincts, reprise et priorité des révisions ; 319/1280 px sans débordement. Aucun compte personnel ni microphone réel utilisé pour cette QA.
+- Guide DAILY_SESSION, décisions, progression et limites mis à jour ; jeux de rôle, ajout depuis une sélection du chat et analyse volontaire d’image restent au suivi. Serveur 8001 relancé, autorisations/voix réelles restant à valider.
+
 ## 13/11/2026 — Activités exécutables, révisions espacées et présence vocale
 
 - Demande : terminer l’exécution des activités et les révisions ; choix confirmé de caméra locale et avatar animé par la voix.

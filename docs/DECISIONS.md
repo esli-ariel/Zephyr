@@ -344,3 +344,12 @@ Le parcours orchestre les générateurs/correcteurs existants et conserve identi
 ## ADR-019 — Caméra locale et avatar de présence
 
 Choix explicite de l’utilisateur : caméra locale et avatar animé par la voix. Utiliser une vidéo seule, activée par clic, sans capture ni transmission. Annuler les permissions tardives et libérer les pistes à l’arrêt, en arrière-plan ou lors d’un dialogue personnel. L’avatar vectoriel est piloté par les événements vocaux ; aucune dépendance vidéo externe, analyse de visage ou synchronisation phonétique revendiquée. Thèmes et mouvement réduit conservés. Les permissions et le matériel réels restent à vérifier par l’utilisateur.
+
+
+## ADR-020 — Accueil quotidien compact et en lecture seule
+
+Respecter la ligne immersive : une carte dans le panneau de conversation et un onglet Aujourd’hui dans le parcours existant, sans texte ajouté près du nuage. Masquer les détails de la carte pendant la conversation. Le résumé lit les révisions et le plan actuels, ne génère aucun contenu et n’écrit aucun progrès. Le jour suit un décalage navigateur borné ; compteurs explicitement limités au plan et à la bibliothèque courants. Pas de rappel système implicite.
+
+## ADR-021 — Brouillon oral séparé du chat et correction explicite
+
+Réutiliser ZephyrVoiceEngine dans une session orale isolée, avec langue initiale du profil et choix explicite si inconnue. Aucun autosend du chat, ni déduction d’option QCM. Le texte dicté peut être modifié, puis reporté par clic, avant un second clic de correction. Lecture/relecture lente utilisent les voix et paramètres natifs. Libérer la session à la fermeture/navigation/arrière-plan et ignorer les événements tardifs ; transmettre seulement les états/volume au nuage/avatar. Aucun enregistrement audio ni score de prononciation. Tests et QA simulée distincts de la validation matérielle restante.

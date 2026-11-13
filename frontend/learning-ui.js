@@ -1,24 +1,24 @@
 'use strict';
-window.ZephyrLearningUI = function({request,onProfile,suspend,onLock,isReady,resolveLanguage}){
+window.ZephyrLearningUI = function({request,onProfile,suspend,onLock,isReady,resolveLanguage,oralAnswer,resolveSpeechLanguage}){
   const dialog=document.createElement('dialog');dialog.id='learning-dialog';dialog.className='learning-dialog';
   dialog.setAttribute('aria-labelledby','learning-title');
   dialog.innerHTML=`<header class="learning-header"><div><span class="tag">VOTRE PARCOURS</span><h2 id="learning-title">Apprendre avec Zéphyr</h2></div><button type="button" id="learning-close" aria-label="Fermer mon parcours">×</button></header>
-  <nav class="learning-tabs" aria-label="Sections du parcours"><button type="button" id="profile-tab" aria-pressed="true">Mon profil</button><button type="button" id="assessment-tab" aria-pressed="false">Mon niveau</button><button type="button" id="plan-tab" aria-pressed="false">Mon plan</button><button type="button" id="reviews-tab" aria-pressed="false">Révisions</button></nav>
+  <nav class="learning-tabs" aria-label="Sections du parcours"><button type="button" id="today-tab" aria-pressed="false">Aujourd’hui</button><button type="button" id="profile-tab" aria-pressed="true">Mon profil</button><button type="button" id="assessment-tab" aria-pressed="false">Mon niveau</button><button type="button" id="plan-tab" aria-pressed="false">Mon plan</button><button type="button" id="reviews-tab" aria-pressed="false">Révisions</button></nav>
   <p id="learning-status" class="learning-status" role="status"></p><div id="learning-content"></div>`;
   document.body.append(dialog);
   const $=id=>dialog.querySelector('#'+id),content=$('learning-content'),status=$('learning-status');
-  let profile=null,progress=null,working=false,section='profile',currentQuestion=null;
+  let profile=null,progress=null,working=false,oralBusy=false,section='today',currentQuestion=null;
   const text=(tag,value,className='')=>{const node=document.createElement(tag);node.textContent=value;if(className)node.className=className;return node;};
   const english=()=>resolveLanguage(profile?.target_language)==='en';
   function message(value,error=false){status.textContent=value;status.classList.toggle('error',error);}
-  function lock(){dialog.querySelectorAll('button,input,select,textarea').forEach(node=>{if(node.id!=='learning-close')node.disabled=working;});}
+  function lock(){dialog.querySelectorAll('button,input,select,textarea').forEach(node=>{if(node.id!=='learning-close')node.disabled=working||(!node.closest('.oral-answer')&&oralBusy)||node.dataset.unavailable==='true';});}
   function action(label,handler,secondary=false){const button=text('button',label,secondary?'learning-secondary':'learning-primary');button.type='button';button.addEventListener('click',()=>task(handler));return button;}
   async function task(handler){
     if(working)return;working=true;lock();
     try{await handler();}catch(error){message(error.message||'Le service est indisponible. Réessayez.',true);}
     finally{working=false;lock();}
   }
-  function selectSection(next){section=next;for(const name of ['profile','assessment','plan','reviews'])$(name+'-tab').setAttribute('aria-pressed',String(next===name));}
+  function selectSection(next){section=next;for(const name of ['today','profile','assessment','plan','reviews'])$(name+'-tab').setAttribute('aria-pressed',String(next===name));}
   function list(title,items){const box=document.createElement('section');box.append(text('h3',title));const ul=document.createElement('ul');for(const item of items||[])ul.append(text('li',item));if(!ul.children.length)ul.append(text('li','Aucun élément pour le moment.'));box.append(ul);return box;}
   function profileView(){
     selectSection('profile');content.replaceChildren();
@@ -113,18 +113,18 @@ window.ZephyrLearningUI = function({request,onProfile,suspend,onLock,isReady,res
     content.append(action('Recommencer depuis A1',async()=>{await ensureEnglish();const data=await request('/api/assessment/start',{method:'POST'});progress=data.progress;questionView(data);message('Nouvelle évaluation démarrée.');}));
     content.append(action('Conserver ma session',async()=>assessmentHome(),true));
   }
-  const journey=window.ZephyrJourneyUI({request,content,text,action,task,message,getProfile:()=>profile,isOpen:()=>dialog.open});
+  const journey=window.ZephyrJourneyUI({request,content,text,action,task,message,getProfile:()=>profile,isOpen:()=>dialog.open,oralAnswer,resolveSpeechLanguage,onOralBusy:value=>{oralBusy=value;lock();},openProfile:()=>loadSection('profile'),selectSection});
   async function loadSection(next){
-    selectSection(next);message('Chargement de votre parcours…');content.replaceChildren();
+    oralAnswer.unmount();selectSection(next);message('Chargement de votre parcours…');content.replaceChildren();
     [profile,progress]=await Promise.all([request('/api/learner/profile'),request('/api/assessment/progress')]);onProfile(profile);
-    if(next==='profile')profileView();else if(next==='plan')await journey.planHome();else if(next==='reviews')await journey.reviewsHome();else assessmentHome();message('');
+    if(next==='today')await journey.todayHome();else if(next==='profile')profileView();else if(next==='plan')await journey.planHome();else if(next==='reviews')await journey.reviewsHome();else assessmentHome();message('');
   }
   $('profile-tab').addEventListener('click',()=>task(()=>loadSection('profile')));
   $('assessment-tab').addEventListener('click',()=>task(()=>loadSection('assessment')));
-  for(const name of ['plan','reviews'])$(name+'-tab').addEventListener('click',()=>task(()=>loadSection(name)));
+  for(const name of ['today','plan','reviews'])$(name+'-tab').addEventListener('click',()=>task(()=>loadSection(name)));
   $('learning-close').addEventListener('click',()=>dialog.close());
-  dialog.addEventListener('close',()=>onLock(false));
-  document.getElementById('open-learning').addEventListener('click',()=>{
-    if(!isReady())return;suspend();dialog.showModal();onLock(true);task(()=>loadSection(section));
-  });
+  dialog.addEventListener('close',()=>{oralAnswer.unmount();onLock(false);});
+  function open(next=section){if(!isReady())return;suspend();dialog.showModal();onLock(true);task(()=>loadSection(next));}
+  document.getElementById('open-learning').addEventListener('click',()=>open());
+  return {open};
 };

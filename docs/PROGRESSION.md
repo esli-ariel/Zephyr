@@ -12,7 +12,7 @@
 | Microphone | Analyse du volume par Web Audio ; validation avec une voix réelle restante |
 | Dictée | Langue configurable, mots provisoires et relecture ; validation avec parole réelle restante |
 | Lecture vocale | Langue, voix, débit, tonalité et volume réglables ; exemple déclenché |
-| Tests actuels | Suite complète : 287 Python et 27 Node réussis ; 2 avertissements de dépendances |
+| Tests actuels | Suite complète : 293 Python et 34 Node réussis ; 2 avertissements de dépendances |
 | Validation manuelle | Chat OpenRouter réel, lecture vocale déclenchée, reprise des messages et responsive |
 | Comptes et droits | Inscription/connexion/déconnexion, cookies, sessions révocables et propriété des profils |
 | Vocal continu | Contrôleur et bouton ajoutés ; boucle réelle à essayer après inscription |
@@ -20,6 +20,8 @@
 | Profil et évaluation dans l’interface | Réalisés : profil, reprise, questions, correction, bilan ; banque anglaise uniquement |
 | Plan → exercice → correction dans l’interface | Réalisé : préparation, enchaînement après validation, correction et reprise persistante |
 | Révisions espacées | Réalisées : mots/règles, échéances, révélation et autoévaluation |
+| Séance du jour | Réalisée : accueil compact, priorité des révisions, reprise et compteurs en lecture seule |
+| Exercices à l’oral | Réalisés dans le plan : dictée modifiable, report explicite puis correction ; voix matérielle à valider |
 | Caméra et avatar | Aperçu local opt-in et avatar animé réalisés ; image réelle à valider après autorisation |
 | Voix temps réel externe | À réaliser ; dictée/synthèse natives et réglages disponibles |
 
@@ -111,9 +113,10 @@ et bascule de visibilité vérifiés. Référence actuelle : 274 Python et 7 Nod
 
 1. Valider avec l’utilisateur le micro, la dictée, la boucle parlée et l’image caméra après autorisation.
 2. Évaluer la qualité pédagogique des nouvelles séances avec le fournisseur réel.
-3. Étendre la banque d’évaluation au-delà de l’anglais.
-4. Voix temps réel externe et synchronisation phonétique de l’avatar, si souhaitées.
-5. Récupération de compte et vérification e-mail ; coordination avant plusieurs workers.
+3. Poursuivre les mises en situation guidées, l’ajout de vocabulaire depuis le chat et l’analyse volontaire d’image.
+4. Étendre la banque d’évaluation au-delà de l’anglais.
+5. Voix temps réel externe et synchronisation phonétique de l’avatar, si souhaitées.
+6. Récupération de compte et vérification e-mail ; coordination avant plusieurs workers.
 
 Les réglages vocaux, l’enchaînement des activités, les révisions espacées, la caméra locale et l’avatar de présence sont disponibles. Guides : [JOURNEY.md](JOURNEY.md), [COMPANION.md](COMPANION.md).
 
@@ -874,3 +877,7 @@ available_minutes = 30
 ### Réglages vocaux et transcription — 12 novembre 2026
 
 Dialogue de configuration, exemple natif, diagnostic de niveau, préférences persistantes et réinitialisation. Finalisation de dictée sans coupure immédiate, résultats provisoires distincts, relecture optionnelle et brouillon préservé. B011 traité ; B008/B016 nécessitent encore une voix réelle et l’autorisation micro. Guide : [VOICE.md](VOICE.md). Validation actuelle : 23 Node et 3 Python interface ; baseline complète précédente 274 Python.
+
+### Séance du jour et oral — 13 novembre 2026
+
+Première priorité réalisée dans la direction immersive : accueil compact dans la conversation et onglet Aujourd’hui, révisions/prochaine activité/progression réelle. Exercices du plan avec dictée modifiable et validation explicite avant correction, répétition/lecture lente. 293 Python et 34 Node réussis ; QA navigateur simulée, 319/1280 px sans débordement. Voix réelle restant à valider. [Guide DAILY_SESSION](DAILY_SESSION.md).

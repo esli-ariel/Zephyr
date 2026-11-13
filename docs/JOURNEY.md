@@ -50,3 +50,7 @@ L’ancien GET `/plan` reste compatible, avec protection contre le remplacement 
 Suite complète : **287 tests Python et 27 tests Node réussis**, deux avertissements de dépendances existants. Les 13 nouveaux tests pédagogiques couvrent échéances, reprise disque, anciens snapshots, erreurs fournisseur/disque, absence de double crédit, score calculé, isolement, authentification et changement de langue. Quatre nouveaux tests Node couvrent le cycle de vie caméra.
 
 Navigateur : séance complète avec contenus simulés sur une base de QA isolée, rechargement après la première réponse puis reprise au deuxième exercice, 2/2 activités terminées avec 66,67/100 pour les exercices, ajout/révélation/notation d’une carte et échéance le lendemain. Aucun compte personnel ni appel IA réel créé par ces essais. Contrôles à 319 et 1280 px sans débordement. La génération/correction réelle utilise toujours le fournisseur OpenRouter configuré ; son contenu n’a pas été évalué dans cette session.
+
+## Extension du 13 novembre : quotidien et oral
+
+L’accueil Aujourd’hui lit les échéances et le plan courant ; l’accès Ma séance reste compact. Les exercices du plan proposent désormais la dictée modifiable, le report explicite puis la correction. Les textes libres et QCM sont pris en charge ; l’évaluation de niveau garde ses contrôles précédents. [Guide DAILY_SESSION](DAILY_SESSION.md). Référence actuelle : 293 Python et 34 Node ; voix réelle restante.

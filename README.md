@@ -307,3 +307,11 @@ Validation de ce changement : **23 tests Node et 3 Python interface réussis**, 
 **Caméra et avatar** ouvre un avatar animé par les états de parole et un aperçu caméra local sur activation volontaire. Aucune image enregistrée ou envoyée. Guides : [séances et révisions](docs/JOURNEY.md), [caméra et avatar](docs/COMPANION.md).
 
 Validation actuelle : **287 Python et 27 Node réussis**, deux avertissements connus. Parcours navigateur complet avec contenus simulés ; aucune nouvelle validation pédagogique IA réelle, ni boucle parlée ou image caméra réelle. Serveur local relancé sur 8001 ; comptes conservés.
+
+## Séance du jour et exercices à l’oral — 13 novembre 2026
+
+**Ma séance ↗ / Mon parcours → Aujourd’hui** présente les révisions dues, la prochaine activité et les compteurs réels. Cet accueil lit les données sans générer de contenu. La carte reste compacte pendant la conversation.
+
+Dans les exercices du plan, **Répondre à l’oral** produit une dictée modifiable ; **Utiliser cette réponse** reporte le texte, puis **Corriger ma réponse** envoie explicitement. Langue du profil, choix manuel si inconnue, QCM exact, répétition et lecture plus lente. Le vocal du parcours reste séparé de l’envoi automatique du chat ; caméra locale, points et avatar conservent leur direction.
+
+Validation : **293 Python et 34 Node réussis**, deux avertissements existants. Navigateur testé avec voix/contenus simulés, sans microphone ou IA réels ; 319/1280 px sans débordement. Permissions et voix matérielle restent à valider. [Guide et limites](docs/DAILY_SESSION.md).

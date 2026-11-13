@@ -1,5 +1,12 @@
 # 📋 Changelog — Zéphyr
 
+## Séance du jour et exercices à l’oral — 13/11/2026
+
+- Accueil compact et onglet Aujourd’hui : révisions dues, reprise d’activité et progression réelle, sans mutation ni génération à l’affichage.
+- Réponse orale modifiable dans les exercices du plan : report explicite, QCM exact et correction séparée.
+- Répétition/lecture plus lente, arrêt et libération du vocal ; animations existantes et thèmes conservés.
+- 293 Python et 34 Node réussis ; parcours navigateur avec voix/contenus simulés et mobile contrôlés. Voix réelle à valider. Guide DAILY_SESSION.
+
 ## Parcours, révisions et présence vocale — 13/11/2026
 
 - Exécution des activités du plan dans Mon parcours : préparation, lecture, trois exercices, correction et enchaînement après validation ; reprise persistante sans double crédit.

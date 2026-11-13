@@ -6,7 +6,7 @@ from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
 import httpx
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from starlette.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -21,6 +21,7 @@ from app.sessions import LearnerSessions, LearnerSession
 from app.auth import AuthStore, COOKIE_NAME
 from app.auth_routes import router as auth_router
 from app.learning.llm_schemas import Level, Skill
+from app.learning.daily_session import daily_summary
 from app.learning.plan_execution import ActivityConflict, start_activity, answer_activity, finish_reading, plan_item, public_activity
 
 logger = logging.getLogger(__name__)
@@ -993,6 +994,11 @@ async def grade_review(agent: Agent, request: ReviewGradeRequest):
                 'review_count': item.review_count, 'mastery': item.mastery}
     except (ValueError, LookupError) as exc:
         raise activity_error(exc) from exc
+
+
+@app.get('/api/learning/today')
+async def today_session(agent: Agent, utc_offset_minutes: int = Query(default=0, ge=-840, le=840)):
+    return daily_summary(agent.learning_engine, utc_offset_minutes)
 
 
 # Same-origin local interface; / and the existing API contract remain available.

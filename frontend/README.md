@@ -193,3 +193,11 @@ Bouton **Réglages vocaux ⚙** près du micro : langues séparées (ou langue d
 Le bouton **Mon parcours** ouvre profil, niveau, plan et révisions. `journey-ui.js` prépare une séance, présente le contenu et les corrections, reprend l’activité, permet d’ajouter des notions et d’autoévaluer les cartes dues. `companion-ui.js` affiche la présence vocale ; `camera-controller.js` isole les permissions/pistes vidéo. Les styles utilisent les thèmes existants, sans bibliothèque supplémentaire.
 
 Caméra volontaire et locale, arrêt en arrière-plan/dialogue/fermeture ; aucun envoi d’images. Avatar SVG réactif aux états du moteur natif, sans synchronisation phonétique. Nouveaux modules contrôlés dans la CI. Validation : 287 Python et 27 Node ; QA simulée complète et responsive 319/1280 px, permissions réelles restantes. [JOURNEY](../docs/JOURNEY.md) · [COMPANION](../docs/COMPANION.md).
+
+## Séance du jour et exercices à l’oral — 13 novembre 2026
+
+**Ma séance ↗ / Mon parcours → Aujourd’hui** présente les révisions dues, la prochaine activité et les compteurs réels. Cet accueil lit les données sans générer de contenu. La carte reste compacte pendant la conversation.
+
+Dans les exercices du plan, **Répondre à l’oral** produit une dictée modifiable ; **Utiliser cette réponse** reporte le texte, puis **Corriger ma réponse** envoie explicitement. Langue du profil, choix manuel si inconnue, QCM exact, répétition et lecture plus lente. Le vocal du parcours reste séparé de l’envoi automatique du chat ; caméra locale, points et avatar conservent leur direction.
+
+Validation : **293 Python et 34 Node réussis**, deux avertissements existants. Navigateur testé avec voix/contenus simulés, sans microphone ou IA réels ; 319/1280 px sans débordement. Permissions et voix matérielle restent à valider. [Guide et limites](../docs/DAILY_SESSION.md).
